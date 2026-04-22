@@ -31,9 +31,7 @@ canvas {
   z-index: 100;
 }
 
-#gameOver {
-  display: none;
-}
+#gameOver { display: none; }
 
 button {
   padding: 10px 20px;
@@ -54,7 +52,6 @@ button {
 
 <div id="gameOver">
   <h1>💀 OH NO YOU DIED 💀</h1>
-  <p>BETTER LUCK NEXT TIME BRO 🥷👊</p>
   <button onclick="restart()">TRY AGAIN</button>
 </div>
 
@@ -69,6 +66,9 @@ let cols, rows;
 
 let snake, dir, food;
 let running = false;
+
+let lastMove = 0;
+let speed = 120;
 
 // resize
 function resize(){
@@ -123,47 +123,50 @@ canvas.addEventListener("touchend",e=>{
 });
 
 // loop
-function loop(){
+function loop(timestamp){
   if(!running) return;
 
-  ctx.fillStyle = "black";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(timestamp - lastMove > speed){
+    lastMove = timestamp;
 
-  let head = {
-    x: snake[0].x + dir.x,
-    y: snake[0].y + dir.y
-  };
-
-  snake.unshift(head);
-
-  if(head.x === food.x && head.y === food.y){
-    food = {
-      x: Math.floor(Math.random()*cols),
-      y: Math.floor(Math.random()*rows)
+    let head = {
+      x: snake[0].x + dir.x,
+      y: snake[0].y + dir.y
     };
-  } else {
-    snake.pop();
-  }
 
-  // wall
-  if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
-    return gameOver();
-  }
+    snake.unshift(head);
 
-  // self
-  for(let i=1;i<snake.length;i++){
-    if(head.x===snake[i].x && head.y===snake[i].y){
+    if(head.x === food.x && head.y === food.y){
+      food = {
+        x: Math.floor(Math.random()*cols),
+        y: Math.floor(Math.random()*rows)
+      };
+    } else {
+      snake.pop();
+    }
+
+    // wall
+    if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
       return gameOver();
+    }
+
+    // self
+    for(let i=1;i<snake.length;i++){
+      if(head.x===snake[i].x && head.y===snake[i].y){
+        return gameOver();
+      }
     }
   }
 
-  // draw snake
+  // draw
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
   snake.forEach((s,i)=>{
     ctx.fillStyle = i===0 ? "lime" : "green";
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
 
-  // draw food
   ctx.fillStyle = "red";
   ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
@@ -184,7 +187,8 @@ function restart(){
   setTimeout(()=>{
     document.getElementById("intro").style.display = "none";
     running = true;
-    loop();
+    lastMove = 0;
+    requestAnimationFrame(loop);
   },2000);
 }
 
@@ -194,9 +198,8 @@ init();
 setTimeout(()=>{
   document.getElementById("intro").style.display = "none";
   running = true;
-  loop();
+  requestAnimationFrame(loop);
 },2000);
-
 </script>
 
 </body>
