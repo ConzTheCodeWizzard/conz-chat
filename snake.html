@@ -9,26 +9,24 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* stop page moving */
+  overflow: hidden;
   background: black;
   touch-action: none;
   font-family: Arial;
-  color: white;
 }
 
-/* full screen canvas */
+/* FULLSCREEN */
 canvas {
   display: block;
-  background: #000;
 }
 
-/* UI overlay */
+/* UI */
 #ui {
   position: fixed;
   top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 100%;
   text-align: center;
+  color: white;
 }
 
 h1 {
@@ -41,13 +39,24 @@ h1 {
   font-size: 16px;
 }
 
-button {
-  margin-top: 5px;
-  padding: 6px 12px;
-  background: black;
-  color: white;
+/* CONTROLS */
+#controls {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,0,0,0.2);
   border: 1px solid red;
-  border-radius: 6px;
+  color: white;
+  font-size: 20px;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -59,7 +68,13 @@ button {
 <div id="ui">
   <h1>CONZ SNAKE 🐍</h1>
   <div id="score">Score: 0 | High: 0</div>
-  <button onclick="restartGame()">Restart</button>
+</div>
+
+<div id="controls">
+  <button class="btn" onclick="setDir('LEFT')">⬅️</button>
+  <button class="btn" onclick="setDir('UP')">⬆️</button>
+  <button class="btn" onclick="setDir('DOWN')">⬇️</button>
+  <button class="btn" onclick="setDir('RIGHT')">➡️</button>
 </div>
 
 <audio id="eatSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
@@ -70,23 +85,29 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let gridSize = 20;
-let snake, direction, food, score, highScore, game;
+let cols, rows;
+
+let snake, direction, food, score, highScore, speed, game;
 
 const eatSound = document.getElementById("eatSound");
 const gameOverSound = document.getElementById("gameOverSound");
 
-// FULLSCREEN SIZE
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+
+  cols = Math.floor(canvas.width / gridSize);
+  rows = Math.floor(canvas.height / gridSize);
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
 function init() {
-  snake = [{ x: 10, y: 10 }];
+  snake = [{ x: Math.floor(cols/2), y: Math.floor(rows/2) }];
   direction = "RIGHT";
   score = 0;
+  speed = 120;
+
   highScore = localStorage.getItem("highScore") || 0;
 
   spawnFood();
@@ -94,8 +115,8 @@ function init() {
 
 function spawnFood() {
   food = {
-    x: Math.floor(Math.random() * (canvas.width / gridSize)),
-    y: Math.floor(Math.random() * (canvas.height / gridSize))
+    x: Math.floor(Math.random() * cols),
+    y: Math.floor(Math.random() * rows)
   };
 }
 
@@ -103,9 +124,12 @@ function draw() {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // draw snake
+  // neon snake
   for (let i = 0; i < snake.length; i++) {
-    ctx.fillStyle = i === 0 ? "lime" : "green";
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "lime";
+    ctx.fillStyle = i === 0 ? "#00ffcc" : "#00aa66";
+
     ctx.fillRect(
       snake[i].x * gridSize,
       snake[i].y * gridSize,
@@ -114,7 +138,9 @@ function draw() {
     );
   }
 
-  // draw food
+  ctx.shadowBlur = 0;
+
+  // food
   ctx.fillStyle = "red";
   ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
 
@@ -125,12 +151,12 @@ function draw() {
   if (direction === "UP") head.y--;
   if (direction === "DOWN") head.y++;
 
-  // collision with walls
+  // collision
   if (
     head.x < 0 ||
     head.y < 0 ||
-    head.x >= canvas.width / gridSize ||
-    head.y >= canvas.height / gridSize ||
+    head.x >= cols ||
+    head.y >= rows ||
     hitSelf(head)
   ) {
     clearInterval(game);
@@ -143,6 +169,11 @@ function draw() {
   if (head.x === food.x && head.y === food.y) {
     score++;
     eatSound.play();
+
+    if (score % 5 === 0 && speed > 60) {
+      speed -= 10; // speed up
+      restartLoop();
+    }
 
     if (score > highScore) {
       highScore = score;
@@ -169,13 +200,21 @@ function hitSelf(head) {
 
 // keyboard
 document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-  if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-  if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-  if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+  if (e.key === "ArrowLeft") setDir("LEFT");
+  if (e.key === "ArrowUp") setDir("UP");
+  if (e.key === "ArrowRight") setDir("RIGHT");
+  if (e.key === "ArrowDown") setDir("DOWN");
 });
 
-// swipe (fixed + responsive)
+// buttons
+function setDir(dir) {
+  if (dir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+  if (dir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+  if (dir === "UP" && direction !== "DOWN") direction = "UP";
+  if (dir === "DOWN" && direction !== "UP") direction = "DOWN";
+}
+
+// swipe
 let startX = 0;
 let startY = 0;
 
@@ -194,11 +233,9 @@ canvas.addEventListener("touchmove", (e) => {
 
   if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
     if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 0 && direction !== "LEFT") direction = "RIGHT";
-      else if (dx < 0 && direction !== "RIGHT") direction = "LEFT";
+      setDir(dx > 0 ? "RIGHT" : "LEFT");
     } else {
-      if (dy > 0 && direction !== "UP") direction = "DOWN";
-      else if (dy < 0 && direction !== "DOWN") direction = "UP";
+      setDir(dy > 0 ? "DOWN" : "UP");
     }
 
     startX = t.clientX;
@@ -206,15 +243,14 @@ canvas.addEventListener("touchmove", (e) => {
   }
 }, { passive: false });
 
-function restartGame() {
+function restartLoop() {
   clearInterval(game);
-  init();
-  game = setInterval(draw, 100);
+  game = setInterval(draw, speed);
 }
 
 // start
 init();
-game = setInterval(draw, 100);
+game = setInterval(draw, speed);
 </script>
 
 </body>
