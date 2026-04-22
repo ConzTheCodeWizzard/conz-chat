@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #000000, #1a0000, #330000);
+  color: white;
+}
+
+/* Header */
+.header {
+  padding: 15px;
+  text-align: center;
+  background: black;
+  box-shadow: 0 0 10px red;
+}
+
+/* Layout */
+.container {
+  display: flex;
+  height: 90vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 30%;
+  background: #111;
+  padding: 10px;
+}
+
+.user {
+  padding: 10px;
+  margin: 5px 0;
+  background: #222;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.user:hover {
+  background: red;
+}
+
+/* Chat */
+.chat {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatBox {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Messages */
+.message {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  max-width: 60%;
+}
+
+.me {
+  background: red;
+  align-self: flex-end;
+}
+
+.other {
+  background: #333;
+  align-self: flex-start;
+}
+
+/* Input */
+.inputArea {
+  display: flex;
+  padding: 10px;
+  background: black;
+}
+
+.inputArea input {
+  flex: 1;
+  padding: 10px;
+}
+
+.inputArea button {
+  margin-left: 10px;
+  padding: 10px;
+  background: red;
+  border: none;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2 id="title">Chat</h2>
+</div>
+
+<div class="container">
+
+  <div class="sidebar" id="users"></div>
+
+  <div class="chat">
+    <div class="chatBox" id="chatBox">
+      <p>Select a user to start chatting</p>
+    </div>
+
+    <div class="inputArea">
+      <input id="msg" placeholder="Type message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentUser = localStorage.getItem("currentUser");
+
+// 🚨 FIX: stop blank screen
+if (!currentUser) {
+  alert("Not logged in");
+  window.location.href = "login.html";
+}
+
+// Load users automatically
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let usersDiv = document.getElementById("users");
+
+let selectedUser = null;
+
+// Show users
+Object.keys(users).forEach(u => {
+  if (u !== currentUser) {
+    let div = document.createElement("div");
+    div.className = "user";
+    div.innerText = u;
+
+    div.onclick = () => openChat(u);
+
+    usersDiv.appendChild(div);
+  }
+});
+
+function getKey(u1, u2) {
+  return [u1, u2].sort().join("_");
+}
+
+function openChat(user) {
+  selectedUser = user;
+  document.getElementById("title").innerText = "Chat with " + user;
+  loadMessages();
+}
+
+function loadMessages() {
+  let key = getKey(currentUser, selectedUser);
+  let chats = JSON.parse(localStorage.getItem("chats")) || {};
+  let messages = chats[key] || [];
+
+  let box = document.getElementById("chatBox");
+  box.innerHTML = "";
+
+  messages.forEach(m => {
+    let div = document.createElement("div");
+    div.className = "message " + (m.sender === currentUser ? "me" : "other");
+    div.innerText = m.text;
+    box.appendChild(div);
+  });
+}
+
+function sendMessage() {
+  if (!selectedUser) {
+    alert("Select a user first");
+    return;
+  }
+
+  let text = document.getElementById("msg").value;
+  if (!text) return;
+
+  let key = getKey(currentUser, selectedUser);
+  let chats = JSON.parse(localStorage.getItem("chats")) || {};
+
+  if (!chats[key]) chats[key] = [];
+
+  chats[key].push({
+    sender: currentUser,
+    text: text
+  });
+
+  localStorage.setItem("chats", JSON.stringify(chats));
+
+  document.getElementById("msg").value = "";
+  loadMessages();
+}
+</script>
+
+</body>
+</html>
