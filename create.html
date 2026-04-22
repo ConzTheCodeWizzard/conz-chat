@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create Account</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(135deg, #1a0000, #000000, #330000);
+  font-family: Arial;
+  color: white;
+}
+
+.container {
+  background: rgba(0,0,0,0.85);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px red;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: red;
+}
+
+input {
+  width: 250px;
+  padding: 12px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+}
+
+button {
+  margin-top: 15px;
+  padding: 12px;
+  width: 200px;
+  background: black;
+  color: white;
+  border: 2px solid red;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px red;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Create Account</h2>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
+  <button onclick="createAccount()">Create</button>
+</div>
+
+<script>
+function createAccount() {
+  let user = document.getElementById("user").value.trim();
+  let pass = document.getElementById("pass").value.trim();
+
+  if (!user || !pass) {
+    alert("Fill all fields");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+
+  if (users[user]) {
+    alert("User already exists");
+    return;
+  }
+
+  users[user] = {
+    password: pass
+  };
+
+  localStorage.setItem("users", JSON.stringify(users));
+
+  alert("Account created!");
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
