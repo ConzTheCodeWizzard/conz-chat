@@ -85,6 +85,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const grid = 25;
+let cols, rows;
 
 let snake, dir, food, enemies, score, high;
 let running = false;
@@ -93,37 +94,59 @@ let running = false;
 function resize(){
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+
+  cols = Math.floor(canvas.width / grid);
+  rows = Math.floor(canvas.height / grid);
 }
 resize();
 window.addEventListener("resize", resize);
 
 // INIT
 function init(){
-  snake = [{x:10,y:10}];
+  const cx = Math.floor(cols/2);
+  const cy = Math.floor(rows/2);
+
+  snake = [
+    {x:cx,y:cy},
+    {x:cx-1,y:cy},
+    {x:cx-2,y:cy}
+  ];
+
   dir = {x:1,y:0};
-  food = spawnFood();
+
   enemies = [];
   score = 0;
   high = localStorage.getItem("high") || 0;
+
+  food = spawnFood();
 }
 
-// FOOD
+// SAFE FOOD
 function spawnFood(){
-  return {
-    x: Math.floor(Math.random()*(canvas.width/grid)),
-    y: Math.floor(Math.random()*(canvas.height/grid))
-  };
+  let f;
+  do {
+    f = {
+      x: Math.floor(Math.random()*cols),
+      y: Math.floor(Math.random()*rows)
+    };
+  } while (snake.some(s => s.x===f.x && s.y===f.y));
+  return f;
 }
 
-// ENEMY
+// SAFE ENEMY
 function spawnEnemy(){
-  enemies.push({
-    x: Math.floor(Math.random()*(canvas.width/grid)),
-    y: Math.floor(Math.random()*(canvas.height/grid)),
-    size: Math.floor(Math.random()*3)+1,
-    bites: 0,
-    dir: randomDir()
-  });
+  let e;
+  do {
+    e = {
+      x: Math.floor(Math.random()*cols),
+      y: Math.floor(Math.random()*rows),
+      size: Math.floor(Math.random()*3)+1,
+      bites: 0,
+      dir: randomDir()
+    };
+  } while (snake.some(s => s.x===e.x && s.y===e.y));
+
+  enemies.push(e);
 }
 
 function randomDir(){
@@ -131,11 +154,12 @@ function randomDir(){
   return d[Math.floor(Math.random()*d.length)];
 }
 
-setInterval(() => {
+// spawn enemies slowly
+setInterval(()=>{
   if(running) spawnEnemy();
-}, 2500);
+},3000);
 
-// SWIPE
+// swipe
 let sx=0, sy=0;
 
 canvas.addEventListener("touchstart",e=>{
@@ -158,7 +182,7 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
-// LEAF
+// leaf
 function drawLeaf(x,y){
   ctx.fillStyle="lime";
   ctx.beginPath();
@@ -170,7 +194,6 @@ function drawLeaf(x,y){
 
 // GAME LOOP
 function game(){
-
   if(!running) return;
 
   ctx.fillStyle="rgba(0,0,0,0.25)";
@@ -183,7 +206,7 @@ function game(){
 
   snake.unshift(head);
 
-  // FOOD
+  // food
   if(head.x===food.x && head.y===food.y){
     score++;
     food = spawnFood();
@@ -191,25 +214,20 @@ function game(){
     snake.pop();
   }
 
-  // WALL
-  if(
-    head.x < 0 || head.y < 0 ||
-    head.x >= canvas.width/grid ||
-    head.y >= canvas.height/grid
-  ){
+  // wall
+  if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
     return gameOver();
   }
 
-  // SELF
+  // self
   for(let i=1;i<snake.length;i++){
     if(head.x===snake[i].x && head.y===snake[i].y){
       return gameOver();
     }
   }
 
-  // ENEMIES
+  // enemies
   enemies.forEach((e,i)=>{
-
     e.x += e.dir.x;
     e.y += e.dir.y;
 
@@ -226,7 +244,7 @@ function game(){
         return;
       }
 
-      if(e.bites < 3){
+      if(e.bites<3){
         e.bites++;
         snake.splice(-e.size);
         score -= e.size;
@@ -240,16 +258,12 @@ function game(){
       }
     }
 
-    ctx.shadowBlur=20;
-    ctx.shadowColor="red";
     ctx.fillStyle="red";
     ctx.fillRect(e.x*grid,e.y*grid,grid,grid);
   });
 
-  // SNAKE
+  // snake
   snake.forEach((s,i)=>{
-    ctx.shadowBlur=20;
-    ctx.shadowColor="lime";
     ctx.fillStyle=i===0?"#00ffcc":"#00aa66";
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
@@ -261,24 +275,23 @@ function game(){
     localStorage.setItem("high",high);
   }
 
-  ctx.shadowBlur=0;
   ctx.fillStyle="white";
   ctx.fillText("Score: "+score+" | High: "+high,20,30);
 
   requestAnimationFrame(game);
 }
 
-// GAME OVER
+// game over
 function gameOver(){
-  running = false;
+  running=false;
   document.getElementById("gameOver").style.display="flex";
 }
 
-// RESTART
+// restart
 function restart(){
   document.getElementById("gameOver").style.display="none";
 
-  let intro = document.getElementById("intro");
+  let intro=document.getElementById("intro");
   intro.style.display="flex";
   intro.style.animation="none";
 
@@ -289,19 +302,18 @@ function restart(){
   init();
 
   setTimeout(()=>{
-    running = true;
+    running=true;
     game();
   },3000);
 }
 
-// START
+// start
 init();
 
 setTimeout(()=>{
-  running = true;
+  running=true;
   game();
 },3000);
-
 </script>
 
 </body>
