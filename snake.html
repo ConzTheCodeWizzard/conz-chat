@@ -5,12 +5,11 @@
 <title>CONZ SNAKE 🐍</title>
 
 <style>
-body {
+html, body {
   margin: 0;
   overflow: hidden;
-  background: radial-gradient(circle, #220000, #000);
+  background: black;
   font-family: Arial;
-  color: white;
 }
 
 canvas {
@@ -18,16 +17,49 @@ canvas {
   touch-action: none;
 }
 
-#ui {
+/* INTRO */
+#intro {
   position: fixed;
-  top: 10px;
   width: 100%;
+  height: 100%;
+  background: black;
+  color: red;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeOut 3s forwards;
   text-align: center;
 }
 
+@keyframes fadeOut {
+  0% {opacity:1;}
+  70% {opacity:1;}
+  100% {opacity:0; visibility:hidden;}
+}
+
+/* GAME OVER */
+#gameOver {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, black, #220000);
+  color: red;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  text-align: center;
+}
+
+#gameOver h1 {
+  text-shadow: 0 0 20px red;
+}
+
 button {
-  margin-top: 5px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   background: black;
   border: 2px solid red;
   color: white;
@@ -38,9 +70,16 @@ button {
 
 <body>
 
-<div id="ui">
-  <div id="score">Score: 0 | High: 0</div>
-  <button onclick="restart()">Restart</button>
+<div id="intro">
+  <h1>WELCOME TO CONZ SNAKE</h1>
+  <p>(developed by conz)</p>
+  <h2>GOOD LUCK!</h2>
+</div>
+
+<div id="gameOver">
+  <h1>💀 OH NO YOU DIED 💀</h1>
+  <p>BETTER LUCK NEXT TIME BRO 🥷👊</p>
+  <button onclick="restart()">TRY AGAIN</button>
 </div>
 
 <canvas id="game"></canvas>
@@ -58,28 +97,28 @@ window.addEventListener("resize", resize);
 
 const grid = 25;
 
-let snake, dir, food, score, high, enemies;
+let snake, dir, food, enemies, score, high;
 
 function init(){
   snake = [{x:10,y:10}];
   dir = {x:1,y:0};
   food = spawnFood();
+  enemies = [];
   score = 0;
   high = localStorage.getItem("high") || 0;
-  enemies = [];
 }
 
 function spawnFood(){
   return {
-    x: Math.floor(Math.random() * (canvas.width/grid)),
-    y: Math.floor(Math.random() * (canvas.height/grid))
-  }
+    x: Math.floor(Math.random()*(canvas.width/grid)),
+    y: Math.floor(Math.random()*(canvas.height/grid))
+  };
 }
 
 function spawnEnemy(){
   enemies.push({
-    x: Math.floor(Math.random() * (canvas.width/grid)),
-    y: Math.floor(Math.random() * (canvas.height/grid)),
+    x: Math.floor(Math.random()*(canvas.width/grid)),
+    y: Math.floor(Math.random()*(canvas.height/grid)),
     size: Math.floor(Math.random()*3)+1,
     bites: 0,
     dir: randomDir()
@@ -87,16 +126,13 @@ function spawnEnemy(){
 }
 
 function randomDir(){
-  const d = [
-    {x:1,y:0},{x:-1,y:0},
-    {x:0,y:1},{x:0,y:-1}
-  ];
+  const d = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
   return d[Math.floor(Math.random()*d.length)];
 }
 
 setInterval(spawnEnemy, 2500);
 
-// swipe controls
+// SWIPE
 let sx=0, sy=0;
 canvas.addEventListener("touchstart",e=>{
   sx=e.touches[0].clientX;
@@ -106,8 +142,8 @@ canvas.addEventListener("touchstart",e=>{
 canvas.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 
 canvas.addEventListener("touchend",e=>{
-  let dx=e.changedTouches[0].clientX - sx;
-  let dy=e.changedTouches[0].clientY - sy;
+  let dx=e.changedTouches[0].clientX-sx;
+  let dy=e.changedTouches[0].clientY-sy;
 
   if(Math.abs(dx)>Math.abs(dy)){
     if(dx>0 && dir.x!==-1) dir={x:1,y:0};
@@ -118,6 +154,7 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
+// DRAW LEAF
 function drawLeaf(x,y){
   ctx.fillStyle="lime";
   ctx.beginPath();
@@ -127,6 +164,7 @@ function drawLeaf(x,y){
   ctx.fill();
 }
 
+// GAME LOOP
 function game(){
 
   ctx.fillStyle="rgba(0,0,0,0.25)";
@@ -139,7 +177,7 @@ function game(){
 
   snake.unshift(head);
 
-  // food
+  // FOOD
   if(head.x===food.x && head.y===food.y){
     score++;
     food = spawnFood();
@@ -147,23 +185,23 @@ function game(){
     snake.pop();
   }
 
-  // wall
+  // WALL
   if(
     head.x < 0 || head.y < 0 ||
     head.x > canvas.width/grid ||
     head.y > canvas.height/grid
   ){
-    gameOver();
+    return gameOver();
   }
 
-  // self
+  // SELF
   for(let i=1;i<snake.length;i++){
     if(head.x===snake[i].x && head.y===snake[i].y){
-      gameOver();
+      return gameOver();
     }
   }
 
-  // enemies
+  // ENEMIES
   enemies.forEach((e,i)=>{
 
     e.x += e.dir.x;
@@ -173,79 +211,77 @@ function game(){
 
     if(e.x===head.x && e.y===head.y){
 
-      // 🟢 YOU EAT THEM
       if(snake.length > e.size){
-
         score += e.size;
-
         for(let j=0;j<e.size;j++){
           snake.push({...snake[snake.length-1]});
         }
-
         enemies.splice(i,1);
         return;
       }
 
-      // 🔴 THEY DAMAGE YOU
       if(e.bites < 3){
-
         e.bites++;
-
-        let dmg = e.size;
-        snake.splice(-dmg);
-        score -= dmg;
-
-        if(score < 0) score = 0;
-
-        if(snake.length <= 0){
-          gameOver();
-        }
+        snake.splice(-e.size);
+        score -= e.size;
+        if(score<0) score=0;
+        if(snake.length<=0) return gameOver();
       }
 
-      if(e.bites >= 3){
+      if(e.bites>=3){
         enemies.splice(i,1);
       }
     }
 
-    // draw enemy
     ctx.shadowBlur=20;
     ctx.shadowColor="red";
     ctx.fillStyle="red";
     ctx.fillRect(e.x*grid,e.y*grid,grid,grid);
   });
 
-  // draw snake
+  // SNAKE
   snake.forEach((s,i)=>{
     ctx.shadowBlur=20;
     ctx.shadowColor="lime";
-    ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
+    ctx.fillStyle=i===0?"#00ffcc":"#00aa66";
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
 
   drawLeaf(food.x*grid,food.y*grid);
 
-  if(score > high){
-    high = score;
-    localStorage.setItem("high", high);
+  if(score>high){
+    high=score;
+    localStorage.setItem("high",high);
   }
 
-  document.getElementById("score").innerText =
-    "Score: " + score + " | High: " + high;
+  ctx.shadowBlur=0;
+  ctx.fillStyle="white";
+  ctx.fillText("Score: "+score+" | High: "+high,20,30);
 
   setTimeout(game, 100);
 }
 
 function gameOver(){
-  alert("Game Over");
-  restart();
+  document.getElementById("gameOver").style.display="flex";
 }
 
 function restart(){
+  document.getElementById("gameOver").style.display="none";
+
+  let intro = document.getElementById("intro");
+  intro.style.display="flex";
+  intro.style.animation="none";
+
+  setTimeout(()=>{
+    intro.style.animation="fadeOut 3s forwards";
+  },50);
+
   init();
+  setTimeout(game, 300);
 }
 
 init();
-game();
+setTimeout(game, 300);
 </script>
 
 </body>
