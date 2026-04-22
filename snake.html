@@ -3,53 +3,64 @@
 <head>
 <title>Conz Snake 🐍</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
 <style>
-body {
+html, body {
   margin: 0;
-  background: linear-gradient(135deg, #000000, #1a0000, #330000);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  padding: 0;
+  overflow: hidden; /* stop page moving */
+  background: black;
+  touch-action: none;
   font-family: Arial;
   color: white;
 }
 
+/* full screen canvas */
+canvas {
+  display: block;
+  background: #000;
+}
+
+/* UI overlay */
+#ui {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
 h1 {
+  margin: 0;
   color: red;
   text-shadow: 0 0 10px red;
 }
 
-canvas {
-  background: #111;
-  border: 2px solid red;
-  box-shadow: 0 0 20px red;
-  touch-action: none; /* IMPORTANT */
-}
-
 #score {
-  margin-top: 10px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 button {
-  margin-top: 10px;
-  padding: 10px 20px;
+  margin-top: 5px;
+  padding: 6px 12px;
   background: black;
   color: white;
-  border: 2px solid red;
-  border-radius: 8px;
+  border: 1px solid red;
+  border-radius: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>CONZ SNAKE 🐍</h1>
-<canvas id="game" width="400" height="400"></canvas>
-<div id="score">Score: 0 | High: 0</div>
-<button onclick="restartGame()">Restart</button>
+<canvas id="game"></canvas>
+
+<div id="ui">
+  <h1>CONZ SNAKE 🐍</h1>
+  <div id="score">Score: 0 | High: 0</div>
+  <button onclick="restartGame()">Restart</button>
+</div>
 
 <audio id="eatSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 <audio id="gameOverSound" src="https://assets.mixkit.co/active_storage/sfx/2698/2698-preview.mp3"></audio>
@@ -58,51 +69,68 @@ button {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const box = 20;
+let gridSize = 20;
 let snake, direction, food, score, highScore, game;
 
 const eatSound = document.getElementById("eatSound");
 const gameOverSound = document.getElementById("gameOverSound");
 
+// FULLSCREEN SIZE
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
 function init() {
-  snake = [{ x: 10 * box, y: 10 * box }];
+  snake = [{ x: 10, y: 10 }];
   direction = "RIGHT";
   score = 0;
   highScore = localStorage.getItem("highScore") || 0;
 
+  spawnFood();
+}
+
+function spawnFood() {
   food = {
-    x: Math.floor(Math.random() * 20) * box,
-    y: Math.floor(Math.random() * 20) * box
+    x: Math.floor(Math.random() * (canvas.width / gridSize)),
+    y: Math.floor(Math.random() * (canvas.height / gridSize))
   };
 }
 
 function draw() {
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, 400, 400);
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // snake
+  // draw snake
   for (let i = 0; i < snake.length; i++) {
     ctx.fillStyle = i === 0 ? "lime" : "green";
-    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    ctx.fillRect(
+      snake[i].x * gridSize,
+      snake[i].y * gridSize,
+      gridSize,
+      gridSize
+    );
   }
 
-  // food
+  // draw food
   ctx.fillStyle = "red";
-  ctx.fillRect(food.x, food.y, box, box);
+  ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
 
   let head = { ...snake[0] };
 
-  if (direction === "LEFT") head.x -= box;
-  if (direction === "RIGHT") head.x += box;
-  if (direction === "UP") head.y -= box;
-  if (direction === "DOWN") head.y += box;
+  if (direction === "LEFT") head.x--;
+  if (direction === "RIGHT") head.x++;
+  if (direction === "UP") head.y--;
+  if (direction === "DOWN") head.y++;
 
-  // collision
+  // collision with walls
   if (
     head.x < 0 ||
     head.y < 0 ||
-    head.x >= 400 ||
-    head.y >= 400 ||
+    head.x >= canvas.width / gridSize ||
+    head.y >= canvas.height / gridSize ||
     hitSelf(head)
   ) {
     clearInterval(game);
@@ -111,7 +139,7 @@ function draw() {
     return;
   }
 
-  // food
+  // eat
   if (head.x === food.x && head.y === food.y) {
     score++;
     eatSound.play();
@@ -121,10 +149,7 @@ function draw() {
       localStorage.setItem("highScore", highScore);
     }
 
-    food = {
-      x: Math.floor(Math.random() * 20) * box,
-      y: Math.floor(Math.random() * 20) * box
-    };
+    spawnFood();
   } else {
     snake.pop();
   }
@@ -137,9 +162,7 @@ function draw() {
 
 function hitSelf(head) {
   for (let i = 1; i < snake.length; i++) {
-    if (head.x === snake[i].x && head.y === snake[i].y) {
-      return true;
-    }
+    if (head.x === snake[i].x && head.y === snake[i].y) return true;
   }
   return false;
 }
@@ -152,7 +175,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
 });
 
-// swipe (FIXED)
+// swipe (fixed + responsive)
 let startX = 0;
 let startY = 0;
 
@@ -166,11 +189,10 @@ canvas.addEventListener("touchmove", (e) => {
   e.preventDefault();
 
   const t = e.touches[0];
-  const dx = t.clientX - startX;
-  const dy = t.clientY - startY;
+  let dx = t.clientX - startX;
+  let dy = t.clientY - startY;
 
-  if (Math.abs(dx) > 25 || Math.abs(dy) > 25) {
-
+  if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
     if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0 && direction !== "LEFT") direction = "RIGHT";
       else if (dx < 0 && direction !== "RIGHT") direction = "LEFT";
@@ -187,12 +209,12 @@ canvas.addEventListener("touchmove", (e) => {
 function restartGame() {
   clearInterval(game);
   init();
-  game = setInterval(draw, 120);
+  game = setInterval(draw, 100);
 }
 
 // start
 init();
-game = setInterval(draw, 120);
+game = setInterval(draw, 100);
 </script>
 
 </body>
