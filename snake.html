@@ -17,7 +17,8 @@ canvas {
   touch-action: none;
 }
 
-#intro, #gameOver {
+/* START SCREEN */
+#startScreen, #gameOver {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -31,27 +32,32 @@ canvas {
   z-index: 100;
 }
 
-#gameOver { display: none; }
+#gameOver {
+  display: none;
+}
 
 button {
-  padding: 10px 20px;
+  padding: 12px 25px;
   border: 2px solid red;
   background: black;
   color: white;
+  font-size: 16px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="intro">
+<div id="startScreen">
   <h1>WELCOME TO CONZ SNAKE</h1>
   <p>(developed by conz)</p>
   <h2>GOOD LUCK!</h2>
+  <button onclick="startGame()">START</button>
 </div>
 
 <div id="gameOver">
   <h1>💀 OH NO YOU DIED 💀</h1>
+  <p>BETTER LUCK NEXT TIME BRO 🥷👊</p>
   <button onclick="restart()">TRY AGAIN</button>
 </div>
 
@@ -145,12 +151,10 @@ function loop(timestamp){
       snake.pop();
     }
 
-    // wall
     if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
       return gameOver();
     }
 
-    // self
     for(let i=1;i<snake.length;i++){
       if(head.x===snake[i].x && head.y===snake[i].y){
         return gameOver();
@@ -158,7 +162,6 @@ function loop(timestamp){
     }
   }
 
-  // draw
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -173,6 +176,14 @@ function loop(timestamp){
   requestAnimationFrame(loop);
 }
 
+function startGame(){
+  document.getElementById("startScreen").style.display = "none";
+  init();
+  running = true;
+  lastMove = 0;
+  requestAnimationFrame(loop);
+}
+
 function gameOver(){
   running = false;
   document.getElementById("gameOver").style.display = "flex";
@@ -180,26 +191,8 @@ function gameOver(){
 
 function restart(){
   document.getElementById("gameOver").style.display = "none";
-  document.getElementById("intro").style.display = "flex";
-
-  init();
-
-  setTimeout(()=>{
-    document.getElementById("intro").style.display = "none";
-    running = true;
-    lastMove = 0;
-    requestAnimationFrame(loop);
-  },2000);
+  document.getElementById("startScreen").style.display = "flex";
 }
-
-// start
-init();
-
-setTimeout(()=>{
-  document.getElementById("intro").style.display = "none";
-  running = true;
-  requestAnimationFrame(loop);
-},2000);
 </script>
 
 </body>
