@@ -66,20 +66,36 @@ button:hover {
   <button onclick="login()">Login</button>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAb0GZpyiXzucmj7yNSE7VXbdtGxpeYByE",
+  authDomain: "conz-chat.firebaseapp.com",
+  projectId: "conz-chat",
+  storageBucket: "conz-chat.firebasestorage.app",
+  messagingSenderId: "49947657963",
+  appId: "1:49947657963:web:593598d12ac94a89e3a0ae"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 function login() {
-  let user = document.getElementById("user").value.trim();
-  let pass = document.getElementById("pass").value.trim();
+    let user = document.getElementById("user").value.trim();
+    let pass = document.getElementById("pass").value.trim();
 
-  let users = JSON.parse(localStorage.getItem("users")) || {};
-
-  if (users[user] && users[user].password === pass) {
-    localStorage.setItem("currentUser", user);
-    window.location.href = "chat.html";
-  } else {
-    alert("Invalid login");
-  }
+    signInWithEmailAndPassword(auth, user + "@conzchat.com", pass)
+        .then((userCredential) => {
+            localStorage.setItem("loggedInUser", user);
+            window.location.href = "chat.html";
+        })
+        .catch((error) => {
+            alert("Wrong username or password");
+        });
 }
+window.login = login;
 </script>
 
 </body>
