@@ -2,23 +2,46 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CONZ SNAKE 🔥</title>
+<title>CONZ SNAKE 🐍</title>
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: black;
+  background: radial-gradient(circle, #220000, #000);
+  font-family: Arial;
+  color: white;
 }
 
 canvas {
   display: block;
   touch-action: none;
 }
+
+#ui {
+  position: fixed;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+button {
+  margin-top: 5px;
+  padding: 8px 16px;
+  background: black;
+  border: 2px solid red;
+  color: white;
+  border-radius: 6px;
+}
 </style>
 </head>
 
 <body>
+
+<div id="ui">
+  <div id="score">Score: 0 | High: 0</div>
+  <button onclick="restart()">Restart</button>
+</div>
 
 <canvas id="game"></canvas>
 
@@ -26,7 +49,7 @@ canvas {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-function resize() {
+function resize(){
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
@@ -35,62 +58,61 @@ window.addEventListener("resize", resize);
 
 const grid = 25;
 
-let snake = [{x:10,y:10}];
-let dir = {x:1,y:0};
+let snake, dir, food, score, high, enemies;
 
-let food = spawnFood();
-let score = 0;
-let high = localStorage.getItem("high") || 0;
-
-let enemies = [];
-let particles = [];
+function init(){
+  snake = [{x:10,y:10}];
+  dir = {x:1,y:0};
+  food = spawnFood();
+  score = 0;
+  high = localStorage.getItem("high") || 0;
+  enemies = [];
+}
 
 function spawnFood(){
   return {
-    x: Math.floor(Math.random()* (canvas.width/grid)),
-    y: Math.floor(Math.random()* (canvas.height/grid))
+    x: Math.floor(Math.random() * (canvas.width/grid)),
+    y: Math.floor(Math.random() * (canvas.height/grid))
   }
 }
 
 function spawnEnemy(){
   enemies.push({
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height,
+    x: Math.floor(Math.random() * (canvas.width/grid)),
+    y: Math.floor(Math.random() * (canvas.height/grid)),
     size: Math.floor(Math.random()*3)+1,
     bites: 0,
-    vx: (Math.random()-0.5)*2,
-    vy: (Math.random()-0.5)*2
+    dir: randomDir()
   });
 }
 
-setInterval(spawnEnemy, 3000);
+function randomDir(){
+  const d = [
+    {x:1,y:0},{x:-1,y:0},
+    {x:0,y:1},{x:0,y:-1}
+  ];
+  return d[Math.floor(Math.random()*d.length)];
+}
 
-document.addEventListener("keydown", e=>{
-  if(e.key==="ArrowUp" && dir.y!==1) dir={x:0,y:-1};
-  if(e.key==="ArrowDown" && dir.y!==-1) dir={x:0,y:1};
-  if(e.key==="ArrowLeft" && dir.x!==1) dir={x:-1,y:0};
-  if(e.key==="ArrowRight" && dir.x!==-1) dir={x:1,y:0};
-});
+setInterval(spawnEnemy, 2500);
 
-// swipe
-let startX=0,startY=0;
+// swipe controls
+let sx=0, sy=0;
 canvas.addEventListener("touchstart",e=>{
-  startX=e.touches[0].clientX;
-  startY=e.touches[0].clientY;
+  sx=e.touches[0].clientX;
+  sy=e.touches[0].clientY;
 },{passive:false});
 
-canvas.addEventListener("touchmove",e=>{
-  e.preventDefault();
-},{passive:false});
+canvas.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 
 canvas.addEventListener("touchend",e=>{
-  let dx=e.changedTouches[0].clientX-startX;
-  let dy=e.changedTouches[0].clientY-startY;
+  let dx=e.changedTouches[0].clientX - sx;
+  let dy=e.changedTouches[0].clientY - sy;
 
   if(Math.abs(dx)>Math.abs(dy)){
     if(dx>0 && dir.x!==-1) dir={x:1,y:0};
     else if(dx<0 && dir.x!==1) dir={x:-1,y:0};
-  }else{
+  } else {
     if(dy>0 && dir.y!==-1) dir={x:0,y:1};
     else if(dy<0 && dir.y!==1) dir={x:0,y:-1};
   }
@@ -99,14 +121,15 @@ canvas.addEventListener("touchend",e=>{
 function drawLeaf(x,y){
   ctx.fillStyle="lime";
   ctx.beginPath();
-  ctx.moveTo(x,y+grid/2);
-  ctx.quadraticCurveTo(x+grid/2,y-10,x+grid,y+grid/2);
-  ctx.quadraticCurveTo(x+grid/2,y+grid+10,x,y+grid/2);
+  ctx.moveTo(x,y+12);
+  ctx.quadraticCurveTo(x+12,y-8,x+25,y+12);
+  ctx.quadraticCurveTo(x+12,y+30,x,y+12);
   ctx.fill();
 }
 
 function game(){
-  ctx.fillStyle="rgba(0,0,0,0.2)";
+
+  ctx.fillStyle="rgba(0,0,0,0.25)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
   let head = {
@@ -116,54 +139,70 @@ function game(){
 
   snake.unshift(head);
 
-  // eat
+  // food
   if(head.x===food.x && head.y===food.y){
     score++;
     food = spawnFood();
-
-    for(let i=0;i<15;i++){
-      particles.push({
-        x:head.x*grid,
-        y:head.y*grid,
-        vx:(Math.random()-0.5)*4,
-        vy:(Math.random()-0.5)*4,
-        life:20
-      });
-    }
-  }else{
+  } else {
     snake.pop();
+  }
+
+  // wall
+  if(
+    head.x < 0 || head.y < 0 ||
+    head.x > canvas.width/grid ||
+    head.y > canvas.height/grid
+  ){
+    gameOver();
+  }
+
+  // self
+  for(let i=1;i<snake.length;i++){
+    if(head.x===snake[i].x && head.y===snake[i].y){
+      gameOver();
+    }
   }
 
   // enemies
   enemies.forEach((e,i)=>{
-    e.x += e.vx;
-    e.y += e.vy;
 
-    // bounce
-    if(e.x<0||e.x>canvas.width) e.vx*=-1;
-    if(e.y<0||e.y>canvas.height) e.vy*=-1;
+    e.x += e.dir.x;
+    e.y += e.dir.y;
 
-    // collision with player
-    let hx = head.x*grid;
-    let hy = head.y*grid;
+    if(Math.random()<0.05) e.dir = randomDir();
 
-    if(Math.abs(e.x-hx)<20 && Math.abs(e.y-hy)<20){
+    if(e.x===head.x && e.y===head.y){
+
+      // 🟢 YOU EAT THEM
+      if(snake.length > e.size){
+
+        score += e.size;
+
+        for(let j=0;j<e.size;j++){
+          snake.push({...snake[snake.length-1]});
+        }
+
+        enemies.splice(i,1);
+        return;
+      }
+
+      // 🔴 THEY DAMAGE YOU
       if(e.bites < 3){
+
         e.bites++;
 
-        let damage = e.size;
-        snake.splice(-damage);
-        score -= damage;
+        let dmg = e.size;
+        snake.splice(-dmg);
+        score -= dmg;
 
-        if(score<0) score=0;
+        if(score < 0) score = 0;
 
-        if(snake.length<=0){
-          alert("GAME OVER");
-          location.reload();
+        if(snake.length <= 0){
+          gameOver();
         }
       }
 
-      if(e.bites>=3){
+      if(e.bites >= 3){
         enemies.splice(i,1);
       }
     }
@@ -172,46 +211,40 @@ function game(){
     ctx.shadowBlur=20;
     ctx.shadowColor="red";
     ctx.fillStyle="red";
-    ctx.fillRect(e.x,e.y,15+e.size*5,15+e.size*5);
+    ctx.fillRect(e.x*grid,e.y*grid,grid,grid);
   });
 
   // draw snake
   snake.forEach((s,i)=>{
-    ctx.shadowBlur=15;
+    ctx.shadowBlur=20;
     ctx.shadowColor="lime";
-    ctx.fillStyle=i===0?"#00ffcc":"#00aa66";
+    ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
 
-  // food
   drawLeaf(food.x*grid,food.y*grid);
 
-  // particles
-  particles.forEach((p,i)=>{
-    p.x+=p.vx;
-    p.y+=p.vy;
-    p.life--;
-
-    ctx.fillStyle="lime";
-    ctx.fillRect(p.x,p.y,3,3);
-
-    if(p.life<=0) particles.splice(i,1);
-  });
-
-  // score
-  if(score>high){
-    high=score;
-    localStorage.setItem("high",high);
+  if(score > high){
+    high = score;
+    localStorage.setItem("high", high);
   }
 
-  ctx.shadowBlur=0;
-  ctx.fillStyle="white";
-  ctx.font="20px Arial";
-  ctx.fillText("Score: "+score+"  High: "+high,20,30);
+  document.getElementById("score").innerText =
+    "Score: " + score + " | High: " + high;
 
-  requestAnimationFrame(game);
+  setTimeout(game, 100);
 }
 
+function gameOver(){
+  alert("Game Over");
+  restart();
+}
+
+function restart(){
+  init();
+}
+
+init();
 game();
 </script>
 
