@@ -29,8 +29,8 @@ canvas {
   justify-content: center;
   align-items: center;
   z-index: 100;
-  animation: fadeOut 3s forwards;
   text-align: center;
+  animation: fadeOut 3s forwards;
 }
 
 @keyframes fadeOut {
@@ -52,10 +52,6 @@ canvas {
   align-items: center;
   z-index: 200;
   text-align: center;
-}
-
-#gameOver h1 {
-  text-shadow: 0 0 20px red;
 }
 
 button {
@@ -88,6 +84,12 @@ button {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+const grid = 25;
+
+let snake, dir, food, enemies, score, high;
+let running = false;
+
+// resize
 function resize(){
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -95,10 +97,7 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-const grid = 25;
-
-let snake, dir, food, enemies, score, high;
-
+// INIT
 function init(){
   snake = [{x:10,y:10}];
   dir = {x:1,y:0};
@@ -108,6 +107,7 @@ function init(){
   high = localStorage.getItem("high") || 0;
 }
 
+// FOOD
 function spawnFood(){
   return {
     x: Math.floor(Math.random()*(canvas.width/grid)),
@@ -115,6 +115,7 @@ function spawnFood(){
   };
 }
 
+// ENEMY
 function spawnEnemy(){
   enemies.push({
     x: Math.floor(Math.random()*(canvas.width/grid)),
@@ -130,10 +131,13 @@ function randomDir(){
   return d[Math.floor(Math.random()*d.length)];
 }
 
-setInterval(spawnEnemy, 2500);
+setInterval(() => {
+  if(running) spawnEnemy();
+}, 2500);
 
 // SWIPE
 let sx=0, sy=0;
+
 canvas.addEventListener("touchstart",e=>{
   sx=e.touches[0].clientX;
   sy=e.touches[0].clientY;
@@ -154,7 +158,7 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
-// DRAW LEAF
+// LEAF
 function drawLeaf(x,y){
   ctx.fillStyle="lime";
   ctx.beginPath();
@@ -166,6 +170,8 @@ function drawLeaf(x,y){
 
 // GAME LOOP
 function game(){
+
+  if(!running) return;
 
   ctx.fillStyle="rgba(0,0,0,0.25)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -188,8 +194,8 @@ function game(){
   // WALL
   if(
     head.x < 0 || head.y < 0 ||
-    head.x > canvas.width/grid ||
-    head.y > canvas.height/grid
+    head.x >= canvas.width/grid ||
+    head.y >= canvas.height/grid
   ){
     return gameOver();
   }
@@ -225,6 +231,7 @@ function game(){
         snake.splice(-e.size);
         score -= e.size;
         if(score<0) score=0;
+
         if(snake.length<=0) return gameOver();
       }
 
@@ -258,13 +265,16 @@ function game(){
   ctx.fillStyle="white";
   ctx.fillText("Score: "+score+" | High: "+high,20,30);
 
-  setTimeout(game, 100);
+  requestAnimationFrame(game);
 }
 
+// GAME OVER
 function gameOver(){
+  running = false;
   document.getElementById("gameOver").style.display="flex";
 }
 
+// RESTART
 function restart(){
   document.getElementById("gameOver").style.display="none";
 
@@ -277,11 +287,21 @@ function restart(){
   },50);
 
   init();
-  setTimeout(game, 300);
+
+  setTimeout(()=>{
+    running = true;
+    game();
+  },3000);
 }
 
+// START
 init();
-setTimeout(game, 300);
+
+setTimeout(()=>{
+  running = true;
+  game();
+},3000);
+
 </script>
 
 </body>
