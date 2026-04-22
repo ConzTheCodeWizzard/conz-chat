@@ -17,7 +17,6 @@ canvas {
   touch-action: none;
 }
 
-/* START SCREEN */
 #startScreen, #gameOver {
   position: fixed;
   width: 100%;
@@ -32,9 +31,7 @@ canvas {
   z-index: 100;
 }
 
-#gameOver {
-  display: none;
-}
+#gameOver { display: none; }
 
 button {
   padding: 12px 25px;
@@ -70,9 +67,11 @@ const ctx = canvas.getContext("2d");
 let grid = 25;
 let cols, rows;
 
-let snake, dir, food;
-let running = false;
+let snake, dir, food, enemies;
+let score = 0;
+let high = localStorage.getItem("high") || 0;
 
+let running = false;
 let lastMove = 0;
 let speed = 120;
 
@@ -99,11 +98,39 @@ function init(){
 
   dir = {x:1,y:0};
 
-  food = {
+  food = spawnFood();
+  enemies = [];
+
+  score = 0;
+}
+
+// safe food
+function spawnFood(){
+  return {
     x: Math.floor(Math.random()*cols),
     y: Math.floor(Math.random()*rows)
   };
 }
+
+// enemies
+function spawnEnemy(){
+  enemies.push({
+    x: Math.floor(Math.random()*cols),
+    y: Math.floor(Math.random()*rows),
+    size: Math.floor(Math.random()*3)+1,
+    bites: 0,
+    dir: randomDir()
+  });
+}
+
+function randomDir(){
+  const d = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+  return d[Math.floor(Math.random()*d.length)];
+}
+
+setInterval(()=>{
+  if(running) spawnEnemy();
+},3000);
 
 // swipe
 let sx=0, sy=0;
@@ -128,7 +155,7 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
-// loop
+// game loop
 function loop(timestamp){
   if(!running) return;
 
@@ -142,27 +169,62 @@ function loop(timestamp){
 
     snake.unshift(head);
 
+    // food
     if(head.x === food.x && head.y === food.y){
-      food = {
-        x: Math.floor(Math.random()*cols),
-        y: Math.floor(Math.random()*rows)
-      };
+      score++;
+      food = spawnFood();
     } else {
       snake.pop();
     }
 
+    // wall
     if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
       return gameOver();
     }
 
+    // self
     for(let i=1;i<snake.length;i++){
       if(head.x===snake[i].x && head.y===snake[i].y){
         return gameOver();
       }
     }
+
+    // enemies
+    enemies.forEach((e,i)=>{
+      e.x += e.dir.x;
+      e.y += e.dir.y;
+
+      if(Math.random()<0.05) e.dir = randomDir();
+
+      if(e.x===head.x && e.y===head.y){
+
+        if(snake.length > e.size){
+          score += e.size;
+          for(let j=0;j<e.size;j++){
+            snake.push({...snake[snake.length-1]});
+          }
+          enemies.splice(i,1);
+          return;
+        }
+
+        if(e.bites<3){
+          e.bites++;
+          snake.splice(-e.size);
+          score -= e.size;
+          if(score<0) score=0;
+
+          if(snake.length<=0) return gameOver();
+        }
+
+        if(e.bites>=3){
+          enemies.splice(i,1);
+        }
+      }
+    });
   }
 
-  ctx.fillStyle = "black";
+  // draw
+  ctx.fillStyle="black";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
   snake.forEach((s,i)=>{
@@ -170,8 +232,21 @@ function loop(timestamp){
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
 
-  ctx.fillStyle = "red";
+  ctx.fillStyle="red";
   ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
+
+  enemies.forEach(e=>{
+    ctx.fillStyle="red";
+    ctx.fillRect(e.x*grid,e.y*grid,grid,grid);
+  });
+
+  ctx.fillStyle="white";
+  ctx.fillText("Score: "+score+" | High: "+high,20,30);
+
+  if(score > high){
+    high = score;
+    localStorage.setItem("high", high);
+  }
 
   requestAnimationFrame(loop);
 }
