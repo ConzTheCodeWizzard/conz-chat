@@ -1,98 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Snake Game</title>
-  <style>
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #000000, #1a0000, #330000);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      font-family: Arial;
-      color: white;
-    }
+<title>Conz Snake 🐍</title>
 
-    h1 {
-      color: red;
-      text-shadow: 0 0 10px red;
-      margin-bottom: 20px;
-    }
+<style>
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #000000, #1a0000, #330000);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: Arial;
+  color: white;
+}
 
-    canvas {
-      border: 4px solid red;
-      box-shadow: 0 0 20px red;
-      background: #111;
-    }
+h1 {
+  color: red;
+  text-shadow: 0 0 10px red;
+}
 
-    #score {
-      margin-top: 15px;
-      font-size: 20px;
-    }
-  </style>
+canvas {
+  background: #111;
+  border: 2px solid red;
+  box-shadow: 0 0 20px red;
+}
+
+#score {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: black;
+  color: white;
+  border: 2px solid red;
+  border-radius: 8px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>CONZ SNAKE</h1>
-
+<h1>CONZ SNAKE 🐍</h1>
 <canvas id="game" width="400" height="400"></canvas>
-<div id="score">Score: 0</div>
+<div id="score">Score: 0 | High: 0</div>
+<button onclick="restartGame()">Restart</button>
+
+<!-- sounds -->
+<audio id="eatSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="gameOverSound" src="https://assets.mixkit.co/active_storage/sfx/2698/2698-preview.mp3"></audio>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const box = 20;
-let score = 0;
+let snake;
+let direction;
+let food;
+let score;
+let highScore = localStorage.getItem("highScore") || 0;
+let game;
 
-let snake = [
-  { x: 200, y: 200 }
-];
+const eatSound = document.getElementById("eatSound");
+const gameOverSound = document.getElementById("gameOverSound");
 
-let food = {
-  x: Math.floor(Math.random() * 20) * box,
-  y: Math.floor(Math.random() * 20) * box
-};
+function init() {
+  snake = [{ x: 10 * box, y: 10 * box }];
+  direction = "RIGHT";
+  score = 0;
 
-let direction = "RIGHT";
-
-document.addEventListener("keydown", changeDirection);
-
-function changeDirection(event) {
-  if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-  if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
-  if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-  if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  food = {
+    x: Math.floor(Math.random() * 20) * box,
+    y: Math.floor(Math.random() * 20) * box
+  };
 }
 
-function drawGame() {
+function draw() {
   ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, 400, 400);
 
+  // snake
   for (let i = 0; i < snake.length; i++) {
-    ctx.fillStyle = i === 0 ? "red" : "darkred";
+    ctx.fillStyle = i === 0 ? "lime" : "green";
     ctx.fillRect(snake[i].x, snake[i].y, box, box);
-
-    ctx.strokeStyle = "black";
-    ctx.strokeRect(snake[i].x, snake[i].y, box, box);
   }
 
-  ctx.fillStyle = "lime";
+  // food
+  ctx.fillStyle = "red";
   ctx.fillRect(food.x, food.y, box, box);
 
-  let snakeX = snake[0].x;
-  let snakeY = snake[0].y;
+  let head = { x: snake[0].x, y: snake[0].y };
 
-  if (direction === "UP") snakeY -= box;
-  if (direction === "DOWN") snakeY += box;
-  if (direction === "LEFT") snakeX -= box;
-  if (direction === "RIGHT") snakeX += box;
+  if (direction === "LEFT") head.x -= box;
+  if (direction === "RIGHT") head.x += box;
+  if (direction === "UP") head.y -= box;
+  if (direction === "DOWN") head.y += box;
 
-  if (snakeX === food.x && snakeY === food.y) {
+  // game over check
+  if (
+    head.x < 0 ||
+    head.y < 0 ||
+    head.x >= 400 ||
+    head.y >= 400 ||
+    collision(head, snake)
+  ) {
+    clearInterval(game);
+    gameOverSound.play();
+    alert("Game Over 😭 Score: " + score);
+    return;
+  }
+
+  // eat food
+  if (head.x === food.x && head.y === food.y) {
     score++;
-    document.getElementById("score").innerText = "Score: " + score;
+    eatSound.play();
+
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
+    }
 
     food = {
       x: Math.floor(Math.random() * 20) * box,
@@ -102,27 +133,14 @@ function drawGame() {
     snake.pop();
   }
 
-  const newHead = {
-    x: snakeX,
-    y: snakeY
-  };
+  snake.unshift(head);
 
-  if (
-    snakeX < 0 ||
-    snakeY < 0 ||
-    snakeX >= canvas.width ||
-    snakeY >= canvas.height ||
-    collision(newHead, snake)
-  ) {
-    clearInterval(game);
-    alert("Game Over! Score: " + score);
-  }
-
-  snake.unshift(newHead);
+  document.getElementById("score").innerText =
+    "Score: " + score + " | High: " + highScore;
 }
 
 function collision(head, array) {
-  for (let i = 0; i < array.length; i++) {
+  for (let i = 1; i < array.length; i++) {
     if (head.x === array[i].x && head.y === array[i].y) {
       return true;
     }
@@ -130,7 +148,47 @@ function collision(head, array) {
   return false;
 }
 
-const game = setInterval(drawGame, 100);
+// keyboard controls
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+  if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+  if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+  if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+});
+
+// touch swipe controls
+let startX, startY;
+
+canvas.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+
+canvas.addEventListener("touchend", (e) => {
+  let endX = e.changedTouches[0].clientX;
+  let endY = e.changedTouches[0].clientY;
+
+  let dx = endX - startX;
+  let dy = endY - startY;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 0 && direction !== "LEFT") direction = "RIGHT";
+    else if (dx < 0 && direction !== "RIGHT") direction = "LEFT";
+  } else {
+    if (dy > 0 && direction !== "UP") direction = "DOWN";
+    else if (dy < 0 && direction !== "DOWN") direction = "UP";
+  }
+});
+
+function restartGame() {
+  clearInterval(game);
+  init();
+  game = setInterval(draw, 120);
+}
+
+// start game
+init();
+game = setInterval(draw, 120);
 </script>
 
 </body>
