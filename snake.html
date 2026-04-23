@@ -17,16 +17,18 @@ canvas {
   touch-action: none;
 }
 
+/* CENTER FIX */
 .screen {
   position: fixed;
   width: 100%;
   height: 100%;
-  background: black;
-  color: red;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  text-align: center;
+  color: red;
+  background: black;
 }
 
 #gameOver, #bombDeath { display:none; }
@@ -43,7 +45,7 @@ button {
 <body>
 
 <div id="startScreen" class="screen">
-  <h1>WELCOME TO CONZ SNAKE</h1>
+  <h1 style="text-align:center;">WELCOME TO CONZ SNAKE</h1>
   <button onclick="startGame()">START</button>
 </div>
 
@@ -64,19 +66,25 @@ button {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let grid = 25;
-let cols, rows;
+let grid = 25, cols, rows;
 
 let snake, dir, food, bombs;
-let score = 0;
-let high = localStorage.getItem("high") || 0;
+let score = 0, high = localStorage.getItem("high") || 0;
 
 let running = false;
 let lastMove = 0;
 let bombTimer = 0;
 let speed = 120;
 
-let audioCtx;
+// 🎵 MUSIC
+let audioCtx, musicOsc;
+
+// ✖️ MULTIPLIER SYSTEM
+let multActive = false;
+let multiplier = 1;
+let multTimer = 0;
+let multDot = null;
+let multDotTimer = 0;
 
 // resize
 function resize(){
@@ -88,31 +96,45 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// 🔊 better sounds
+// sounds
 function chomp(){
   let o = audioCtx.createOscillator();
   let g = audioCtx.createGain();
-  o.type = "triangle";
-  o.frequency.setValueAtTime(500, audioCtx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime+0.15);
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  o.type="triangle";
+  o.frequency.setValueAtTime(400,audioCtx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(100,audioCtx.currentTime+0.15);
+  o.connect(g); g.connect(audioCtx.destination);
   o.start();
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
   o.stop(audioCtx.currentTime+0.2);
 }
 
 function boom(){
   let o = audioCtx.createOscillator();
   let g = audioCtx.createGain();
-  o.type = "sawtooth";
-  o.frequency.setValueAtTime(120, audioCtx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.3);
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  o.type="sawtooth";
+  o.frequency.setValueAtTime(100,audioCtx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(40,audioCtx.currentTime+0.3);
+  o.connect(g); g.connect(audioCtx.destination);
   o.start();
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);
   o.stop(audioCtx.currentTime+0.3);
+}
+
+// 🎵 MUSIC LOOP
+function startMusic(){
+  musicOsc = audioCtx.createOscillator();
+  let gain = audioCtx.createGain();
+
+  musicOsc.type = "sine";
+  musicOsc.frequency.value = 120;
+
+  musicOsc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  gain.gain.value = 0.03;
+
+  musicOsc.start();
 }
 
 // init
@@ -130,9 +152,13 @@ function init(){
   food = spawnFood();
   bombs = [];
   score = 0;
+
+  multActive = false;
+  multiplier = 1;
+  multDot = null;
 }
 
-// safe food
+// food
 function spawnFood(){
   return {
     x: Math.floor(Math.random()*cols),
@@ -147,6 +173,16 @@ function spawnBomb(){
     y: Math.floor(Math.random()*rows),
     life: 2000
   });
+}
+
+// ✖️ MULT DOT
+function spawnMultDot(){
+  multDot = {
+    x: Math.floor(Math.random()*cols),
+    y: Math.floor(Math.random()*rows),
+    value: Math.floor(Math.random()*4)+2 // x2–x5
+  };
+  multDotTimer = 3000;
 }
 
 // swipe
@@ -169,46 +205,6 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
-// draw snake properly
-function drawSnake(){
-  snake.forEach((s,i)=>{
-    ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
-
-    ctx.beginPath();
-    ctx.roundRect(s.x*grid, s.y*grid, grid, grid, 8);
-    ctx.fill();
-
-    // eyes on head
-    if(i===0){
-      ctx.fillStyle="black";
-      ctx.fillRect(s.x*grid+6, s.y*grid+6, 4,4);
-      ctx.fillRect(s.x*grid+15, s.y*grid+6, 4,4);
-    }
-  });
-}
-
-// draw bomb
-function drawBomb(b){
-  let x = b.x*grid + grid/2;
-  let y = b.y*grid + grid/2;
-
-  ctx.fillStyle="#222";
-  ctx.beginPath();
-  ctx.arc(x,y,10,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.strokeStyle="orange";
-  ctx.beginPath();
-  ctx.moveTo(x,y-10);
-  ctx.lineTo(x,y-18);
-  ctx.stroke();
-
-  ctx.fillStyle="yellow";
-  ctx.beginPath();
-  ctx.arc(x,y-20,3,0,Math.PI*2);
-  ctx.fill();
-}
-
 // loop
 function loop(time){
   if(!running) return;
@@ -226,52 +222,86 @@ function loop(time){
 
     snake.unshift(head);
 
+    // FOOD
     if(head.x===food.x && head.y===food.y){
-      score++;
+      score += multiplier;
       chomp();
       food = spawnFood();
     } else {
       snake.pop();
     }
 
-    if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
-      return normalDeath();
-    }
-
+    // WALL / SELF
+    if(head.x<0||head.y<0||head.x>=cols||head.y>=rows) return normalDeath();
     for(let i=1;i<snake.length;i++){
-      if(head.x===snake[i].x && head.y===snake[i].y){
-        return normalDeath();
-      }
+      if(head.x===snake[i].x && head.y===snake[i].y) return normalDeath();
     }
 
-    bombs.forEach((b,i)=>{
+    // BOMB
+    bombs.forEach((b)=>{
       if(head.x===b.x && head.y===b.y){
         boom();
         return bombDeath();
       }
     });
 
+    // MULT DOT
+    if(multDot && head.x===multDot.x && head.y===multDot.y){
+      multiplier = multDot.value;
+      multActive = true;
+      multTimer = 15000;
+      multDot = null;
+    }
+
     if(time - bombTimer > 2500){
       spawnBomb();
       bombTimer = time;
     }
+
+    // spawn multiplier randomly
+    if(!multDot && Math.random()<0.01){
+      spawnMultDot();
+    }
   }
 
-  drawSnake();
+  // snake
+  snake.forEach((s,i)=>{
+    ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
+    ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
+  });
 
+  // food
   ctx.fillStyle="lime";
   ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
+  // bombs
   bombs.forEach((b,i)=>{
-    drawBomb(b);
-    b.life -= 16;
+    ctx.fillStyle="red";
+    ctx.fillRect(b.x*grid,b.y*grid,grid,grid);
+    b.life-=16;
     if(b.life<=0) bombs.splice(i,1);
   });
 
-  // score
+  // ✖️ MULT DOT DRAW
+  if(multDot){
+    ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+    ctx.fillRect(multDot.x*grid, multDot.y*grid, grid, grid);
+    multDotTimer -= 16;
+    if(multDotTimer<=0) multDot=null;
+  }
+
+  // UI
   ctx.fillStyle="white";
-  ctx.font="18px Arial";
   ctx.fillText("Score: "+score+" | High: "+high,20,30);
+
+  if(multActive){
+    ctx.fillText("x"+multiplier+" ("+Math.ceil(multTimer/1000)+")",20,55);
+    multTimer -= 16;
+    if(multTimer<=0){
+      multActive=false;
+      multiplier=1;
+    }
+  }
 
   if(score>high){
     high=score;
@@ -295,6 +325,8 @@ function bombDeath(){
 // controls
 function startGame(){
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  startMusic();
+
   document.getElementById("startScreen").style.display="none";
   init();
   running=true;
