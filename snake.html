@@ -9,47 +9,30 @@ html,body{margin:0;background:black;color:red;font-family:Arial;overflow:hidden;
 canvas{display:block;}
 
 .screen{
- position:fixed;
- width:100%;
- height:100%;
- display:flex;
- flex-direction:column;
- justify-content:center;
- align-items:center;
- text-align:center;
- background:black;
- z-index:10;
+ position:fixed;width:100%;height:100%;
+ display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ text-align:center;background:black;z-index:10;
 }
 
 .hidden{display:none;}
 
 button{
- padding:12px 20px;
- margin:8px;
- border:2px solid red;
- background:black;
- color:white;
- font-size:16px;
+ padding:12px 20px;margin:8px;
+ border:2px solid red;background:black;color:white;
 }
 
 #ui{
- position:fixed;
- top:10px;
- left:10px;
- color:white;
+ position:fixed;top:10px;left:10px;color:white;
 }
-
 #modBtn{
- position:fixed;
- bottom:20px;
- right:20px;
+ position:fixed;bottom:20px;right:20px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- START -->
 <div id="startScreen" class="screen">
   <h1>WELCOME TO CONZ SNAKE</h1>
   <button onclick="openPlayer()">START</button>
@@ -58,42 +41,37 @@ button{
   <button onclick="openAbout()">ABOUT CONZ</button>
 </div>
 
-<!-- ABOUT -->
 <div id="aboutScreen" class="screen hidden">
 <h2>About the developer of this app</h2>
 <div style="color:white;max-width:500px;">
-hi, I'm conz iv been coding since I was 13 but took 6 years off away from the hobby, i have coded for 5 years in total, as a teen I mainly worked on modded kik apps which where modded variants of a social media platform called kik, I also built modded variants of messenger, Facebook, snapchat, and discord, I finally picked up the hobby again and decided to start on good old fashion snake with my little twists to it, built from scratch, hope you enjoy the game👊
+hi, I'm conz iv been coding since I was 13 but took 6 years off away from the hobby, i have coded for 5 years in total...
 </div>
 <button onclick="back()">BACK</button>
 </div>
 
-<!-- PLAYER -->
 <div id="playerScreen" class="screen hidden">
 <h2>SELECT PLAYER</h2>
 <button onclick="selectPlayer('Connor')">Connor</button>
 <button onclick="selectPlayer('Emma')">Emma</button>
 </div>
 
-<!-- SETTINGS -->
 <div id="settingsScreen" class="screen hidden">
 <h2>SETTINGS</h2>
-<button onclick="toggleMusic()">Music</button>
-<button onclick="toggleBombs()">Bombs</button>
-<button onclick="cycleColor()">Snake Colour</button>
+<button onclick="toggleMusic()">Music: <span id="musicTxt">ON</span></button>
+<button onclick="toggleBombs()">Bombs: <span id="bombTxt">ON</span></button>
+<button onclick="cycleColor()">Colour: <span id="colorTxt">Green</span></button>
 <button onclick="back()">BACK</button>
 </div>
 
-<!-- MODS -->
 <div id="modsScreen" class="screen hidden">
 <h2>MODS</h2>
-<button onclick="noClip=!noClip">No Clip</button>
-<button onclick="alwaysX5=!alwaysX5">Always x5</button>
-<button onclick="godMode=!godMode">Never Die</button>
+<button onclick="toggleNoClip()">No Clip: <span id="noclipTxt">OFF</span></button>
+<button onclick="toggleX5()">Always x5: <span id="x5Txt">OFF</span></button>
+<button onclick="toggleGod()">Never Die: <span id="godTxt">OFF</span></button>
 <button onclick="resume()">RESUME</button>
 <button onclick="back()">MENU</button>
 </div>
 
-<!-- GAME OVER -->
 <div id="gameOver" class="screen hidden">
 <h1>💀 YOU DIED 💀</h1>
 <button onclick="back()">MENU</button>
@@ -108,16 +86,23 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 let grid=25,cols,rows;
-let snake,dir,food,bombs=[],mults=[];
+let snake,dir,food;
 let running=false,started=false;
 
 let score=0,high=0,currentPlayer=null;
+
+// SETTINGS / MODS
 let noClip=false,alwaysX5=false,godMode=false;
 let bombsOn=true,musicOn=true;
 
 let colors=["green","purple","red","rainbow"];
 let colorIndex=0;
 
+// TIMING FIX
+let lastTime=0;
+let speed=120;
+
+// resize
 function resize(){
  canvas.width=innerWidth;
  canvas.height=innerHeight;
@@ -127,22 +112,16 @@ function resize(){
 resize();
 window.onresize=resize;
 
-function hideAll(){
- document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
-}
-
-function back(){
- hideAll();
- document.getElementById("startScreen").classList.remove("hidden");
- running=false;
-}
-
+// MENU
+function hideAll(){document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));}
+function back(){hideAll();startScreen.classList.remove("hidden");running=false;}
 function openAbout(){hideAll();aboutScreen.classList.remove("hidden");}
 function openSettings(){hideAll();settingsScreen.classList.remove("hidden");}
 function openMods(){hideAll();modsScreen.classList.remove("hidden");}
 function openPlayer(){hideAll();playerScreen.classList.remove("hidden");}
-function resume(){hideAll();running=true;loop();}
+function resume(){hideAll();running=true;requestAnimationFrame(loop);}
 
+// PLAYER
 function selectPlayer(name){
  currentPlayer=name;
  high=localStorage.getItem("high_"+name)||0;
@@ -150,11 +129,13 @@ function selectPlayer(name){
  startGame();
 }
 
+// GAME
 function startGame(){
  hideAll();
  init();
  running=true;
  started=false;
+ lastTime=0;
  requestAnimationFrame(loop);
 }
 
@@ -163,7 +144,6 @@ function init(){
  snake=[{x:cx,y:cy}];
  dir={x:1,y:0};
  food=spawn();
- bombs=[];mults=[];
  score=0;
 }
 
@@ -171,48 +151,66 @@ function spawn(){
  return {x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};
 }
 
+// TOUCH FIX (no instant move)
+let sx=0,sy=0;
 canvas.addEventListener("touchstart",e=>{
- let t=e.touches[0];
- this.sx=t.clientX;this.sy=t.clientY;
+ sx=e.touches[0].clientX;
+ sy=e.touches[0].clientY;
 });
+
 canvas.addEventListener("touchend",e=>{
- let dx=e.changedTouches[0].clientX-this.sx;
- let dy=e.changedTouches[0].clientY-this.sy;
+ let dx=e.changedTouches[0].clientX-sx;
+ let dy=e.changedTouches[0].clientY-sy;
 
  if(Math.abs(dx)>Math.abs(dy)){
-  dir=dx>0?{x:1,y:0}:{x:-1,y:0};
+  if(dx>0 && dir.x!==-1) dir={x:1,y:0};
+  if(dx<0 && dir.x!==1) dir={x:-1,y:0};
  }else{
-  dir=dy>0?{x:0,y:1}:{x:0,y:-1};
+  if(dy>0 && dir.y!==-1) dir={x:0,y:1};
+  if(dy<0 && dir.y!==1) dir={x:0,y:-1};
  }
+
  started=true;
 });
 
-function loop(){
+// LOOP (FIXED SPEED)
+function loop(time){
  if(!running)return;
 
+ if(time-lastTime>speed){
+  lastTime=time;
+
+  if(started){
+   let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+
+   if(noClip){
+    head.x=(head.x+cols)%cols;
+    head.y=(head.y+rows)%rows;
+   }else{
+    if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
+     if(!godMode)return gameOver();
+     head={...snake[0]};
+    }
+   }
+
+   snake.unshift(head);
+
+   if(head.x===food.x&&head.y===food.y){
+    score+=alwaysX5?5:1;
+    food=spawn();
+   }else{
+    snake.pop();
+   }
+  }
+ }
+
+ draw();
+ requestAnimationFrame(loop);
+}
+
+function draw(){
  ctx.fillStyle="black";
  ctx.fillRect(0,0,canvas.width,canvas.height);
-
- if(started){
-  let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-
-  if(!noClip){
-   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
-    if(!godMode)return gameOver();
-    head=snake[0];
-   }
-  }else{
-   head.x=(head.x+cols)%cols;
-   head.y=(head.y+rows)%rows;
-  }
-
-  snake.unshift(head);
-
-  if(head.x===food.x&&head.y===food.y){
-   score+=alwaysX5?5:1;
-   food=spawn();
-  }else snake.pop();
- }
 
  snake.forEach((s,i)=>{
   ctx.fillStyle=colors[colorIndex];
@@ -222,26 +220,51 @@ function loop(){
  ctx.fillStyle="lime";
  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
- document.getElementById("ui").innerText=
- `${currentPlayer} Score:${score} High:${high}`;
+ ui.innerText=`${currentPlayer} Score:${score} High:${high}`;
 
  if(score>high){
   high=score;
   localStorage.setItem("high_"+currentPlayer,high);
  }
-
- requestAnimationFrame(loop);
 }
 
 function gameOver(){
  running=false;
- document.getElementById("gameOver").classList.remove("hidden");
+ gameOverScreen.classList.remove("hidden");
 }
 
-function toggleMusic(){musicOn=!musicOn;}
-function toggleBombs(){bombsOn=!bombsOn;}
-function cycleColor(){colorIndex=(colorIndex+1)%colors.length;}
+// TOGGLES (FIXED)
+function toggleMusic(){
+ musicOn=!musicOn;
+ musicTxt.innerText=musicOn?"ON":"OFF";
+}
 
+function toggleBombs(){
+ bombsOn=!bombsOn;
+ bombTxt.innerText=bombsOn?"ON":"OFF";
+}
+
+function cycleColor(){
+ colorIndex=(colorIndex+1)%colors.length;
+ colorTxt.innerText=colors[colorIndex];
+}
+
+function toggleNoClip(){
+ noClip=!noClip;
+ noclipTxt.innerText=noClip?"ON":"OFF";
+}
+
+function toggleX5(){
+ alwaysX5=!alwaysX5;
+ x5Txt.innerText=alwaysX5?"ON":"OFF";
+}
+
+function toggleGod(){
+ godMode=!godMode;
+ godTxt.innerText=godMode?"ON":"OFF";
+}
+
+// INIT
 window.onload=back;
 </script>
 
