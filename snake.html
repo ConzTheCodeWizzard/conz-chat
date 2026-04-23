@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conz Snake</title>
+<title>Conz Snake FINAL</title>
 
 <style>
 html,body{margin:0;overflow:hidden;background:black;font-family:Arial;}
@@ -24,11 +24,19 @@ canvas{display:block;}
 .hidden{display:none;}
 
 button{
- padding:12px 25px;
- margin:6px;
+ padding:10px 20px;
+ margin:5px;
  border:2px solid red;
  background:black;
  color:white;
+}
+
+#topUI{
+ position:fixed;
+ top:10px;
+ left:10px;
+ color:white;
+ z-index:5;
 }
 </style>
 </head>
@@ -39,12 +47,12 @@ button{
   <h1>CONZ SNAKE</h1>
   <button onclick="startGame()">START</button>
   <button onclick="showSettings()">SETTINGS</button>
-  <button onclick="showMods()">MOD MENU</button>
 </div>
 
 <div id="settings" class="screen hidden">
   <h2>SETTINGS</h2>
   <button onclick="toggleMusic()">Music: <span id="musicState">ON</span></button>
+  <button onclick="toggleBombs()">Bombs: <span id="bombState">ON</span></button>
   <button onclick="cycleColor()">Snake: <span id="colorState">Green</span></button>
   <button onclick="back()">BACK</button>
 </div>
@@ -54,7 +62,7 @@ button{
   <button onclick="toggleNoClip()">No Clip: <span id="noclipState">OFF</span></button>
   <button onclick="toggleX5()">Always x5: <span id="x5State">OFF</span></button>
   <button onclick="toggleGod()">Never Die: <span id="godState">OFF</span></button>
-  <button onclick="back()">BACK</button>
+  <button onclick="resume()">BACK TO GAME</button>
 </div>
 
 <div id="gameOver" class="screen hidden">
@@ -62,6 +70,7 @@ button{
   <button onclick="back()">MENU</button>
 </div>
 
+<div id="topUI"></div>
 <canvas id="game"></canvas>
 
 <script>
@@ -69,28 +78,26 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 let grid=25,cols,rows;
-let snake,dir,food;
+let snake,dir,food,bombs=[];
+let running=false,started=false;
 
-let running=false, started=false;
-let score=0;
+let score=0,high=localStorage.getItem("high")||0;
 
-// speed control (FIX)
-let lastStep=0;
-let stepDelay=120;
+let lastStep=0,stepDelay=120;
 
 // settings
-let musicOn=true;
+let musicOn=true,bombsOn=true;
 let colors=["green","purple","red","rainbow"];
 let colorIndex=0;
 
 // mods
-let noClip=false;
-let alwaysX5=false;
-let godMode=false;
+let noClip=false,alwaysX5=false,godMode=false;
+
+// multiplier
+let mult=1,multTimer=0,multDot=null;
 
 // audio
-let audioCtx;
-let musicInterval;
+let audioCtx,musicLoop;
 
 // resize
 function resize(){
@@ -104,87 +111,58 @@ window.addEventListener("resize",resize);
 
 // init
 function init(){
- let cx=Math.floor(cols/2);
- let cy=Math.floor(rows/2);
-
- snake=[
-  {x:cx,y:cy},
-  {x:cx-1,y:cy},
-  {x:cx-2,y:cy}
- ];
-
+ let cx=Math.floor(cols/2),cy=Math.floor(rows/2);
+ snake=[{x:cx,y:cy},{x:cx-1,y:cy},{x:cx-2,y:cy}];
  dir={x:1,y:0};
  food=spawn();
+ bombs=[];
  score=0;
+ mult=1;
+ multTimer=0;
+ multDot=null;
  started=false;
 }
 
-// spawn
+// spawn safe
 function spawn(){
- return{
-  x:Math.floor(Math.random()*cols),
-  y:Math.floor(Math.random()*rows)
- };
+ return {x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};
 }
 
 // swipe
 let sx=0,sy=0;
 canvas.addEventListener("touchstart",e=>{
- sx=e.touches[0].clientX;
- sy=e.touches[0].clientY;
-},{passive:false});
-
+ sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+});
 canvas.addEventListener("touchend",e=>{
  let dx=e.changedTouches[0].clientX-sx;
  let dy=e.changedTouches[0].clientY-sy;
 
  if(Math.abs(dx)>Math.abs(dy)){
-  if(dx>0 && dir.x!==-1){dir={x:1,y:0}; started=true;}
-  else if(dx<0 && dir.x!==1){dir={x:-1,y:0}; started=true;}
+  if(dx>0&&dir.x!==-1){dir={x:1,y:0};started=true;}
+  else if(dx<0&&dir.x!==1){dir={x:-1,y:0};started=true;}
  }else{
-  if(dy>0 && dir.y!==-1){dir={x:0,y:1}; started=true;}
-  else if(dy<0 && dir.y!==1){dir={x:0,y:-1}; started=true;}
+  if(dy>0&&dir.y!==-1){dir={x:0,y:1};started=true;}
+  else if(dy<0&&dir.y!==1){dir={x:0,y:-1};started=true;}
  }
 });
 
-// sound
-function chomp(){
+// sounds
+function beep(freq){
  if(!audioCtx) return;
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
- o.type="triangle";
- o.frequency.value=500;
+ o.frequency.value=freq;
  o.connect(g); g.connect(audioCtx.destination);
  o.start();
  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
  o.stop(audioCtx.currentTime+0.2);
 }
 
-// 🎵 REAL MUSIC (pulse beat, not hum)
+// music
 function startMusic(){
- if(!audioCtx) return;
-
- musicInterval=setInterval(()=>{
-  let o=audioCtx.createOscillator();
-  let g=audioCtx.createGain();
-
-  o.type="sine";
-  o.frequency.value=120;
-
-  o.connect(g);
-  g.connect(audioCtx.destination);
-
-  g.gain.setValueAtTime(0.03,audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
-
-  o.start();
-  o.stop(audioCtx.currentTime+0.2);
- },600);
+ musicLoop=setInterval(()=>beep(120),700);
 }
-
-function stopMusic(){
- clearInterval(musicInterval);
-}
+function stopMusic(){clearInterval(musicLoop);}
 
 // loop
 function loop(time){
@@ -207,54 +185,100 @@ function loop(time){
 
   snake.unshift(head);
 
-  if(head.x===food.x && head.y===food.y){
-   score += alwaysX5 ? 5 : 1;
-   chomp();
+  // food
+  if(head.x===food.x&&head.y===food.y){
+   score += alwaysX5 ? 5 : mult;
+   beep(600);
    food=spawn();
   }else snake.pop();
 
-  if(!godMode){
-   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
-    return gameOver();
-   }
-   for(let i=1;i<snake.length;i++){
-    if(head.x===snake[i].x && head.y===snake[i].y){
+  // multiplier pickup
+  if(multDot && head.x===multDot.x && head.y===multDot.y){
+   mult=multDot.value;
+   multTimer=15000;
+   multDot=null;
+   beep(1000);
+  }
+
+  // bombs
+  if(bombsOn){
+   bombs.forEach(b=>{
+    if(head.x===b.x&&head.y===b.y && !godMode){
      return gameOver();
     }
+   });
+  }
+
+  // death
+  if(!godMode){
+   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows) return gameOver();
+   for(let i=1;i<snake.length;i++){
+    if(head.x===snake[i].x&&head.y===snake[i].y) return gameOver();
    }
+  }
+
+  // spawn bombs
+  if(bombsOn && Math.random()<0.02){
+   bombs.push({...spawn()});
+  }
+
+  // spawn multiplier
+  if(!multDot && Math.random()<0.01){
+   multDot={...spawn(),value:Math.floor(Math.random()*4)+2};
   }
  }
 
  // draw snake
  snake.forEach((s,i)=>{
-  if(colors[colorIndex]==="rainbow"){
-   ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
-  }else{
-   ctx.fillStyle=colors[colorIndex];
-  }
+  ctx.fillStyle=i===0?"#00ffcc":colors[colorIndex];
   ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
  });
 
+ // food
  ctx.fillStyle="lime";
  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
- ctx.fillStyle="white";
- ctx.fillText("Score: "+score,20,30);
+ // bombs
+ if(bombsOn){
+  bombs.forEach(b=>{
+   ctx.fillStyle="red";
+   ctx.fillRect(b.x*grid,b.y*grid,grid,grid);
+  });
+ }
+
+ // mult dot
+ if(multDot){
+  ctx.fillStyle=`hsl(${Date.now()%360},100%,50%)`;
+  ctx.fillRect(multDot.x*grid,multDot.y*grid,grid,grid);
+ }
+
+ // UI
+ let text=`Score: ${score} | High: ${high}`;
+ if(alwaysX5) text+=" | INFINITE x5 ENABLED";
+ if(mult>1 && !alwaysX5) text+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
+
+ document.getElementById("topUI").innerText=text;
+
+ if(multTimer>0){
+  multTimer-=16;
+  if(multTimer<=0) mult=1;
+ }
+
+ if(score>high){
+  high=score;
+  localStorage.setItem("high",high);
+ }
 
  requestAnimationFrame(loop);
 }
 
-// start
+// controls
 function startGame(){
  hideAll();
-
  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-
  if(musicOn) startMusic();
-
  init();
  running=true;
- lastStep=0;
  requestAnimationFrame(loop);
 }
 
@@ -265,52 +289,21 @@ function gameOver(){
 }
 
 // menus
-function hideAll(){
- document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
-}
-
-function showSettings(){
- hideAll();
- document.getElementById("settings").classList.remove("hidden");
-}
-
-function showMods(){
- hideAll();
- document.getElementById("mods").classList.remove("hidden");
-}
-
-function back(){
- hideAll();
- document.getElementById("startScreen").classList.remove("hidden");
-}
+function hideAll(){document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));}
+function showSettings(){hideAll();document.getElementById("settings").classList.remove("hidden");}
+function back(){hideAll();document.getElementById("startScreen").classList.remove("hidden");}
+function resume(){hideAll();}
 
 // toggles
-function toggleMusic(){
- musicOn=!musicOn;
- document.getElementById("musicState").innerText=musicOn?"ON":"OFF";
- if(musicOn) startMusic();
- else stopMusic();
-}
+function toggleMusic(){musicOn=!musicOn;document.getElementById("musicState").innerText=musicOn?"ON":"OFF";musicOn?startMusic():stopMusic();}
+function toggleBombs(){bombsOn=!bombsOn;document.getElementById("bombState").innerText=bombsOn?"ON":"OFF";}
+function cycleColor(){colorIndex=(colorIndex+1)%colors.length;document.getElementById("colorState").innerText=colors[colorIndex];}
+function toggleNoClip(){noClip=!noClip;document.getElementById("noclipState").innerText=noClip?"ON":"OFF";}
+function toggleX5(){alwaysX5=!alwaysX5;document.getElementById("x5State").innerText=alwaysX5?"ON":"OFF";}
+function toggleGod(){godMode=!godMode;document.getElementById("godState").innerText=godMode?"ON":"OFF";}
 
-function cycleColor(){
- colorIndex=(colorIndex+1)%colors.length;
- document.getElementById("colorState").innerText=colors[colorIndex];
-}
-
-function toggleNoClip(){
- noClip=!noClip;
- document.getElementById("noclipState").innerText=noClip?"ON":"OFF";
-}
-
-function toggleX5(){
- alwaysX5=!alwaysX5;
- document.getElementById("x5State").innerText=alwaysX5?"ON":"OFF";
-}
-
-function toggleGod(){
- godMode=!godMode;
- document.getElementById("godState").innerText=godMode?"ON":"OFF";
-}
+// open mods in game
+window.addEventListener("dblclick",()=>{document.getElementById("mods").classList.remove("hidden");running=false;});
 </script>
 
 </body>
