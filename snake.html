@@ -46,7 +46,6 @@ button{
   <h2>SETTINGS</h2>
   <button onclick="toggleMusic()">Music: <span id="musicState">ON</span></button>
   <button onclick="cycleColor()">Snake: <span id="colorState">Green</span></button>
-  <button onclick="toggleBombs()">Bombs: <span id="bombState">ON</span></button>
   <button onclick="back()">BACK</button>
 </div>
 
@@ -71,8 +70,13 @@ const ctx=canvas.getContext("2d");
 
 let grid=25,cols,rows;
 let snake,dir,food;
-let running=false, startedMoving=false;
+
+let running=false, started=false;
 let score=0;
+
+// speed control (FIX)
+let lastStep=0;
+let stepDelay=120;
 
 // settings
 let musicOn=true;
@@ -85,7 +89,8 @@ let alwaysX5=false;
 let godMode=false;
 
 // audio
-let audioCtx, musicOsc;
+let audioCtx;
+let musicInterval;
 
 // resize
 function resize(){
@@ -111,7 +116,7 @@ function init(){
  dir={x:1,y:0};
  food=spawn();
  score=0;
- startedMoving=false;
+ started=false;
 }
 
 // spawn
@@ -134,11 +139,11 @@ canvas.addEventListener("touchend",e=>{
  let dy=e.changedTouches[0].clientY-sy;
 
  if(Math.abs(dx)>Math.abs(dy)){
-  if(dx>0 && dir.x!==-1){dir={x:1,y:0}; startedMoving=true;}
-  else if(dx<0 && dir.x!==1){dir={x:-1,y:0}; startedMoving=true;}
+  if(dx>0 && dir.x!==-1){dir={x:1,y:0}; started=true;}
+  else if(dx<0 && dir.x!==1){dir={x:-1,y:0}; started=true;}
  }else{
-  if(dy>0 && dir.y!==-1){dir={x:0,y:1}; startedMoving=true;}
-  else if(dy<0 && dir.y!==1){dir={x:0,y:-1}; startedMoving=true;}
+  if(dy>0 && dir.y!==-1){dir={x:0,y:1}; started=true;}
+  else if(dy<0 && dir.y!==1){dir={x:0,y:-1}; started=true;}
  }
 });
 
@@ -155,29 +160,42 @@ function chomp(){
  o.stop(audioCtx.currentTime+0.2);
 }
 
-// music
+// 🎵 REAL MUSIC (pulse beat, not hum)
 function startMusic(){
- musicOsc=audioCtx.createOscillator();
- let g=audioCtx.createGain();
+ if(!audioCtx) return;
 
- musicOsc.type="sine";
- musicOsc.frequency.value=100;
+ musicInterval=setInterval(()=>{
+  let o=audioCtx.createOscillator();
+  let g=audioCtx.createGain();
 
- musicOsc.connect(g);
- g.connect(audioCtx.destination);
- g.gain.value=0.03;
+  o.type="sine";
+  o.frequency.value=120;
 
- musicOsc.start();
+  o.connect(g);
+  g.connect(audioCtx.destination);
+
+  g.gain.setValueAtTime(0.03,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
+
+  o.start();
+  o.stop(audioCtx.currentTime+0.2);
+ },600);
+}
+
+function stopMusic(){
+ clearInterval(musicInterval);
 }
 
 // loop
-function loop(){
+function loop(time){
  if(!running) return;
 
  ctx.fillStyle="black";
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
- if(startedMoving){
+ if(started && time-lastStep>stepDelay){
+  lastStep=time;
+
   let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 
   if(noClip){
@@ -196,9 +214,13 @@ function loop(){
   }else snake.pop();
 
   if(!godMode){
-   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows) return gameOver();
+   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
+    return gameOver();
+   }
    for(let i=1;i<snake.length;i++){
-    if(head.x===snake[i].x && head.y===snake[i].y) return gameOver();
+    if(head.x===snake[i].x && head.y===snake[i].y){
+     return gameOver();
+    }
    }
   }
  }
@@ -213,7 +235,6 @@ function loop(){
   ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
  });
 
- // food
  ctx.fillStyle="lime";
  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
@@ -233,11 +254,13 @@ function startGame(){
 
  init();
  running=true;
+ lastStep=0;
  requestAnimationFrame(loop);
 }
 
 function gameOver(){
  running=false;
+ stopMusic();
  document.getElementById("gameOver").classList.remove("hidden");
 }
 
@@ -265,16 +288,13 @@ function back(){
 function toggleMusic(){
  musicOn=!musicOn;
  document.getElementById("musicState").innerText=musicOn?"ON":"OFF";
- if(musicOn && audioCtx) startMusic();
+ if(musicOn) startMusic();
+ else stopMusic();
 }
 
 function cycleColor(){
  colorIndex=(colorIndex+1)%colors.length;
  document.getElementById("colorState").innerText=colors[colorIndex];
-}
-
-function toggleBombs(){
- document.getElementById("bombState").innerText="OFF";
 }
 
 function toggleNoClip(){
