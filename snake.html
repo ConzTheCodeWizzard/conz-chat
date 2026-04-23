@@ -38,6 +38,19 @@ button{
   <button onclick="openPlayerSelect()">START</button>
   <button onclick="showSettings()">SETTINGS</button>
   <button onclick="showMods()">MOD MENU</button>
+  <!-- 🔥 ADDED BUTTON -->
+  <button onclick="showAbout()">ABOUT CONZ</button>
+</div>
+
+<!-- 🔥 ADDED ABOUT SCREEN -->
+<div id="aboutScreen" class="screen hidden">
+  <h2>About the developer of this app</h2>
+
+  <div style="color:white; max-width:500px; line-height:1.5;">
+    hi, I'm conz iv been coding since I was 13 but took 6 years off away from the hobby, i have coded for 5 years in total, as a teen I mainly worked on modded kik apps which where modded variants of a social media platform called kik, I also built modded variants of messenger, Facebook, snapchat, and discord, I finally picked up the hobby again and decided to start on good old fashion snake with my little twists to it, built from scratch, hope you enjoy the game👊
+  </div>
+
+  <button onclick="back()">BACK</button>
 </div>
 
 <div id="playerSelect" class="screen hidden">
@@ -76,6 +89,17 @@ button{
 <canvas id="game"></canvas>
 
 <script>
+// 🔥 NEW FUNCTION (ONLY ADDITION)
+function showAbout(){
+ hideAll();
+ document.getElementById("aboutScreen").classList.remove("hidden");
+}
+
+/* 
+⚠️ EVERYTHING BELOW THIS IS YOUR ORIGINAL CODE
+UNCHANGED — NOTHING REMOVED
+*/
+
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
