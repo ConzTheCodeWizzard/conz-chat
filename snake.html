@@ -35,9 +35,15 @@ button{
 
 <div id="startScreen" class="screen">
   <h1>WELCOME TO CONZ SNAKE</h1>
-  <button onclick="startGame()">START</button>
+  <button onclick="openPlayerSelect()">START</button>
   <button onclick="showSettings()">SETTINGS</button>
   <button onclick="showMods()">MOD MENU</button>
+</div>
+
+<div id="playerSelect" class="screen hidden">
+  <h2>SELECT PLAYER</h2>
+  <button onclick="selectPlayer('Connor')">Connor</button>
+  <button onclick="selectPlayer('Emma')">Emma</button>
 </div>
 
 <div id="settings" class="screen hidden">
@@ -77,24 +83,24 @@ let grid=25,cols,rows;
 let snake,dir,food,bombs=[],mults=[];
 let running=false,started=false;
 
-let score=0,high=localStorage.getItem("high")||0;
+let score=0,high=0;
+let currentPlayer=null;
 
 let lastStep=0,stepDelay=120;
 
 // mods
 let noClip=false,alwaysX5=false,godMode=false;
 
-// NEW SETTINGS
-let bombsOn = true;
-let musicOn = true;
-let colors = ["green","purple","red","rainbow"];
-let colorIndex = 0;
+// settings
+let bombsOn=true,musicOn=true;
+let colors=["green","purple","red","rainbow"];
+let colorIndex=0;
 
 // multiplier
 let mult=1,multTimer=0;
 
 // audio
-let audioCtx, musicInt;
+let audioCtx,musicInt;
 
 // resize
 function resize(){
@@ -112,12 +118,12 @@ function init(){
  snake=[{x:cx,y:cy},{x:cx-1,y:cy},{x:cx-2,y:cy}];
  dir={x:1,y:0};
  food=spawnSafe();
- bombs=[]; mults=[];
- score=0; mult=1; multTimer=0;
+ bombs=[];mults=[];
+ score=0;mult=1;multTimer=0;
  started=false;
 }
 
-// safe spawn
+// spawn safe
 function spawnSafe(){
  let pos;
  do{
@@ -130,10 +136,27 @@ function spawnSafe(){
  return pos;
 }
 
+// player select
+function openPlayerSelect(){
+ hideAll();
+ document.getElementById("playerSelect").classList.remove("hidden");
+}
+
+function selectPlayer(name){
+ currentPlayer=name;
+
+ high=localStorage.getItem("high_"+name)||0;
+
+ if(name==="Connor") colorIndex=2;
+ if(name==="Emma") colorIndex=1;
+
+ startGame();
+}
+
 // swipe
 let sx=0,sy=0;
 canvas.addEventListener("touchstart",e=>{
- sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+ sx=e.touches[0].clientX;sy=e.touches[0].clientY;
 });
 canvas.addEventListener("touchend",e=>{
  let dx=e.changedTouches[0].clientX-sx;
@@ -150,11 +173,11 @@ canvas.addEventListener("touchend",e=>{
 
 // sound
 function beep(f){
- if(!audioCtx) return;
+ if(!audioCtx)return;
  let o=audioCtx.createOscillator();
  let g=audioCtx.createGain();
  o.frequency.value=f;
- o.connect(g); g.connect(audioCtx.destination);
+ o.connect(g);g.connect(audioCtx.destination);
  o.start();
  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
  o.stop(audioCtx.currentTime+0.2);
@@ -162,36 +185,36 @@ function beep(f){
 
 // music
 function startMusic(){
- if(musicInt) return;
+ if(musicInt)return;
  musicInt=setInterval(()=>beep(120),700);
 }
 function stopMusic(){
  clearInterval(musicInt);
- musicInt = null;
+ musicInt=null;
 }
 
 // loop
 function loop(time){
- if(!running) return;
+ if(!running)return;
 
  ctx.fillStyle="black";
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
- if(started && time-lastStep>stepDelay){
+ if(started&&time-lastStep>stepDelay){
   lastStep=time;
 
   let next={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 
   if(noClip){
-   if(next.x<0) next.x=cols-1;
-   if(next.x>=cols) next.x=0;
-   if(next.y<0) next.y=rows-1;
-   if(next.y>=rows) next.y=0;
+   if(next.x<0)next.x=cols-1;
+   if(next.x>=cols)next.x=0;
+   if(next.y<0)next.y=rows-1;
+   if(next.y>=rows)next.y=0;
   }
 
-  if(godMode && !noClip){
+  if(godMode&&!noClip){
    if(next.x<0||next.y<0||next.x>=cols||next.y>=rows){
-    next = {...snake[0]};
+    next={...snake[0]};
    }
   }
 
@@ -204,11 +227,9 @@ function loop(time){
   }else snake.pop();
 
   bombs.forEach((b,i)=>{
-   if(next.x===b.x&&next.y===b.y&&!godMode){
-    return gameOver();
-   }
+   if(next.x===b.x&&next.y===b.y&&!godMode)return gameOver();
    b.life-=16;
-   if(b.life<=0) bombs.splice(i,1);
+   if(b.life<=0)bombs.splice(i,1);
   });
 
   mults.forEach((m,i)=>{
@@ -219,22 +240,20 @@ function loop(time){
     mults.splice(i,1);
    }
    m.life-=16;
-   if(m.life<=0) mults.splice(i,1);
+   if(m.life<=0)mults.splice(i,1);
   });
 
   if(!godMode){
-   if(next.x<0||next.y<0||next.x>=cols||next.y>=rows) return gameOver();
+   if(next.x<0||next.y<0||next.x>=cols||next.y>=rows)return gameOver();
    for(let i=1;i<snake.length;i++){
-    if(next.x===snake[i].x&&next.y===snake[i].y) return gameOver();
+    if(next.x===snake[i].x&&next.y===snake[i].y)return gameOver();
    }
   }
 
-  // spawn (FIXED)
-  if(bombsOn && Math.random()<0.006) bombs.push({...spawnSafe(),life:2000});
-  if(Math.random()<0.003) mults.push({...spawnSafe(),value:2+Math.floor(Math.random()*4),life:3000});
+  if(bombsOn&&Math.random()<0.006)bombs.push({...spawnSafe(),life:2000});
+  if(Math.random()<0.003)mults.push({...spawnSafe(),value:2+Math.floor(Math.random()*4),life:3000});
  }
 
- // draw snake (UPDATED)
  snake.forEach((s,i)=>{
   if(colors[colorIndex]==="rainbow"){
    ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
@@ -257,19 +276,19 @@ function loop(time){
   ctx.fillRect(m.x*grid,m.y*grid,grid,grid);
  });
 
- let txt=`Score:${score} High:${high}`;
- if(mult>1) txt+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
- if(alwaysX5) txt+=" | INF x5";
+ let txt=`${currentPlayer} | Score:${score} High:${high}`;
+ if(mult>1)txt+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
+ if(alwaysX5)txt+=" | INF x5";
  document.getElementById("ui").innerText=txt;
 
  if(multTimer>0){
   multTimer-=16;
-  if(multTimer<=0) mult=1;
+  if(multTimer<=0)mult=1;
  }
 
  if(score>high){
   high=score;
-  localStorage.setItem("high",high);
+  localStorage.setItem("high_"+currentPlayer,high);
  }
 
  requestAnimationFrame(loop);
@@ -279,7 +298,7 @@ function loop(time){
 function startGame(){
  hideAll();
  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
- if(musicOn) startMusic();
+ if(musicOn)startMusic();
  init();
  running=true;
  requestAnimationFrame(loop);
