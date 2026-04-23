@@ -7,21 +7,17 @@
 <style>
 html,body{margin:0;background:black;color:red;font-family:Arial;overflow:hidden;}
 canvas{display:block;}
-
 .screen{
  position:fixed;width:100%;height:100%;
  display:flex;flex-direction:column;
  justify-content:center;align-items:center;
  text-align:center;background:black;z-index:10;
 }
-
 .hidden{display:none;}
-
 button{
  padding:12px 20px;margin:8px;
  border:2px solid red;background:black;color:white;
 }
-
 #ui{position:fixed;top:10px;left:10px;color:white;}
 #modBtn{position:fixed;bottom:20px;right:20px;}
 </style>
@@ -54,7 +50,6 @@ hi, I'm conz iv been coding since I was 13 but took 6 years off away from the ho
 <div id="settingsScreen" class="screen hidden">
 <h2>SETTINGS</h2>
 <button onclick="toggleMusic()">Music: <span id="musicTxt">ON</span></button>
-<button onclick="toggleBombs()">Bombs: <span id="bombTxt">ON</span></button>
 <button onclick="cycleColor()">Colour: <span id="colorTxt">Green</span></button>
 <button onclick="back()">BACK</button>
 </div>
@@ -86,18 +81,20 @@ let snake,dir,food,bombs=[],mults=[];
 let running=false,started=false;
 
 let score=0,high=0,currentPlayer=null;
+
 let noClip=false,alwaysX5=false,godMode=false;
-let bombsOn=true,musicOn=true;
+let musicOn=true;
 
 let colors=["green","purple","red","rainbow"];
 let colorIndex=0;
 
 let mult=1,multTimer=0;
+
 let lastTime=0,speed=120;
 
-let audioCtx;
+let audioCtx,musicLoop;
 
-// SOUND
+// ---------- AUDIO ----------
 function sound(f){
  if(!audioCtx||!musicOn)return;
  let o=audioCtx.createOscillator();
@@ -108,37 +105,44 @@ function sound(f){
  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
  o.stop(audioCtx.currentTime+0.2);
 }
+function startMusic(){
+ if(!musicOn||!audioCtx)return;
+ musicLoop=setInterval(()=>sound(140),500);
+}
+function stopMusic(){ clearInterval(musicLoop); }
 
-// resize
+// ---------- RESIZE ----------
 function resize(){
  canvas.width=innerWidth;
  canvas.height=innerHeight;
  cols=Math.floor(canvas.width/grid);
  rows=Math.floor(canvas.height/grid);
 }
-resize();window.onresize=resize;
+resize(); window.onresize=resize;
 
-// menus
+// ---------- MENUS ----------
 function hideAll(){document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));}
-function back(){hideAll();startScreen.classList.remove("hidden");running=false;}
+function back(){hideAll();startScreen.classList.remove("hidden");running=false;stopMusic();}
 function openAbout(){hideAll();aboutScreen.classList.remove("hidden");}
 function openSettings(){hideAll();settingsScreen.classList.remove("hidden");}
 function openMods(){hideAll();modsScreen.classList.remove("hidden");}
 function openPlayer(){hideAll();playerScreen.classList.remove("hidden");}
 function resume(){hideAll();running=true;requestAnimationFrame(loop);}
 
-// player
+// ---------- PLAYER ----------
 function selectPlayer(name){
  currentPlayer=name;
  high=localStorage.getItem("high_"+name)||0;
- colorIndex=name==="Connor"?2:1;
+ if(name==="Connor") colorIndex=2;
+ if(name==="Emma") colorIndex=1;
  startGame();
 }
 
-// game
+// ---------- GAME ----------
 function startGame(){
  hideAll();
  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ startMusic();
  init();
  running=true;started=false;lastTime=0;
  requestAnimationFrame(loop);
@@ -149,21 +153,22 @@ function init(){
  snake=[{x:cx,y:cy},{x:cx-1,y:cy},{x:cx-2,y:cy}];
  dir={x:1,y:0};
  food=spawn();
- bombs=[];mults=[];
- score=0;mult=1;multTimer=0;
+ bombs=[]; mults=[];
+ score=0; mult=1; multTimer=0;
 }
 
-function spawn(){return{x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};}
+function spawn(){
+ return {x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};
+}
 
-// touch
+// ---------- TOUCH ----------
 let sx=0,sy=0;
 canvas.addEventListener("touchstart",e=>{
- sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+ sx=e.touches[0].clientX; sy=e.touches[0].clientY;
 });
 canvas.addEventListener("touchend",e=>{
  let dx=e.changedTouches[0].clientX-sx;
  let dy=e.changedTouches[0].clientY-sy;
-
  if(Math.abs(dx)>Math.abs(dy)){
   if(dx>0&&dir.x!==-1)dir={x:1,y:0};
   if(dx<0&&dir.x!==1)dir={x:-1,y:0};
@@ -174,7 +179,7 @@ canvas.addEventListener("touchend",e=>{
  started=true;
 });
 
-// loop
+// ---------- LOOP ----------
 function loop(t){
  if(!running)return;
 
@@ -184,97 +189,148 @@ function loop(t){
   if(started){
    let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 
+   // walls
    if(noClip){
     head.x=(head.x+cols)%cols;
     head.y=(head.y+rows)%rows;
    }else if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
-    if(!godMode){sound(120);return gameOver();}
+    if(!godMode){ sound(120); return gameOver(); }
     else head={...snake[0]};
    }
 
    snake.unshift(head);
 
+   // tail collision
+   if(!godMode){
+     for(let i=1;i<snake.length;i++){
+       if(head.x===snake[i].x && head.y===snake[i].y){
+         sound(120);
+         return gameOver();
+       }
+     }
+   }
+
+   // food
    if(head.x===food.x&&head.y===food.y){
-    score+=alwaysX5?5:mult;
+    score += alwaysX5 ? 5 : mult;
     sound(600);
     food=spawn();
-   }else snake.pop();
+   }else{
+    snake.pop();
+   }
 
    // bombs
    bombs.forEach((b,i)=>{
-    if(head.x===b.x&&head.y===b.y&&!godMode){sound(100);return gameOver();}
-    b.life-=16;if(b.life<=0)bombs.splice(i,1);
+     if(head.x===b.x && head.y===b.y && !godMode){
+       sound(100);
+       return gameOver();
+     }
+     b.life -= 16;
+     if(b.life<=0) bombs.splice(i,1);
    });
 
    // multipliers
    mults.forEach((m,i)=>{
-    if(head.x===m.x&&head.y===m.y){
-     mult=m.v;multTimer=15000;sound(1000);
-     mults.splice(i,1);
-    }
-    m.life-=16;if(m.life<=0)mults.splice(i,1);
+     if(head.x===m.x && head.y===m.y){
+       mult = alwaysX5 ? 5 : m.value;
+       multTimer = 15000;
+       sound(1000);
+       mults.splice(i,1);
+     }
+     m.life -= 16;
+     if(m.life<=0) mults.splice(i,1);
    });
 
-   if(bombsOn&&Math.random()<0.005)bombs.push({...spawn(),life:2000});
-   if(Math.random()<0.003)mults.push({...spawn(),v:2+Math.floor(Math.random()*4),life:3000});
+   // spawn
+   if(Math.random()<0.005) bombs.push({...spawn(),life:2000});
+   if(Math.random()<0.003) mults.push({...spawn(),value:2+Math.floor(Math.random()*4),life:3000});
   }
+ }
+
+ // timer
+ if(multTimer>0){
+  multTimer-=16;
+  if(multTimer<=0) mult=1;
  }
 
  draw();
  requestAnimationFrame(loop);
 }
 
-// draw
+// ---------- DRAW ----------
 function draw(){
  ctx.fillStyle="black";ctx.fillRect(0,0,canvas.width,canvas.height);
 
  snake.forEach((s,i)=>{
-  if(i===0){ctx.fillStyle="#00ffcc";}
-  else{
-   let a=1-(i/snake.length);
-   ctx.fillStyle=`rgba(0,255,150,${a})`;
-   ctx.shadowColor="lime";ctx.shadowBlur=10;
+  let base=colors[colorIndex];
+  if(base==="rainbow"){
+    base=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
+  }
+  if(i===0){
+    ctx.fillStyle=base;
+  }else{
+    let a=1-(i/snake.length);
+    ctx.fillStyle=`rgba(0,255,150,${a})`;
+    ctx.shadowColor=base;
+    ctx.shadowBlur=10;
   }
   ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   ctx.shadowBlur=0;
  });
 
- ctx.fillStyle="lime";ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
+ ctx.fillStyle="lime";
+ ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
  bombs.forEach(b=>{
-  ctx.fillStyle="red";ctx.fillRect(b.x*grid,b.y*grid,grid,grid);
+   ctx.fillStyle="red";
+   ctx.fillRect(b.x*grid,b.y*grid,grid,grid);
  });
 
  mults.forEach(m=>{
-  ctx.fillStyle=`hsl(${Date.now()%360},100%,50%)`;
-  ctx.fillRect(m.x*grid,m.y*grid,grid,grid);
+   ctx.fillStyle=`hsl(${Date.now()%360},100%,50%)`;
+   ctx.fillRect(m.x*grid,m.y*grid,grid,grid);
  });
 
- ui.innerText=`${currentPlayer} Score:${score} High:${high} x${mult}`;
+ let txt=`${currentPlayer} Score:${score} High:${high}`;
+ if(mult>1) txt+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
+ if(alwaysX5) txt+=" | INF x5";
+ ui.innerText=txt;
 
  if(score>high){
   high=score;
   localStorage.setItem("high_"+currentPlayer,high);
  }
-
- if(multTimer>0){
-  multTimer-=16;
-  if(multTimer<=0)mult=1;
- }
 }
 
+// ---------- GAME OVER ----------
 function gameOver(){
  running=false;
+ stopMusic();
  gameOverScreen.classList.remove("hidden");
 }
 
-// toggles
-function toggleMusic(){musicOn=!musicOn;musicTxt.innerText=musicOn?"ON":"OFF";}
-function toggleBombs(){bombsOn=!bombsOn;bombTxt.innerText=bombsOn?"ON":"OFF";}
-function cycleColor(){colorIndex=(colorIndex+1)%colors.length;colorTxt.innerText=colors[colorIndex];}
-function toggleNoClip(){noClip=!noClip;noclipTxt.innerText=noClip?"ON":"OFF";}
-function toggleX5(){alwaysX5=!alwaysX5;x5Txt.innerText=alwaysX5?"ON":"OFF";}
-function toggleGod(){godMode=!godMode;godTxt.innerText=godMode?"ON":"OFF";}
+// ---------- TOGGLES ----------
+function toggleMusic(){
+ musicOn=!musicOn;
+ musicTxt.innerText=musicOn?"ON":"OFF";
+ musicOn?startMusic():stopMusic();
+}
+function cycleColor(){
+ colorIndex=(colorIndex+1)%colors.length;
+ colorTxt.innerText=colors[colorIndex];
+}
+function toggleNoClip(){
+ noClip=!noClip;
+ noclipTxt.innerText=noClip?"ON":"OFF";
+}
+function toggleX5(){
+ alwaysX5=!alwaysX5;
+ x5Txt.innerText=alwaysX5?"ON":"OFF";
+}
+function toggleGod(){
+ godMode=!godMode;
+ godTxt.innerText=godMode?"ON":"OFF";
+}
 
 window.onload=back;
 </script>
