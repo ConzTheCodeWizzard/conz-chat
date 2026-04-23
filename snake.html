@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conz Snake 🔊</title>
+<title>Conz Snake 💣</title>
 
 <style>
 html, body {
@@ -17,7 +17,7 @@ canvas {
   touch-action: none;
 }
 
-#startScreen, #gameOver {
+.screen {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -31,30 +31,36 @@ canvas {
   z-index: 100;
 }
 
-#gameOver { display: none; }
+#gameOver, #bombDeath {
+  display: none;
+}
 
 button {
   padding: 12px 25px;
   border: 2px solid red;
   background: black;
   color: white;
-  font-size: 16px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="startScreen">
+<div id="startScreen" class="screen">
   <h1>WELCOME TO CONZ SNAKE</h1>
   <p>(developed by conz)</p>
   <h2>GOOD LUCK!</h2>
   <button onclick="startGame()">START</button>
 </div>
 
-<div id="gameOver">
-  <h1>💀 OH NO YOU DIED 💀</h1>
-  <p>BETTER LUCK NEXT TIME BRO 🥷👊</p>
+<div id="gameOver" class="screen">
+  <h1>💀 YOU DIED 💀</h1>
+  <button onclick="restart()">TRY AGAIN</button>
+</div>
+
+<div id="bombDeath" class="screen">
+  <h1>💣 BOOM 💣</h1>
+  <p>Seriously... you didn't see that giant bomb? 🤡</p>
   <button onclick="restart()">TRY AGAIN</button>
 </div>
 
@@ -64,25 +70,19 @@ button {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// 🔊 SOUND SETUP
-const eatSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-const hitSound = new Audio("https://actions.google.com/sounds/v1/impacts/wood_crack.ogg");
-const deathSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+// sounds
+const boom = new Audio("https://actions.google.com/sounds/v1/explosions/explosion.ogg");
 
-function playSound(s){
-  s.currentTime = 0;
-  s.play().catch(()=>{});
-}
-
+// grid
 let grid = 25;
 let cols, rows;
 
-let snake, dir, food, enemies, particles;
-let score, high;
-
+// game state
+let snake, dir, food, bombs;
+let score = 0, high = localStorage.getItem("high") || 0;
 let running = false;
 let lastMove = 0;
-let enemyTimer = 0;
+let bombTimer = 0;
 let speed = 120;
 
 // resize
@@ -97,8 +97,8 @@ window.addEventListener("resize", resize);
 
 // init
 function init(){
-  const cx = Math.floor(cols/2);
-  const cy = Math.floor(rows/2);
+  let cx = Math.floor(cols/2);
+  let cy = Math.floor(rows/2);
 
   snake = [
     {x:cx,y:cy},
@@ -109,13 +109,11 @@ function init(){
   dir = {x:1,y:0};
 
   food = spawnFood();
-  enemies = [];
-  particles = [];
-
+  bombs = [];
   score = 0;
-  high = localStorage.getItem("high") || 0;
 }
 
+// food
 function spawnFood(){
   return {
     x: Math.floor(Math.random()*cols),
@@ -123,22 +121,25 @@ function spawnFood(){
   };
 }
 
-function spawnEnemy(size=1){
-  enemies.push({
+// bomb
+function spawnBomb(){
+  bombs.push({
     x: Math.floor(Math.random()*cols),
     y: Math.floor(Math.random()*rows),
-    size: size,
-    dir: {x:1,y:0}
+    life: 2000 // milliseconds
   });
 }
 
 // swipe
 let sx=0, sy=0;
+
 canvas.addEventListener("touchstart",e=>{
   sx=e.touches[0].clientX;
   sy=e.touches[0].clientY;
 },{passive:false});
+
 canvas.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+
 canvas.addEventListener("touchend",e=>{
   let dx=e.changedTouches[0].clientX-sx;
   let dy=e.changedTouches[0].clientY-sy;
@@ -156,6 +157,7 @@ canvas.addEventListener("touchend",e=>{
 function loop(time){
   if(!running) return;
 
+  // background effect
   let hue = (score * 5) % 360;
   ctx.fillStyle = `hsl(${hue}, 40%, 5%)`;
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -173,75 +175,63 @@ function loop(time){
     // food
     if(head.x === food.x && head.y === food.y){
       score++;
-      playSound(eatSound);
-
       food = spawnFood();
 
       if(score % 5 === 0 && speed > 60) speed -= 5;
-      if(score % 10 === 0) spawnEnemy(5);
 
     } else {
       snake.pop();
     }
 
+    // wall
     if(head.x<0 || head.y<0 || head.x>=cols || head.y>=rows){
-      return gameOver();
+      return normalDeath();
     }
 
+    // self
     for(let i=1;i<snake.length;i++){
       if(head.x===snake[i].x && head.y===snake[i].y){
-        return gameOver();
+        return normalDeath();
       }
     }
 
-    // enemies
-    enemies.forEach((e,i)=>{
-
-      if(snake[0].x > e.x) e.dir = {x:1,y:0};
-      else if(snake[0].x < e.x) e.dir = {x:-1,y:0};
-      else if(snake[0].y > e.y) e.dir = {x:0,y:1};
-      else e.dir = {x:0,y:-1};
-
-      e.x += e.dir.x;
-      e.y += e.dir.y;
-
-      if(e.x===head.x && e.y===head.y){
-
-        playSound(hitSound);
-
-        if(snake.length > e.size){
-          score += e.size;
-          snake.push({...snake[snake.length-1]});
-          enemies.splice(i,1);
-        } else {
-          snake.splice(-e.size);
-          score -= e.size;
-          if(score<0) score=0;
-          if(snake.length<=0) return gameOver();
-        }
+    // bombs
+    bombs.forEach((b,i)=>{
+      if(head.x===b.x && head.y===b.y){
+        boom.play();
+        return bombDeath();
       }
     });
 
-    if(time - enemyTimer > 3000){
-      spawnEnemy(Math.floor(Math.random()*3)+1);
-      enemyTimer = time;
+    // spawn bombs
+    if(time - bombTimer > 2500){
+      spawnBomb();
+      bombTimer = time;
     }
   }
 
-  // draw
+  // draw snake
   snake.forEach((s,i)=>{
     ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
     ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
   });
 
+  // food
   ctx.fillStyle="lime";
   ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
-  enemies.forEach(e=>{
-    ctx.fillStyle="orange";
-    ctx.fillRect(e.x*grid,e.y*grid,grid,grid);
+  // bombs
+  bombs.forEach((b,i)=>{
+    ctx.fillStyle="red";
+    ctx.beginPath();
+    ctx.arc(b.x*grid+12, b.y*grid+12, 10, 0, Math.PI*2);
+    ctx.fill();
+
+    b.life -= 16;
+    if(b.life <= 0) bombs.splice(i,1);
   });
 
+  // score
   ctx.fillStyle="white";
   ctx.fillText("Score: "+score+" | High: "+high,20,30);
 
@@ -253,27 +243,30 @@ function loop(time){
   requestAnimationFrame(loop);
 }
 
+// deaths
+function normalDeath(){
+  running=false;
+  document.getElementById("gameOver").style.display="flex";
+}
+
+function bombDeath(){
+  running=false;
+  document.getElementById("bombDeath").style.display="flex";
+}
+
+// controls
 function startGame(){
   document.getElementById("startScreen").style.display="none";
-
-  // unlock audio on mobile
-  playSound(eatSound);
-
   init();
   running=true;
   lastMove=0;
-  enemyTimer=0;
+  bombTimer=0;
   requestAnimationFrame(loop);
-}
-
-function gameOver(){
-  running=false;
-  playSound(deathSound);
-  document.getElementById("gameOver").style.display="flex";
 }
 
 function restart(){
   document.getElementById("gameOver").style.display="none";
+  document.getElementById("bombDeath").style.display="none";
   document.getElementById("startScreen").style.display="flex";
 }
 </script>
