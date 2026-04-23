@@ -2,40 +2,82 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conz Snake Ultimate</title>
+<title>Conz Snake</title>
 
 <style>
 html,body{margin:0;overflow:hidden;background:black;font-family:Arial;}
 canvas{display:block;}
 
-button{
+.screen{
  position:fixed;
- bottom:20px;
- padding:10px;
+ width:100%;
+ height:100%;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
+ background:black;
+ color:red;
+ z-index:10;
+}
+
+.hidden{display:none;}
+
+button{
+ padding:10px 20px;
+ margin:5px;
  border:2px solid red;
  background:black;
  color:white;
- z-index:5;
 }
-
-#boost{left:20px;}
-#menuBtn{right:20px;}
 
 #ui{
  position:fixed;
  top:10px;
  left:10px;
  color:white;
+ z-index:5;
+}
+
+#modBtn{
+ position:fixed;
+ bottom:20px;
+ right:20px;
 }
 </style>
 </head>
 
 <body>
 
-<button id="boost">BOOST</button>
-<button id="menuBtn">MODS</button>
+<div id="startScreen" class="screen">
+  <h1>WELCOME TO CONZ SNAKE</h1>
+  <button onclick="startGame()">START</button>
+  <button onclick="showSettings()">SETTINGS</button>
+  <button onclick="showMods()">MOD MENU</button>
+</div>
+
+<div id="settings" class="screen hidden">
+  <h2>SETTINGS</h2>
+  <button onclick="cycleColor()">Snake Colour</button>
+  <button onclick="back()">BACK</button>
+</div>
+
+<div id="mods" class="screen hidden">
+  <h2>MOD MENU</h2>
+  <button onclick="toggleNoClip()">No Clip</button>
+  <button onclick="toggleX5()">Always x5</button>
+  <button onclick="toggleGod()">Never Die</button>
+  <button onclick="back()">BACK</button>
+</div>
+
+<div id="gameOver" class="screen hidden">
+  <h1>💀 YOU DIED 💀</h1>
+  <button onclick="back()">MENU</button>
+</div>
 
 <div id="ui"></div>
+<button id="modBtn" onclick="openModsInGame()">MODS</button>
+
 <canvas id="game"></canvas>
 
 <script>
@@ -43,22 +85,22 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 let grid=25,cols,rows;
-let snake,dir,food,bombs=[],mults=[],particles=[];
-let running=true,started=false;
+let snake,dir,food,bombs=[],mults=[];
+let running=false,started=false;
 
 let score=0,high=localStorage.getItem("high")||0;
 
-let stepDelay=120,lastStep=0;
+let lastStep=0,stepDelay=120;
 
 // mods
-let noClip=false,godMode=false,alwaysX5=false;
-let ghost=false,magnet=true,chaos=true;
-
-// abilities
-let boost=false,shield=false;
+let noClip=false,alwaysX5=false,godMode=false;
 
 // multiplier
-let mult=1,multTimer=0;
+let mult=1,multTimer=0,popup="",popupTime=0;
+
+// colors
+let colors=["green","purple","red","rainbow"];
+let colorIndex=0;
 
 // resize
 function resize(){
@@ -76,10 +118,13 @@ function init(){
  snake=[{x:cx,y:cy},{x:cx-1,y:cy},{x:cx-2,y:cy}];
  dir={x:1,y:0};
  food=spawn();
- bombs=[]; mults=[]; particles=[];
- score=0; mult=1; multTimer=0;
+ bombs=[];
+ mults=[];
+ score=0;
+ mult=1;
+ multTimer=0;
+ started=false;
 }
-init();
 
 // spawn
 function spawn(){
@@ -104,20 +149,14 @@ canvas.addEventListener("touchend",e=>{
  }
 });
 
-// boost button
-document.getElementById("boost").onclick=()=>{
- boost=true;
- setTimeout(()=>boost=false,2000);
-};
-
 // loop
 function loop(time){
+ if(!running) return;
+
  ctx.fillStyle="black";
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
- let speed=boost?60:120;
-
- if(started && time-lastStep>speed){
+ if(started && time-lastStep>stepDelay){
   lastStep=time;
 
   let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
@@ -132,54 +171,52 @@ function loop(time){
 
   snake.unshift(head);
 
-  // magnet
-  if(magnet){
-   if(Math.abs(head.x-food.x)<3) food.x+=Math.sign(head.x-food.x);
-   if(Math.abs(head.y-food.y)<3) food.y+=Math.sign(head.y-food.y);
-  }
-
   // eat
   if(head.x===food.x&&head.y===food.y){
    score+=alwaysX5?5:mult;
    food=spawn();
   }else snake.pop();
 
+  // multiplier pickup
+  mults.forEach((m,i)=>{
+   if(head.x===m.x&&head.y===m.y){
+    mult=m.value;
+    multTimer=15000;
+    popup="x"+mult+"!";
+    popupTime=1000;
+    mults.splice(i,1);
+   }
+  });
+
   // bombs
   bombs.forEach((b,i)=>{
-   if(head.x===b.x&&head.y===b.y){
-    if(shield){shield=false; bombs.splice(i,1); return;}
-    if(!godMode) running=false;
+   if(head.x===b.x&&head.y===b.y&&!godMode){
+    return gameOver();
    }
    b.life-=16;
    if(b.life<=0) bombs.splice(i,1);
   });
 
-  // mults
-  mults.forEach((m,i)=>{
-   if(head.x===m.x&&head.y===m.y){
-    mult=m.value;
-    multTimer=15000;
-    mults.splice(i,1);
-   }
-   m.life-=16;
-   if(m.life<=0) mults.splice(i,1);
-  });
-
-  // self collision
-  if(!ghost && !godMode){
+  // death
+  if(!godMode){
+   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows) return gameOver();
    for(let i=1;i<snake.length;i++){
-    if(head.x===snake[i].x&&head.y===snake[i].y) running=false;
+    if(head.x===snake[i].x&&head.y===snake[i].y) return gameOver();
    }
   }
 
-  // spawn
-  if(Math.random()<0.02) bombs.push({...spawn(),life:2000});
-  if(Math.random()<0.01) mults.push({...spawn(),value:2+Math.floor(Math.random()*4),life:3000});
+  // spawn balanced
+  if(Math.random()<0.01) bombs.push({...spawn(),life:2000});
+  if(Math.random()<0.005) mults.push({...spawn(),value:2+Math.floor(Math.random()*4),life:3000});
  }
 
- // draw snake trail
+ // draw snake
  snake.forEach((s,i)=>{
-  ctx.fillStyle=`hsl(${(i*30+Date.now()/10)%360},100%,50%)`;
+  if(colors[colorIndex]==="rainbow"){
+   ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
+  }else{
+   ctx.fillStyle=colors[colorIndex];
+  }
   ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
  });
 
@@ -195,15 +232,29 @@ function loop(time){
 
  // mults
  mults.forEach(m=>{
-  ctx.fillStyle="cyan";
+  ctx.fillStyle=`hsl(${Date.now()%360},100%,50%)`;
   ctx.fillRect(m.x*grid,m.y*grid,grid,grid);
  });
 
  // UI
  let txt=`Score:${score} High:${high}`;
+ if(mult>1) txt+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
  if(alwaysX5) txt+=" | INF x5";
- if(mult>1) txt+=` | x${mult}`;
  document.getElementById("ui").innerText=txt;
+
+ // popup
+ if(popup){
+  ctx.fillStyle="white";
+  ctx.font="28px Arial";
+  ctx.fillText(popup,canvas.width/2-40,canvas.height/2);
+  popupTime-=16;
+  if(popupTime<=0) popup="";
+ }
+
+ if(multTimer>0){
+  multTimer-=16;
+  if(multTimer<=0) mult=1;
+ }
 
  if(score>high){
   high=score;
@@ -213,7 +264,31 @@ function loop(time){
  requestAnimationFrame(loop);
 }
 
-loop();
+// controls
+function startGame(){
+ hideAll();
+ init();
+ running=true;
+ requestAnimationFrame(loop);
+}
+
+function gameOver(){
+ running=false;
+ document.getElementById("gameOver").classList.remove("hidden");
+}
+
+// menus
+function hideAll(){document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));}
+function showSettings(){hideAll();document.getElementById("settings").classList.remove("hidden");}
+function showMods(){hideAll();document.getElementById("mods").classList.remove("hidden");}
+function back(){hideAll();document.getElementById("startScreen").classList.remove("hidden");}
+function openModsInGame(){running=false;document.getElementById("mods").classList.remove("hidden");}
+
+// toggles
+function cycleColor(){colorIndex=(colorIndex+1)%colors.length;}
+function toggleNoClip(){noClip=!noClip;}
+function toggleX5(){alwaysX5=!alwaysX5;}
+function toggleGod(){godMode=!godMode;}
 </script>
 
 </body>
