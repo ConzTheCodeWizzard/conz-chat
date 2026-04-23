@@ -5,37 +5,30 @@
 <title>Conz Snake</title>
 
 <style>
-html,body{
-  margin:0;
-  overflow:hidden;
-  background:black;
-  font-family:Arial;
-}
-
+html,body{margin:0;overflow:hidden;background:black;font-family:Arial;}
 canvas{display:block;}
 
 .screen{
-  position:fixed;
-  width:100%;
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  background:black;
-  color:red;
-  z-index:10;
+ position:fixed;
+ width:100%;
+ height:100%;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
+ background:black;
+ color:red;
+ z-index:10;
 }
 
 .hidden{display:none;}
 
 button{
-  padding:12px 25px;
-  margin:6px;
-  border:2px solid red;
-  background:black;
-  color:white;
-  font-size:16px;
+ padding:12px 25px;
+ margin:6px;
+ border:2px solid red;
+ background:black;
+ color:white;
 }
 </style>
 </head>
@@ -51,21 +44,17 @@ button{
 
 <div id="settings" class="screen hidden">
   <h2>SETTINGS</h2>
-
   <button onclick="toggleMusic()">Music: <span id="musicState">ON</span></button>
   <button onclick="cycleColor()">Snake: <span id="colorState">Green</span></button>
   <button onclick="toggleBombs()">Bombs: <span id="bombState">ON</span></button>
-
   <button onclick="back()">BACK</button>
 </div>
 
 <div id="mods" class="screen hidden">
   <h2>MOD MENU</h2>
-
   <button onclick="toggleNoClip()">No Clip: <span id="noclipState">OFF</span></button>
   <button onclick="toggleX5()">Always x5: <span id="x5State">OFF</span></button>
   <button onclick="toggleGod()">Never Die: <span id="godState">OFF</span></button>
-
   <button onclick="back()">BACK</button>
 </div>
 
@@ -81,14 +70,12 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 let grid=25,cols,rows;
-let snake,dir,food,bombs;
-
-let running=false;
+let snake,dir,food;
+let running=false, startedMoving=false;
 let score=0;
 
 // settings
 let musicOn=true;
-let bombsOn=true;
 let colors=["green","purple","red","rainbow"];
 let colorIndex=0;
 
@@ -97,179 +84,212 @@ let noClip=false;
 let alwaysX5=false;
 let godMode=false;
 
+// audio
+let audioCtx, musicOsc;
+
 // resize
 function resize(){
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-  cols=Math.floor(canvas.width/grid);
-  rows=Math.floor(canvas.height/grid);
+ canvas.width=window.innerWidth;
+ canvas.height=window.innerHeight;
+ cols=Math.floor(canvas.width/grid);
+ rows=Math.floor(canvas.height/grid);
 }
 resize();
 window.addEventListener("resize",resize);
 
 // init
 function init(){
-  let cx=Math.floor(cols/2);
-  let cy=Math.floor(rows/2);
+ let cx=Math.floor(cols/2);
+ let cy=Math.floor(rows/2);
 
-  snake=[
-    {x:cx,y:cy},
-    {x:cx-1,y:cy},
-    {x:cx-2,y:cy}
-  ];
+ snake=[
+  {x:cx,y:cy},
+  {x:cx-1,y:cy},
+  {x:cx-2,y:cy}
+ ];
 
-  dir={x:1,y:0};
-  food=spawn();
-  bombs=[];
-  score=0;
+ dir={x:1,y:0};
+ food=spawn();
+ score=0;
+ startedMoving=false;
 }
 
 // spawn
 function spawn(){
-  return{
-    x:Math.floor(Math.random()*cols),
-    y:Math.floor(Math.random()*rows)
-  };
+ return{
+  x:Math.floor(Math.random()*cols),
+  y:Math.floor(Math.random()*rows)
+ };
 }
 
 // swipe
 let sx=0,sy=0;
 canvas.addEventListener("touchstart",e=>{
-  sx=e.touches[0].clientX;
-  sy=e.touches[0].clientY;
+ sx=e.touches[0].clientX;
+ sy=e.touches[0].clientY;
 },{passive:false});
 
 canvas.addEventListener("touchend",e=>{
-  let dx=e.changedTouches[0].clientX-sx;
-  let dy=e.changedTouches[0].clientY-sy;
+ let dx=e.changedTouches[0].clientX-sx;
+ let dy=e.changedTouches[0].clientY-sy;
 
-  if(Math.abs(dx)>Math.abs(dy)){
-    if(dx>0&&dir.x!==-1) dir={x:1,y:0};
-    else if(dx<0&&dir.x!==1) dir={x:-1,y:0};
-  }else{
-    if(dy>0&&dir.y!==-1) dir={x:0,y:1};
-    else if(dy<0&&dir.y!==1) dir={x:0,y:-1};
-  }
+ if(Math.abs(dx)>Math.abs(dy)){
+  if(dx>0 && dir.x!==-1){dir={x:1,y:0}; startedMoving=true;}
+  else if(dx<0 && dir.x!==1){dir={x:-1,y:0}; startedMoving=true;}
+ }else{
+  if(dy>0 && dir.y!==-1){dir={x:0,y:1}; startedMoving=true;}
+  else if(dy<0 && dir.y!==1){dir={x:0,y:-1}; startedMoving=true;}
+ }
 });
+
+// sound
+function chomp(){
+ if(!audioCtx) return;
+ let o=audioCtx.createOscillator();
+ let g=audioCtx.createGain();
+ o.type="triangle";
+ o.frequency.value=500;
+ o.connect(g); g.connect(audioCtx.destination);
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
+ o.stop(audioCtx.currentTime+0.2);
+}
+
+// music
+function startMusic(){
+ musicOsc=audioCtx.createOscillator();
+ let g=audioCtx.createGain();
+
+ musicOsc.type="sine";
+ musicOsc.frequency.value=100;
+
+ musicOsc.connect(g);
+ g.connect(audioCtx.destination);
+ g.gain.value=0.03;
+
+ musicOsc.start();
+}
 
 // loop
 function loop(){
-  if(!running) return;
+ if(!running) return;
 
+ ctx.fillStyle="black";
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ if(startedMoving){
   let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 
-  // no clip
   if(noClip){
-    if(head.x<0) head.x=cols-1;
-    if(head.x>=cols) head.x=0;
-    if(head.y<0) head.y=rows-1;
-    if(head.y>=rows) head.y=0;
+   if(head.x<0) head.x=cols-1;
+   if(head.x>=cols) head.x=0;
+   if(head.y<0) head.y=rows-1;
+   if(head.y>=rows) head.y=0;
   }
 
   snake.unshift(head);
 
-  if(head.x===food.x&&head.y===food.y){
-    score += alwaysX5 ? 5 : 1;
-    food=spawn();
+  if(head.x===food.x && head.y===food.y){
+   score += alwaysX5 ? 5 : 1;
+   chomp();
+   food=spawn();
   }else snake.pop();
 
   if(!godMode){
-    if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
-      return gameOver();
-    }
-
-    for(let i=1;i<snake.length;i++){
-      if(head.x===snake[i].x&&head.y===snake[i].y){
-        return gameOver();
-      }
-    }
+   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows) return gameOver();
+   for(let i=1;i<snake.length;i++){
+    if(head.x===snake[i].x && head.y===snake[i].y) return gameOver();
+   }
   }
+ }
 
-  ctx.fillStyle="black";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+ // draw snake
+ snake.forEach((s,i)=>{
+  if(colors[colorIndex]==="rainbow"){
+   ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
+  }else{
+   ctx.fillStyle=colors[colorIndex];
+  }
+  ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
+ });
 
-  // snake
-  snake.forEach((s,i)=>{
-    if(colors[colorIndex]==="rainbow"){
-      ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
-    }else{
-      ctx.fillStyle=colors[colorIndex];
-    }
-    ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
-  });
+ // food
+ ctx.fillStyle="lime";
+ ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
-  // food
-  ctx.fillStyle="lime";
-  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
+ ctx.fillStyle="white";
+ ctx.fillText("Score: "+score,20,30);
 
-  ctx.fillStyle="white";
-  ctx.fillText("Score: "+score,20,30);
-
-  requestAnimationFrame(loop);
+ requestAnimationFrame(loop);
 }
 
-// game control
+// start
 function startGame(){
-  hideAll();
-  init();
-  running=true;
-  requestAnimationFrame(loop);
+ hideAll();
+
+ audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+
+ if(musicOn) startMusic();
+
+ init();
+ running=true;
+ requestAnimationFrame(loop);
 }
 
 function gameOver(){
-  running=false;
-  document.getElementById("gameOver").classList.remove("hidden");
+ running=false;
+ document.getElementById("gameOver").classList.remove("hidden");
 }
 
-// menu nav
+// menus
 function hideAll(){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+ document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
 }
 
 function showSettings(){
-  hideAll();
-  document.getElementById("settings").classList.remove("hidden");
+ hideAll();
+ document.getElementById("settings").classList.remove("hidden");
 }
 
 function showMods(){
-  hideAll();
-  document.getElementById("mods").classList.remove("hidden");
+ hideAll();
+ document.getElementById("mods").classList.remove("hidden");
 }
 
 function back(){
-  hideAll();
-  document.getElementById("startScreen").classList.remove("hidden");
+ hideAll();
+ document.getElementById("startScreen").classList.remove("hidden");
 }
 
 // toggles
 function toggleMusic(){
-  musicOn=!musicOn;
-  document.getElementById("musicState").innerText=musicOn?"ON":"OFF";
-}
-
-function toggleBombs(){
-  bombsOn=!bombsOn;
-  document.getElementById("bombState").innerText=bombsOn?"ON":"OFF";
+ musicOn=!musicOn;
+ document.getElementById("musicState").innerText=musicOn?"ON":"OFF";
+ if(musicOn && audioCtx) startMusic();
 }
 
 function cycleColor(){
-  colorIndex=(colorIndex+1)%colors.length;
-  document.getElementById("colorState").innerText=colors[colorIndex];
+ colorIndex=(colorIndex+1)%colors.length;
+ document.getElementById("colorState").innerText=colors[colorIndex];
+}
+
+function toggleBombs(){
+ document.getElementById("bombState").innerText="OFF";
 }
 
 function toggleNoClip(){
-  noClip=!noClip;
-  document.getElementById("noclipState").innerText=noClip?"ON":"OFF";
+ noClip=!noClip;
+ document.getElementById("noclipState").innerText=noClip?"ON":"OFF";
 }
 
 function toggleX5(){
-  alwaysX5=!alwaysX5;
-  document.getElementById("x5State").innerText=alwaysX5?"ON":"OFF";
+ alwaysX5=!alwaysX5;
+ document.getElementById("x5State").innerText=alwaysX5?"ON":"OFF";
 }
 
 function toggleGod(){
-  godMode=!godMode;
-  document.getElementById("godState").innerText=godMode?"ON":"OFF";
+ godMode=!godMode;
+ document.getElementById("godState").innerText=godMode?"ON":"OFF";
 }
 </script>
 
