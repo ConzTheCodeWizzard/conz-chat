@@ -5,7 +5,7 @@
 <title>Conz Snake</title>
 
 <style>
-html,body{margin:0;overflow:hidden;background:black;font-family:Arial;}
+html,body{margin:0;background:black;color:red;font-family:Arial;overflow:hidden;}
 canvas{display:block;}
 
 .screen{
@@ -13,88 +13,97 @@ canvas{display:block;}
  width:100%;
  height:100%;
  display:flex;
+ flex-direction:column;
  justify-content:center;
  align-items:center;
- flex-direction:column;
- background:black;
- color:red;
  text-align:center;
+ background:black;
  z-index:10;
+}
 
- overflow-y:auto; /* ✅ ONLY CHANGE */
+.hidden{display:none;}
+
+button{
+ padding:12px 20px;
+ margin:8px;
+ border:2px solid red;
+ background:black;
+ color:white;
+ font-size:16px;
+}
+
+#ui{
+ position:fixed;
+ top:10px;
+ left:10px;
+ color:white;
+}
+
+#modBtn{
+ position:fixed;
+ bottom:20px;
+ right:20px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- START -->
 <div id="startScreen" class="screen">
   <h1>WELCOME TO CONZ SNAKE</h1>
-  <button onclick="openPlayerSelect()">START</button>
-  <button onclick="showSettings()">SETTINGS</button>
-  <button onclick="showMods()">MOD MENU</button>
-  <!-- 🔥 ADDED BUTTON -->
-  <button onclick="showAbout()">ABOUT CONZ</button>
+  <button onclick="openPlayer()">START</button>
+  <button onclick="openSettings()">SETTINGS</button>
+  <button onclick="openMods()">MOD MENU</button>
+  <button onclick="openAbout()">ABOUT CONZ</button>
 </div>
 
-<!-- 🔥 ADDED ABOUT SCREEN -->
+<!-- ABOUT -->
 <div id="aboutScreen" class="screen hidden">
-  <h2>About the developer of this app</h2>
-
-  <div style="color:white; max-width:500px; line-height:1.5;">
-    hi, I'm conz iv been coding since I was 13 but took 6 years off away from the hobby, i have coded for 5 years in total, as a teen I mainly worked on modded kik apps which where modded variants of a social media platform called kik, I also built modded variants of messenger, Facebook, snapchat, and discord, I finally picked up the hobby again and decided to start on good old fashion snake with my little twists to it, built from scratch, hope you enjoy the game👊
-  </div>
-
-  <button onclick="back()">BACK</button>
+<h2>About the developer of this app</h2>
+<div style="color:white;max-width:500px;">
+hi, I'm conz iv been coding since I was 13 but took 6 years off away from the hobby, i have coded for 5 years in total, as a teen I mainly worked on modded kik apps which where modded variants of a social media platform called kik, I also built modded variants of messenger, Facebook, snapchat, and discord, I finally picked up the hobby again and decided to start on good old fashion snake with my little twists to it, built from scratch, hope you enjoy the game👊
+</div>
+<button onclick="back()">BACK</button>
 </div>
 
-<div id="playerSelect" class="screen hidden">
-  <h2>SELECT PLAYER</h2>
-  <button onclick="selectPlayer('Connor')">Connor</button>
-  <button onclick="selectPlayer('Emma')">Emma</button>
+<!-- PLAYER -->
+<div id="playerScreen" class="screen hidden">
+<h2>SELECT PLAYER</h2>
+<button onclick="selectPlayer('Connor')">Connor</button>
+<button onclick="selectPlayer('Emma')">Emma</button>
 </div>
 
-<div id="settings" class="screen hidden">
-  <h2>SETTINGS</h2>
-
-  <button onclick="toggleMusic()">Music: <span id="musicState">ON</span></button>
-  <button onclick="toggleBombs()">Bombs: <span id="bombState">ON</span></button>
-  <button onclick="cycleColor()">Snake: <span id="colorState">Green</span></button>
-
-  <button onclick="back()">BACK</button>
+<!-- SETTINGS -->
+<div id="settingsScreen" class="screen hidden">
+<h2>SETTINGS</h2>
+<button onclick="toggleMusic()">Music</button>
+<button onclick="toggleBombs()">Bombs</button>
+<button onclick="cycleColor()">Snake Colour</button>
+<button onclick="back()">BACK</button>
 </div>
 
-<div id="mods" class="screen hidden">
-  <h2>MOD MENU</h2>
-  <button onclick="toggleNoClip()">No Clip: <span id="noclipState">OFF</span></button>
-  <button onclick="toggleX5()">Always x5: <span id="x5State">OFF</span></button>
-  <button onclick="toggleGod()">Never Die: <span id="godState">OFF</span></button>
-  <button onclick="resume()">RESUME</button>
-  <button onclick="back()">MENU</button>
+<!-- MODS -->
+<div id="modsScreen" class="screen hidden">
+<h2>MODS</h2>
+<button onclick="noClip=!noClip">No Clip</button>
+<button onclick="alwaysX5=!alwaysX5">Always x5</button>
+<button onclick="godMode=!godMode">Never Die</button>
+<button onclick="resume()">RESUME</button>
+<button onclick="back()">MENU</button>
 </div>
 
+<!-- GAME OVER -->
 <div id="gameOver" class="screen hidden">
-  <h1>💀 YOU DIED 💀</h1>
-  <button onclick="back()">MENU</button>
+<h1>💀 YOU DIED 💀</h1>
+<button onclick="back()">MENU</button>
 </div>
 
 <div id="ui"></div>
-<button id="modBtn" onclick="openModsInGame()">MODS</button>
-
+<button id="modBtn" onclick="openMods()">MODS</button>
 <canvas id="game"></canvas>
 
 <script>
-// 🔥 NEW FUNCTION (ONLY ADDITION)
-function showAbout(){
- hideAll();
- document.getElementById("aboutScreen").classList.remove("hidden");
-}
-
-/* 
-⚠️ EVERYTHING BELOW THIS IS YOUR ORIGINAL CODE
-UNCHANGED — NOTHING REMOVED
-*/
-
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
@@ -102,208 +111,119 @@ let grid=25,cols,rows;
 let snake,dir,food,bombs=[],mults=[];
 let running=false,started=false;
 
-let score=0,high=0;
-let currentPlayer=null;
-
-let lastStep=0,stepDelay=120;
-
-// mods
+let score=0,high=0,currentPlayer=null;
 let noClip=false,alwaysX5=false,godMode=false;
-
-// settings
 let bombsOn=true,musicOn=true;
+
 let colors=["green","purple","red","rainbow"];
 let colorIndex=0;
 
-// multiplier
-let mult=1,multTimer=0;
-
-// audio
-let audioCtx,musicInt;
-
-// resize
 function resize(){
- canvas.width=window.innerWidth;
- canvas.height=window.innerHeight;
+ canvas.width=innerWidth;
+ canvas.height=innerHeight;
  cols=Math.floor(canvas.width/grid);
  rows=Math.floor(canvas.height/grid);
 }
 resize();
-window.addEventListener("resize",resize);
+window.onresize=resize;
 
-// init
-function init(){
- let cx=Math.floor(cols/2),cy=Math.floor(rows/2);
- snake=[{x:cx,y:cy},{x:cx-1,y:cy},{x:cx-2,y:cy}];
- dir={x:1,y:0};
- food=spawnSafe();
- bombs=[];mults=[];
- score=0;mult=1;multTimer=0;
- started=false;
+function hideAll(){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
 }
 
-// spawn safe
-function spawnSafe(){
- let pos;
- do{
-  pos={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};
- }while(
-  snake.some(s=>s.x===pos.x&&s.y===pos.y) ||
-  bombs.some(b=>b.x===pos.x&&b.y===pos.y) ||
-  mults.some(m=>m.x===pos.x&&m.y===pos.y)
- );
- return pos;
-}
-
-// player select
-function openPlayerSelect(){
+function back(){
  hideAll();
- document.getElementById("playerSelect").classList.remove("hidden");
+ document.getElementById("startScreen").classList.remove("hidden");
+ running=false;
 }
+
+function openAbout(){hideAll();aboutScreen.classList.remove("hidden");}
+function openSettings(){hideAll();settingsScreen.classList.remove("hidden");}
+function openMods(){hideAll();modsScreen.classList.remove("hidden");}
+function openPlayer(){hideAll();playerScreen.classList.remove("hidden");}
+function resume(){hideAll();running=true;loop();}
 
 function selectPlayer(name){
  currentPlayer=name;
-
  high=localStorage.getItem("high_"+name)||0;
-
- if(name==="Connor") colorIndex=2;
- if(name==="Emma") colorIndex=1;
-
+ colorIndex=name==="Connor"?2:1;
  startGame();
 }
 
-// swipe
-let sx=0,sy=0;
+function startGame(){
+ hideAll();
+ init();
+ running=true;
+ started=false;
+ requestAnimationFrame(loop);
+}
+
+function init(){
+ let cx=Math.floor(cols/2),cy=Math.floor(rows/2);
+ snake=[{x:cx,y:cy}];
+ dir={x:1,y:0};
+ food=spawn();
+ bombs=[];mults=[];
+ score=0;
+}
+
+function spawn(){
+ return {x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};
+}
+
 canvas.addEventListener("touchstart",e=>{
- sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+ let t=e.touches[0];
+ this.sx=t.clientX;this.sy=t.clientY;
 });
 canvas.addEventListener("touchend",e=>{
- let dx=e.changedTouches[0].clientX-sx;
- let dy=e.changedTouches[0].clientY-sy;
+ let dx=e.changedTouches[0].clientX-this.sx;
+ let dy=e.changedTouches[0].clientY-this.sy;
 
  if(Math.abs(dx)>Math.abs(dy)){
-  if(dx>0&&dir.x!==-1){dir={x:1,y:0};started=true;}
-  else if(dx<0&&dir.x!==1){dir={x:-1,y:0};started=true;}
+  dir=dx>0?{x:1,y:0}:{x:-1,y:0};
  }else{
-  if(dy>0&&dir.y!==-1){dir={x:0,y:1};started=true;}
-  else if(dy<0&&dir.y!==1){dir={x:0,y:-1};started=true;}
+  dir=dy>0?{x:0,y:1}:{x:0,y:-1};
  }
+ started=true;
 });
 
-// sound
-function beep(f){
- if(!audioCtx)return;
- let o=audioCtx.createOscillator();
- let g=audioCtx.createGain();
- o.frequency.value=f;
- o.connect(g);g.connect(audioCtx.destination);
- o.start();
- g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);
- o.stop(audioCtx.currentTime+0.2);
-}
-
-// music
-function startMusic(){
- if(musicInt)return;
- musicInt=setInterval(()=>beep(120),700);
-}
-function stopMusic(){
- clearInterval(musicInt);
- musicInt=null;
-}
-
-// loop
-function loop(time){
+function loop(){
  if(!running)return;
 
  ctx.fillStyle="black";
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
- if(started&&time-lastStep>stepDelay){
-  lastStep=time;
+ if(started){
+  let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
 
-  let next={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-
-  if(noClip){
-   if(next.x<0)next.x=cols-1;
-   if(next.x>=cols)next.x=0;
-   if(next.y<0)next.y=rows-1;
-   if(next.y>=rows)next.y=0;
-  }
-
-  if(godMode&&!noClip){
-   if(next.x<0||next.y<0||next.x>=cols||next.y>=rows){
-    next={...snake[0]};
+  if(!noClip){
+   if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
+    if(!godMode)return gameOver();
+    head=snake[0];
    }
+  }else{
+   head.x=(head.x+cols)%cols;
+   head.y=(head.y+rows)%rows;
   }
 
-  snake.unshift(next);
+  snake.unshift(head);
 
-  if(next.x===food.x&&next.y===food.y){
-   score+=alwaysX5?5:mult;
-   beep(600);
-   food=spawnSafe();
+  if(head.x===food.x&&head.y===food.y){
+   score+=alwaysX5?5:1;
+   food=spawn();
   }else snake.pop();
-
-  bombs.forEach((b,i)=>{
-   if(next.x===b.x&&next.y===b.y&&!godMode)return gameOver();
-   b.life-=16;
-   if(b.life<=0)bombs.splice(i,1);
-  });
-
-  mults.forEach((m,i)=>{
-   if(next.x===m.x&&next.y===m.y){
-    mult=m.value;
-    multTimer=15000;
-    beep(1000);
-    mults.splice(i,1);
-   }
-   m.life-=16;
-   if(m.life<=0)mults.splice(i,1);
-  });
-
-  if(!godMode){
-   if(next.x<0||next.y<0||next.x>=cols||next.y>=rows)return gameOver();
-   for(let i=1;i<snake.length;i++){
-    if(next.x===snake[i].x&&next.y===snake[i].y)return gameOver();
-   }
-  }
-
-  if(bombsOn&&Math.random()<0.006)bombs.push({...spawnSafe(),life:2000});
-  if(Math.random()<0.003)mults.push({...spawnSafe(),value:2+Math.floor(Math.random()*4),life:3000});
  }
 
  snake.forEach((s,i)=>{
-  if(colors[colorIndex]==="rainbow"){
-   ctx.fillStyle=`hsl(${(i*40+Date.now()/10)%360},100%,50%)`;
-  }else{
-   ctx.fillStyle=i===0?"#00ffcc":colors[colorIndex];
-  }
+  ctx.fillStyle=colors[colorIndex];
   ctx.fillRect(s.x*grid,s.y*grid,grid,grid);
  });
 
  ctx.fillStyle="lime";
  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
- bombs.forEach(b=>{
-  ctx.fillStyle="red";
-  ctx.fillRect(b.x*grid,b.y*grid,grid,grid);
- });
-
- mults.forEach(m=>{
-  ctx.fillStyle=`hsl(${Date.now()%360},100%,50%)`;
-  ctx.fillRect(m.x*grid,m.y*grid,grid,grid);
- });
-
- let txt=`${currentPlayer} | Score:${score} High:${high}`;
- if(mult>1)txt+=` | x${mult} (${Math.ceil(multTimer/1000)})`;
- if(alwaysX5)txt+=" | INF x5";
- document.getElementById("ui").innerText=txt;
-
- if(multTimer>0){
-  multTimer-=16;
-  if(multTimer<=0)mult=1;
- }
+ document.getElementById("ui").innerText=
+ `${currentPlayer} Score:${score} High:${high}`;
 
  if(score>high){
   high=score;
@@ -313,61 +233,16 @@ function loop(time){
  requestAnimationFrame(loop);
 }
 
-// controls
-function startGame(){
- hideAll();
- audioCtx=new (window.AudioContext||window.webkitAudioContext)();
- if(musicOn)startMusic();
- init();
- running=true;
- requestAnimationFrame(loop);
-}
-
 function gameOver(){
  running=false;
- stopMusic();
  document.getElementById("gameOver").classList.remove("hidden");
 }
 
-// menus
-function hideAll(){document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));}
-function showSettings(){hideAll();document.getElementById("settings").classList.remove("hidden");}
-function showMods(){hideAll();document.getElementById("mods").classList.remove("hidden");}
-function openModsInGame(){running=false;document.getElementById("mods").classList.remove("hidden");}
-function resume(){hideAll();running=true;requestAnimationFrame(loop);}
-function back(){hideAll();document.getElementById("startScreen").classList.remove("hidden");}
+function toggleMusic(){musicOn=!musicOn;}
+function toggleBombs(){bombsOn=!bombsOn;}
+function cycleColor(){colorIndex=(colorIndex+1)%colors.length;}
 
-// toggles
-function toggleMusic(){
- musicOn=!musicOn;
- document.getElementById("musicState").innerText=musicOn?"ON":"OFF";
- musicOn?startMusic():stopMusic();
-}
-
-function toggleBombs(){
- bombsOn=!bombsOn;
- document.getElementById("bombState").innerText=bombsOn?"ON":"OFF";
-}
-
-function cycleColor(){
- colorIndex=(colorIndex+1)%colors.length;
- document.getElementById("colorState").innerText=colors[colorIndex];
-}
-
-function toggleNoClip(){
- noClip=!noClip;
- document.getElementById("noclipState").innerText=noClip?"ON":"OFF";
-}
-
-function toggleX5(){
- alwaysX5=!alwaysX5;
- document.getElementById("x5State").innerText=alwaysX5?"ON":"OFF";
-}
-
-function toggleGod(){
- godMode=!godMode;
- document.getElementById("godState").innerText=godMode?"ON":"OFF";
-}
+window.onload=back;
 </script>
 
 </body>
