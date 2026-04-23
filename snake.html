@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CONZ SNAKE INSANE 🔥</title>
+<title>Conz Snake</title>
 
 <style>
 html, body {
@@ -27,8 +27,6 @@ canvas {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  text-align: center;
-  z-index: 100;
 }
 
 #gameOver, #bombDeath { display:none; }
@@ -46,7 +44,6 @@ button {
 
 <div id="startScreen" class="screen">
   <h1>WELCOME TO CONZ SNAKE</h1>
-  <p>(developed by conz)</p>
   <button onclick="startGame()">START</button>
 </div>
 
@@ -71,13 +68,14 @@ let grid = 25;
 let cols, rows;
 
 let snake, dir, food, bombs;
+let score = 0;
+let high = localStorage.getItem("high") || 0;
+
 let running = false;
 let lastMove = 0;
 let bombTimer = 0;
 let speed = 120;
 
-let shake = 0;
-let hue = 0;
 let audioCtx;
 
 // resize
@@ -90,19 +88,31 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// sound
-function beep(freq, dur){
-  if(!audioCtx) return;
+// 🔊 better sounds
+function chomp(){
   let o = audioCtx.createOscillator();
   let g = audioCtx.createGain();
-  o.frequency.value = freq;
-  o.type = "square";
+  o.type = "triangle";
+  o.frequency.setValueAtTime(500, audioCtx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime+0.15);
   o.connect(g);
   g.connect(audioCtx.destination);
   o.start();
-  g.gain.setValueAtTime(0.2, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
-  o.stop(audioCtx.currentTime+dur);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2);
+  o.stop(audioCtx.currentTime+0.2);
+}
+
+function boom(){
+  let o = audioCtx.createOscillator();
+  let g = audioCtx.createGain();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(120, audioCtx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.3);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
+  o.stop(audioCtx.currentTime+0.3);
 }
 
 // init
@@ -119,9 +129,10 @@ function init(){
   dir = {x:1,y:0};
   food = spawnFood();
   bombs = [];
+  score = 0;
 }
 
-// food
+// safe food
 function spawnFood(){
   return {
     x: Math.floor(Math.random()*cols),
@@ -158,49 +169,43 @@ canvas.addEventListener("touchend",e=>{
   }
 });
 
-// draw snake glow + trail
+// draw snake properly
 function drawSnake(){
   snake.forEach((s,i)=>{
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "lime";
     ctx.fillStyle = i===0 ? "#00ffcc" : "#00aa66";
-    ctx.fillRect(s.x*grid, s.y*grid, grid, grid);
+
+    ctx.beginPath();
+    ctx.roundRect(s.x*grid, s.y*grid, grid, grid, 8);
+    ctx.fill();
+
+    // eyes on head
+    if(i===0){
+      ctx.fillStyle="black";
+      ctx.fillRect(s.x*grid+6, s.y*grid+6, 4,4);
+      ctx.fillRect(s.x*grid+15, s.y*grid+6, 4,4);
+    }
   });
-
-  ctx.shadowBlur = 0;
-
-  // tongue flick
-  if(Math.random()<0.1){
-    let head = snake[0];
-    ctx.fillStyle="red";
-    ctx.fillRect(head.x*grid+10, head.y*grid-5, 3,5);
-  }
 }
 
-// bomb visual
+// draw bomb
 function drawBomb(b){
-  let x = b.x*grid+12;
-  let y = b.y*grid+12;
+  let x = b.x*grid + grid/2;
+  let y = b.y*grid + grid/2;
 
-  let pulse = Math.sin(Date.now()/100)*2;
-
-  ctx.fillStyle="black";
+  ctx.fillStyle="#222";
   ctx.beginPath();
-  ctx.arc(x,y,10+pulse,0,Math.PI*2);
+  ctx.arc(x,y,10,0,Math.PI*2);
   ctx.fill();
 
-  // flashing warning
-  if(b.life < 800){
-    ctx.strokeStyle="red";
-    ctx.beginPath();
-    ctx.arc(x,y,14+pulse,0,Math.PI*2);
-    ctx.stroke();
-  }
+  ctx.strokeStyle="orange";
+  ctx.beginPath();
+  ctx.moveTo(x,y-10);
+  ctx.lineTo(x,y-18);
+  ctx.stroke();
 
-  // fuse spark
   ctx.fillStyle="yellow";
   ctx.beginPath();
-  ctx.arc(x,y-15,3,0,Math.PI*2);
+  ctx.arc(x,y-20,3,0,Math.PI*2);
   ctx.fill();
 }
 
@@ -208,16 +213,8 @@ function drawBomb(b){
 function loop(time){
   if(!running) return;
 
-  // 🌈 animated background
-  hue += 0.5;
-  ctx.fillStyle = `hsl(${hue}, 30%, 5%)`;
+  ctx.fillStyle="black";
   ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  // 💥 screen shake
-  if(shake > 0){
-    shake--;
-    ctx.translate(Math.random()*10-5, Math.random()*10-5);
-  }
 
   if(time - lastMove > speed){
     lastMove = time;
@@ -230,33 +227,31 @@ function loop(time){
     snake.unshift(head);
 
     if(head.x===food.x && head.y===food.y){
-      beep(700,0.1);
+      score++;
+      chomp();
       food = spawnFood();
     } else {
       snake.pop();
     }
 
-    // wall/self
     if(head.x<0||head.y<0||head.x>=cols||head.y>=rows){
       return normalDeath();
     }
+
     for(let i=1;i<snake.length;i++){
       if(head.x===snake[i].x && head.y===snake[i].y){
         return normalDeath();
       }
     }
 
-    // bombs
     bombs.forEach((b,i)=>{
       if(head.x===b.x && head.y===b.y){
-        beep(80,0.5);
-        shake = 15;
+        boom();
         return bombDeath();
       }
     });
 
-    // spawn bombs
-    if(time - bombTimer > 2000){
+    if(time - bombTimer > 2500){
       spawnBomb();
       bombTimer = time;
     }
@@ -264,16 +259,24 @@ function loop(time){
 
   drawSnake();
 
-  // food
   ctx.fillStyle="lime";
-  ctx.fillRect(food.x*grid, food.y*grid, grid, grid);
+  ctx.fillRect(food.x*grid,food.y*grid,grid,grid);
 
-  // bombs
   bombs.forEach((b,i)=>{
     drawBomb(b);
     b.life -= 16;
     if(b.life<=0) bombs.splice(i,1);
   });
+
+  // score
+  ctx.fillStyle="white";
+  ctx.font="18px Arial";
+  ctx.fillText("Score: "+score+" | High: "+high,20,30);
+
+  if(score>high){
+    high=score;
+    localStorage.setItem("high",high);
+  }
 
   requestAnimationFrame(loop);
 }
@@ -295,7 +298,6 @@ function startGame(){
   document.getElementById("startScreen").style.display="none";
   init();
   running=true;
-  lastMove=0;
   requestAnimationFrame(loop);
 }
 
