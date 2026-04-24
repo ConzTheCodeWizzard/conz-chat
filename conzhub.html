@@ -87,7 +87,7 @@
 <div class="video-grid" id="videoGrid"></div>
 
 <script>
-  let videos = [];
+  let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
   function uploadVideo() {
     const fileInput = document.getElementById("videoUpload");
@@ -101,10 +101,16 @@
       return;
     }
 
-    const url = URL.createObjectURL(file);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const videoData = e.target.result;
 
-    videos.push({ title, url });
-    renderVideos();
+      videos.push({ title, url: videoData });
+      localStorage.setItem("videos", JSON.stringify(videos));
+      renderVideos();
+    };
+
+    reader.readAsDataURL(file);
 
     fileInput.value = "";
     titleInput.value = "";
@@ -132,6 +138,8 @@
   document.getElementById("search").addEventListener("input", (e) => {
     renderVideos(e.target.value);
   });
+
+  renderVideos();
 </script>
 
 </body>
