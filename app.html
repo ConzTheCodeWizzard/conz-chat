@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConzChat</title>
+
+<style>
+body { margin:0; background:black; color:white; font-family:Arial; }
+
+.header {
+  background:red;
+  color:black;
+  padding:15px;
+  text-align:center;
+}
+
+.chatItem {
+  border-bottom:1px solid red;
+  padding:10px;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  background:black;
+  border:1px solid red;
+  color:white;
+}
+
+button {
+  width:100%;
+  padding:10px;
+  background:red;
+  border:none;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">ConzChat</div>
+
+<input id="search" placeholder="Search user">
+<button onclick="findUser()">Find</button>
+
+<div id="results"></div>
+
+<div id="messages"></div>
+<input id="msg">
+<button onclick="send()">Send</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSy...",
+  authDomain:"conzchat.firebaseapp.com",
+  projectId:"conzchat"
+});
+
+const db = getFirestore(app);
+
+let currentUser = localStorage.getItem("user");
+let currentChat = "";
+
+/* SEARCH */
+window.findUser = async ()=>{
+  let q=query(collection(db,"users"),where("username","==",search.value));
+  let snap=await getDocs(q);
+
+  results.innerHTML="";
+  snap.forEach(doc=>{
+    let u=doc.data();
+    results.innerHTML+=`<div onclick="openChat('${u.username}')">${u.username}</div>`;
+  });
+};
+
+/* OPEN CHAT */
+window.openChat = user=>{
+  currentChat=user;
+  loadMessages();
+};
+
+/* SEND */
+window.send = async ()=>{
+  await addDoc(collection(db,"messages"),{
+    from:currentUser,
+    to:currentChat,
+    text:msg.value,
+    time:Date.now()
+  });
+  msg.value="";
+};
+
+/* LOAD */
+function loadMessages(){
+  let q=query(collection(db,"messages"),orderBy("time"));
+
+  onSnapshot(q,snap=>{
+    messages.innerHTML="";
+    snap.forEach(doc=>{
+      let m=doc.data();
+      if(
+        (m.from===currentUser && m.to===currentChat) ||
+        (m.from===currentChat && m.to===currentUser)
+      ){
+        messages.innerHTML+=`<div>${m.text}</div>`;
+      }
+    });
+  });
+}
+</script>
+
+</body>
+</html>
