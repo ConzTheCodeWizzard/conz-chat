@@ -5,28 +5,55 @@
 <title>ConzChat</title>
 
 <style>
-body { margin:0; font-family:Arial; background:black; color:white; }
-.screen { display:none; height:100vh; }
-.active { display:flex; flex-direction:column; justify-content:center; align-items:center; }
-
-h1 { color:red; }
+body {margin:0;font-family:Arial;background:black;color:white;}
+.screen {display:none;padding:15px;}
+.active {display:block;}
 
 button {
-  width:80%;
+  width:100%;
   padding:12px;
-  margin:10px;
+  margin:8px 0;
   background:red;
   border:none;
   color:white;
 }
 
 input {
-  width:80%;
+  width:100%;
   padding:10px;
-  margin:5px;
+  margin:5px 0;
   background:black;
   border:1px solid red;
   color:white;
+}
+
+.header {
+  background:red;
+  color:black;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+#messages {
+  height:60vh;
+  overflow:auto;
+}
+
+.me {
+  text-align:right;
+}
+
+.other {
+  text-align:left;
+}
+
+.bubble {
+  display:inline-block;
+  padding:8px;
+  margin:5px;
+  border-radius:10px;
+  background:red;
 }
 </style>
 </head>
@@ -34,122 +61,207 @@ input {
 <body>
 
 <!-- WELCOME -->
-<div id="welcome" class="screen active">
-  <h1>ConzChat</h1>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
+<div id="welcome" class="screen active" style="text-align:center;height:100vh;display:flex;flex-direction:column;justify-content:space-between;">
+  <div>
+    <h1 style="color:red;">Welcome to</h1>
+    <h1 style="font-size:40px;">ConzChat</h1>
+    <p style="color:white;">Built from the ground up by Conz</p>
+  </div>
+
+  <div>
+    <button onclick="show('login')">Login</button>
+    <button onclick="show('signup')">Create Account</button>
+  </div>
+
+  <p style="font-size:12px;">~ Developed By Conz ~</p>
 </div>
 
 <!-- SIGNUP -->
 <div id="signup" class="screen">
   <h2>Create Account</h2>
+
   <input id="su_user" placeholder="Username">
   <input id="su_pass" type="password" placeholder="Password">
   <input id="su_dob" type="date">
+
   <button onclick="signup()">Create</button>
 </div>
 
 <!-- LOGIN -->
 <div id="login" class="screen">
   <h2>Login</h2>
+
   <input id="li_user" placeholder="Username">
   <input id="li_pass" type="password">
+
   <button onclick="login()">Login</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="screen">
-  <h2>Logged in</h2>
-  <p id="who"></p>
+  <div class="header" id="header">ConzChat</div>
+
+  <div id="chatList"></div>
+
+  <input id="search" placeholder="Find user">
+  <button onclick="findUser()">Search</button>
+
+  <div id="results"></div>
 </div>
 
-<!-- Firebase (compat = stable) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
-  authDomain: "conzchat.firebaseapp.com",
-  projectId: "conzchat"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
+  projectId:"conzchat"
+});
 
-firebase.initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+let currentUser="";
+let currentChat="";
 
 /* NAV */
-function show(id){
+window.show=id=>{
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-}
+};
 
 /* SIGNUP */
-async function signup(){
-  let username = su_user.value.trim();
-  let password = su_pass.value;
-  let dob = new Date(su_dob.value);
+window.signup=async()=>{
+  let u=su_user.value;
+  let p=su_pass.value;
+  let dob=new Date(su_dob.value);
 
-  if(!username || !password){ alert("Fill all fields"); return; }
-
-  let age = new Date().getFullYear() - dob.getFullYear();
-  if(age < 13){ alert("Too young"); return; }
-
-  // 🔒 check username unique
-  let snap = await db.collection("users")
-    .where("username","==",username).get();
-
-  if(!snap.empty){
-    alert("Username already taken");
-    return;
+  if(new Date().getFullYear()-dob.getFullYear()<13){
+    alert("Too young"); return;
   }
 
-  try{
-    // hidden email trick
-    let fakeEmail = username + "@conzchat.com";
+  let q=query(collection(db,"users"),where("username","==",u));
+  let snap=await getDocs(q);
 
-    let userCred = await auth.createUserWithEmailAndPassword(fakeEmail, password);
+  if(!snap.empty){alert("Taken");return;}
 
-    await db.collection("users").doc(userCred.user.uid).set({
-      username: username,
-      created: Date.now()
-    });
+  await addDoc(collection(db,"users"),{
+    username:u,
+    password:p,
+    created:Date.now()
+  });
 
-    who.innerText = "Welcome " + username;
-    show("app");
-
-  }catch(e){
-    alert(e.message);
-  }
-}
+  currentUser=u;
+  show("app");
+  loadChats();
+};
 
 /* LOGIN */
-async function login(){
-  let username = li_user.value.trim();
-  let password = li_pass.value;
+window.login=async()=>{
+  let q=query(collection(db,"users"),
+    where("username","==",li_user.value),
+    where("password","==",li_pass.value)
+  );
 
-  let fakeEmail = username + "@conzchat.com";
+  let snap=await getDocs(q);
+  if(snap.empty){alert("Login failed");return;}
 
-  try{
-    let userCred = await auth.signInWithEmailAndPassword(fakeEmail, password);
+  currentUser=li_user.value;
+  show("app");
+  loadChats();
+};
 
-    let doc = await db.collection("users").doc(userCred.user.uid).get();
-    let data = doc.data();
+/* FIND */
+window.findUser=async()=>{
+  let q=query(collection(db,"users"),where("username","==",search.value));
+  let snap=await getDocs(q);
 
-    who.innerText = "Welcome " + data.username;
-    show("app");
+  results.innerHTML="";
+  snap.forEach(doc=>{
+    let u=doc.data();
+    results.innerHTML+=`<div onclick="openChat('${u.username}')">${u.username}</div>`;
+  });
+};
 
-  }catch(e){
-    if(e.code === "auth/user-not-found"){
-      alert("Username doesn't exist");
-    } else if(e.code === "auth/wrong-password"){
-      alert("Wrong password");
-    } else {
-      alert(e.message);
-    }
-  }
+/* OPEN CHAT */
+window.openChat=user=>{
+  currentChat=user;
+
+  document.getElementById("app").innerHTML=`
+    <div class="header">${user}</div>
+    <div id="messages"></div>
+    <input id="msg">
+    <button onclick="send()">Send</button>
+    <button onclick="location.reload()">Back</button>
+  `;
+
+  loadMessages();
+};
+
+/* SEND */
+window.send=async()=>{
+  await addDoc(collection(db,"messages"),{
+    from:currentUser,
+    to:currentChat,
+    text:msg.value,
+    time:Date.now(),
+    status:"S"
+  });
+
+  msg.value="";
+};
+
+/* LOAD MESSAGES */
+function loadMessages(){
+  let q=query(collection(db,"messages"),orderBy("time"));
+
+  onSnapshot(q,snap=>{
+    messages.innerHTML="";
+
+    snap.forEach(async d=>{
+      let m=d.data();
+
+      if(
+        (m.from===currentUser&&m.to===currentChat)||
+        (m.from===currentChat&&m.to===currentUser)
+      ){
+        let side=m.from===currentUser?"me":"other";
+
+        if(m.to===currentUser && m.status!=="R"){
+          await updateDoc(doc(db,"messages",d.id),{status:"R"});
+        }
+
+        messages.innerHTML+=`
+          <div class="${side}">
+            <div class="bubble">${m.text} (${m.status})</div>
+          </div>
+        `;
+      }
+    });
+  });
+}
+
+/* CHAT LIST */
+function loadChats(){
+  let q=query(collection(db,"messages"),orderBy("time"));
+
+  onSnapshot(q,snap=>{
+    let users={};
+
+    snap.forEach(doc=>{
+      let m=doc.data();
+
+      if(m.from===currentUser) users[m.to]=true;
+      if(m.to===currentUser) users[m.from]=true;
+    });
+
+    chatList.innerHTML="";
+
+    Object.keys(users).forEach(u=>{
+      chatList.innerHTML+=`
+        <div onclick="openChat('${u}')">${u}</div>
+      `;
+    });
+  });
 }
 </script>
 
