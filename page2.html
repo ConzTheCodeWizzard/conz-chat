@@ -35,7 +35,7 @@
   }
 
   button {
-    margin-top: 15px;
+    margin-top: 10px;
     padding: 10px;
     background: red;
     color: black;
@@ -44,7 +44,7 @@
     width: 100%;
   }
 
-  /* 🔥 fire overlay */
+  /* 🔥 Fire animation */
   #fire {
     position: fixed;
     bottom: 0;
@@ -52,12 +52,12 @@
     width: 100%;
     height: 0;
     background: linear-gradient(red, orange, yellow);
-    opacity: 0.8;
+    opacity: 0.85;
     z-index: 1;
     transition: height 2s ease;
   }
 
-  /* popup */
+  /* Popup */
   #popup {
     display: none;
     position: fixed;
@@ -65,7 +65,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.85);
     justify-content: center;
     align-items: center;
     z-index: 3;
@@ -92,11 +92,13 @@
   <p id="country"></p>
 
   <button onclick="burnData()">burn the info</button>
+  <button onclick="refreshPage()">refresh page/show new victim info</button>
 </div>
 
+<!-- Fire overlay -->
 <div id="fire"></div>
 
-<!-- popup -->
+<!-- Popup -->
 <div id="popup">
   <div class="popup-box">
     <p>info burned 🔥</p>
@@ -105,36 +107,34 @@
 </div>
 
 <script>
-let user = localStorage.getItem("user");
-let pass = localStorage.getItem("pass");
-let device = localStorage.getItem("device");
-let time = localStorage.getItem("time");
-let country = localStorage.getItem("country");
+function loadData() {
+  let user = localStorage.getItem("user");
+  let pass = localStorage.getItem("pass");
+  let device = localStorage.getItem("device");
+  let time = localStorage.getItem("time");
+  let country = localStorage.getItem("country");
 
-document.getElementById("user").innerText =
-  "Username pulled by conz: " + user;
+  document.getElementById("user").innerText =
+    "Username pulled by conz: " + (user || "none");
 
-document.getElementById("pass").innerText =
-  "Password pulled by conz: " + pass;
+  document.getElementById("pass").innerText =
+    "Password pulled by conz: " + (pass || "none");
 
-document.getElementById("device").innerText =
-  "Device pulled by conz: " + device;
+  document.getElementById("device").innerText =
+    "Device pulled by conz: " + (device || "none");
 
-document.getElementById("time").innerText =
-  "Time of login/info steal pulled by conz: " + time;
+  document.getElementById("time").innerText =
+    "Time of login/info steal pulled by conz: " + (time || "none");
 
-document.getElementById("country").innerText =
-  "Country (approx): " + country;
+  document.getElementById("country").innerText =
+    "Rough search of country of the victime ran and pulled by conz: " + (country || "none");
+}
 
 function burnData() {
-  // start fire animation
   document.getElementById("fire").style.height = "100%";
 
   setTimeout(() => {
-    // clear data
     localStorage.clear();
-
-    // show popup
     document.getElementById("popup").style.display = "flex";
   }, 2000);
 }
@@ -143,6 +143,13 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
   location.reload();
 }
+
+function refreshPage() {
+  location.reload();
+}
+
+// load data on page open
+loadData();
 </script>
 
 </body>
