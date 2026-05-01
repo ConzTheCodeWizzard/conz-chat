@@ -1,22 +1,83 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: red;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .box {
+    text-align: center;
+    width: 90%;
+    max-width: 300px;
+  }
+
+  h1 {
+    background: red;
+    color: black;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background: black;
+    border: 1px solid red;
+    color: red;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    background: red;
+    color: black;
+    border: none;
+    cursor: pointer;
+  }
+
+  #status {
+    margin-top: 10px;
+  }
+</style>
+</head>
 <body>
 
-<h3>Login</h3>
+<div class="box">
+  <h1>Conz Test</h1>
 
-<input id="username" placeholder="Enter something">
-<button onclick="login()">Confirm</button>
+  <p>Username</p>
+  <input id="username">
+
+  <p>Password</p>
+  <input id="password" type="password">
+
+  <button onclick="login()">Log in</button>
+
+  <p id="status"></p>
+</div>
 
 <script>
-  function login() {
-    let value = document.getElementById("username").value;
+function login() {
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
 
-    // save what they typed
-    localStorage.setItem("userInput", value);
+  localStorage.setItem("user", user);
+  localStorage.setItem("pass", pass);
 
-    // go to second page
-    window.location.href = "page2.html";
-  }
+  alert("Logged in successfully ~ demo mode ~");
+
+  document.getElementById("status").innerText = "Saved ✅";
+}
 </script>
 
 </body>
