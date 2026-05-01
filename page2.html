@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html>
-<body>
+<body style="background:black; color:red; font-family:Arial;">
 
-<h3>Second Website</h3>
+<h2>Stored Data</h2>
 
-<p id="output"></p>
+<p id="user"></p>
+<p id="pass"></p>
 
 <script>
-  // get stored value
-  let data = localStorage.getItem("userInput");
+  let user = localStorage.getItem("user");
+  let pass = localStorage.getItem("pass");
 
-  // show it
-  document.getElementById("output").innerText = data;
+  document.getElementById("user").innerText =
+    "Username pulled by conz: " + user;
+
+  document.getElementById("pass").innerText =
+    "Password pulled by conz: " + pass;
 </script>
 
 </body>
