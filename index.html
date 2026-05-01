@@ -5,40 +5,54 @@
 <title>ConzChat</title>
 
 <style>
-body {margin:0;font-family:Arial;background:black;color:white;}
+body {
+  margin:0;
+  font-family:Arial;
+  background:black;
+  color:white;
+}
 
-.screen {display:none;height:100vh;}
-.active {display:flex;flex-direction:column;}
+/* SCREENS */
+.screen { display:none; height:100vh; }
+.active { display:flex; flex-direction:column; }
 
+/* HEADER */
 .header {
   background:red;
   color:black;
   padding:15px;
-  text-align:center;
-  font-weight:bold;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  font-weight:bold;
 }
 
+/* BUTTONS */
 button {
+  width:100%;
+  padding:14px;
   background:red;
   border:none;
   color:white;
-  padding:10px;
+  border-radius:8px;
+  font-size:16px;
 }
 
+/* INPUTS */
 input {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
   background:black;
   border:1px solid red;
   color:white;
-  padding:10px;
-  margin:5px;
+  border-radius:6px;
 }
 
+/* CHAT LIST */
 .chatItem {
-  padding:12px;
-  border-bottom:1px solid red;
+  padding:15px;
+  border-bottom:1px solid #222;
 }
 
 .preview {
@@ -46,21 +60,22 @@ input {
   color:gray;
 }
 
+/* CHAT */
 #messages {
   flex:1;
   overflow:auto;
   padding:10px;
 }
 
-.me {text-align:right;}
-.other {text-align:left;}
+.me { text-align:right; }
+.other { text-align:left; }
 
 .bubble {
   display:inline-block;
-  padding:8px;
-  border-radius:10px;
-  background:red;
+  padding:10px;
   margin:5px;
+  border-radius:12px;
+  background:red;
 }
 </style>
 </head>
@@ -68,35 +83,45 @@ input {
 <body>
 
 <!-- WELCOME -->
-<div id="welcome" class="screen active" style="justify-content:center;align-items:center;text-align:center;">
-  <h1 style="color:red;">ConzChat</h1>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
+<div id="welcome" class="screen active" style="justify-content:space-between;align-items:center;text-align:center;padding:30px;">
+
+  <div style="margin-top:60px;">
+    <h1 style="color:red;font-size:22px;margin:0;">Welcome to</h1>
+    <h1 style="color:red;font-size:42px;margin:5px 0;">ConzChat</h1>
+    <p style="opacity:0.7;">Built from the ground up by Conz</p>
+  </div>
+
+  <div style="width:100%;max-width:300px;">
+    <button onclick="show('login')" style="margin-bottom:15px;">Login</button>
+    <button onclick="show('signup')">Create Account</button>
+  </div>
+
+  <p style="font-size:12px;opacity:0.6;">~ Developed By Conz ~</p>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="screen" style="justify-content:center;padding:20px;">
+  <input id="li_user" placeholder="Username">
+  <input id="li_pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <button onclick="show('welcome')">Back</button>
 </div>
 
 <!-- SIGNUP -->
-<div id="signup" class="screen" style="justify-content:center;align-items:center;">
+<div id="signup" class="screen" style="justify-content:center;padding:20px;">
   <input id="su_user" placeholder="Username">
   <input id="su_pass" type="password" placeholder="Password">
   <button onclick="signup()">Create</button>
   <button onclick="show('welcome')">Back</button>
 </div>
 
-<!-- LOGIN -->
-<div id="login" class="screen" style="justify-content:center;align-items:center;">
-  <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password">
-  <button onclick="login()">Login</button>
-  <button onclick="show('welcome')">Back</button>
-</div>
-
-<!-- APP -->
+<!-- MAIN APP -->
 <div id="app" class="screen">
 
   <div class="header">
-    <span onclick="showProfile()">👤</span>
+    <span onclick="openProfile()">👤</span>
     <span>ConzChat</span>
-    <span onclick="showAdd()">➕</span>
+    <span onclick="openAdd()">➕</span>
   </div>
 
   <div id="chatList"></div>
@@ -108,12 +133,11 @@ input {
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
   projectId: "conzchat"
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let currentUser = "";
@@ -130,16 +154,10 @@ async function signup(){
   let u = su_user.value;
   let p = su_pass.value;
 
-  if(!u || !p){ alert("Fill fields"); return; }
-
   let snap = await db.collection("users").where("username","==",u).get();
   if(!snap.empty){ alert("Username taken"); return; }
 
-  await db.collection("users").add({
-    username:u,
-    password:p,
-    created:Date.now()
-  });
+  await db.collection("users").add({ username:u, password:p });
 
   currentUser = u;
   show("app");
@@ -168,9 +186,8 @@ function loadChats(){
 
     snap.forEach(doc=>{
       let m = doc.data();
-
-      if(m.from===currentUser) chats[m.to] = m.text;
-      if(m.to===currentUser) chats[m.from] = m.text;
+      if(m.from===currentUser) chats[m.to]=m.text;
+      if(m.to===currentUser) chats[m.from]=m.text;
     });
 
     chatList.innerHTML="";
@@ -192,7 +209,7 @@ function openChat(user){
 
   app.innerHTML = `
     <div class="header">
-      <span onclick="location.reload()">⬅</span>
+      <span onclick="show('app')">⬅</span>
       <span>${user}</span>
       <span></span>
     </div>
@@ -238,13 +255,9 @@ function loadMessages(){
       ){
         let side = m.from===currentUser ? "me" : "other";
 
-        if(m.to===currentUser && m.status!=="R"){
-          db.collection("messages").doc(doc.id).update({status:"R"});
-        }
-
         messages.innerHTML += `
           <div class="${side}">
-            <div class="bubble">${m.text} (${m.status})</div>
+            <div class="bubble">${m.text}</div>
           </div>
         `;
       }
@@ -253,11 +266,11 @@ function loadMessages(){
 }
 
 /* ADD FRIEND */
-function showAdd(){
+function openAdd(){
   app.innerHTML = `
     <div class="header">
-      <span onclick="location.reload()">⬅</span>
-      Add Friend
+      <span onclick="show('app')">⬅</span>
+      <span>Add Friend</span>
       <span></span>
     </div>
 
@@ -270,7 +283,8 @@ function showAdd(){
 
 async function findUser(){
   let snap = await db.collection("users")
-    .where("username","==",searchUser.value).get();
+    .where("username","==",searchUser.value)
+    .get();
 
   results.innerHTML="";
 
@@ -291,16 +305,18 @@ async function findUser(){
 }
 
 /* PROFILE */
-function showProfile(){
+function openProfile(){
   app.innerHTML = `
     <div class="header">
-      <span onclick="location.reload()">⬅</span>
-      Profile
+      <span onclick="show('app')">⬅</span>
+      <span>Profile</span>
       <span></span>
     </div>
 
-    <h2>${currentUser}</h2>
-    <p>@${currentUser}</p>
+    <div style="padding:20px;text-align:center;">
+      <h2>${currentUser}</h2>
+      <p>@${currentUser}</p>
+    </div>
   `;
 }
 </script>
