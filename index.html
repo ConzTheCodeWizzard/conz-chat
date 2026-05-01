@@ -3,21 +3,75 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ConzChat</title>
+
+<style>
+body {
+  margin:0;
+  background:black;
+  color:red;
+  font-family:Arial;
+}
+
+header {
+  background:red;
+  color:black;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.view { display:none; padding:10px; }
+.active { display:block; }
+
+input {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  background:black;
+  border:1px solid red;
+  color:red;
+}
+
+button {
+  width:100%;
+  padding:10px;
+  background:red;
+  color:black;
+  border:none;
+  margin-top:5px;
+}
+
+.user {
+  border:1px solid red;
+  padding:10px;
+  margin-top:5px;
+}
+</style>
 </head>
 
-<body style="background:black; color:red; font-family:Arial;">
+<body>
 
-<h2>ConzChat</h2>
+<header>ConzChat</header>
 
-<input id="username" placeholder="Username">
-<button onclick="test()">Test Firebase</button>
+<!-- LOGIN -->
+<div id="login" class="view active">
+  <h3>Create Username</h3>
+  <input id="username" placeholder="Username">
+  <button onclick="createUser()">Create</button>
+</div>
 
-<p id="output"></p>
+<!-- MAIN -->
+<div id="main" class="view">
+  <h3>Find User</h3>
+  <input id="search" placeholder="Search username">
+  <button onclick="searchUser()">Search</button>
+  <div id="results"></div>
+</div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
@@ -30,16 +84,49 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // login
-signInAnonymously(auth).then(() => {
-  document.getElementById("output").innerText = "Firebase connected ✅";
-});
+await signInAnonymously(auth);
 
-// test button
-window.test = function() {
-  document.getElementById("output").innerText = "Button works 👍";
-}
+// CREATE USER
+window.createUser = async function() {
+  let username = document.getElementById("username").value;
+
+  let q = query(collection(db, "users"), where("username", "==", username));
+  let snap = await getDocs(q);
+
+  if (!snap.empty) {
+    alert("username already in use");
+    return;
+  }
+
+  await addDoc(collection(db, "users"), {
+    username: username,
+    uid: auth.currentUser.uid
+  });
+
+  document.getElementById("login").classList.remove("active");
+  document.getElementById("main").classList.add("active");
+};
+
+// SEARCH USER
+window.searchUser = async function() {
+  let name = document.getElementById("search").value;
+
+  let q = query(collection(db, "users"), where("username", "==", name));
+  let snap = await getDocs(q);
+
+  let results = document.getElementById("results");
+  results.innerHTML = "";
+
+  snap.forEach(doc => {
+    let u = doc.data();
+    results.innerHTML += `
+      <div class="user">${u.username}</div>
+    `;
+  });
+};
 </script>
 
 </body>
