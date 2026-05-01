@@ -7,13 +7,13 @@
 <style>
 body { margin:0; font-family:Arial; background:black; color:white; }
 
-.screen { display:none; padding:20px; }
+.screen { display:none; padding:15px; }
 .active { display:block; }
 
 button {
   width:100%;
   padding:12px;
-  margin:10px 0;
+  margin:8px 0;
   background:red;
   border:none;
   color:white;
@@ -28,6 +28,7 @@ input {
   color:white;
 }
 
+/* HEADER */
 .header {
   background:red;
   color:black;
@@ -36,18 +37,39 @@ input {
   font-weight:bold;
 }
 
+/* CHAT AREA */
+#messages {
+  height:300px;
+  overflow-y:auto;
+  border:1px solid red;
+  padding:10px;
+  margin:10px 0;
+}
+
+/* BUBBLES */
 .chatBubbleMe {
   background:red;
   padding:8px;
   margin:5px;
   text-align:right;
+  border-radius:10px;
+  width:fit-content;
+  margin-left:auto;
 }
 
 .chatBubbleOther {
-  background:red;
+  background:#222;
   padding:8px;
   margin:5px;
   text-align:left;
+  border-radius:10px;
+  width:fit-content;
+}
+
+/* USER SEARCH RESULTS */
+.user {
+  padding:10px;
+  border-bottom:1px solid red;
 }
 </style>
 </head>
@@ -87,7 +109,7 @@ input {
 
 <!-- MAIN APP -->
 <div id="app" class="screen">
-  <div class="header">ConzChat</div>
+  <div class="header" id="chatHeader">ConzChat</div>
 
   <input id="search" placeholder="Search username">
   <button onclick="findUser()">Find</button>
@@ -171,13 +193,18 @@ window.findUser = async ()=>{
   results.innerHTML="";
   snap.forEach(doc=>{
     let u=doc.data();
-    results.innerHTML+=`<div onclick="openChat('${u.username}')">${u.username}</div>`;
+    results.innerHTML+=`
+  <div class="user" onclick="openChat('${u.username}')">
+    ${u.username}
+  </div>
+`;
   });
 };
 
 /* OPEN CHAT */
 window.openChat = user=>{
-  currentChat=user;
+  currentChat = user;
+  document.getElementById("chatHeader").innerText = user;
   loadMessages();
 };
 
