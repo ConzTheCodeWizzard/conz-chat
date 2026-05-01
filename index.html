@@ -46,6 +46,10 @@ button {
   padding:10px;
   margin-top:5px;
 }
+
+#messages div {
+  margin:5px 0;
+}
 </style>
 </head>
 
@@ -68,10 +72,16 @@ button {
   <div id="results"></div>
 </div>
 
+<!-- CHAT -->
+<div id="chat" class="view"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { 
+  getFirestore, collection, addDoc, query, where, getDocs, 
+  onSnapshot, orderBy 
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
@@ -86,8 +96,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// login
-await signInAnonymously(auth);
+let currentUser = "";
+let currentChat = "";
+
+// LOGIN
+signInAnonymously(auth);
 
 // CREATE USER
 window.createUser = async function() {
@@ -106,6 +119,8 @@ window.createUser = async function() {
     uid: auth.currentUser.uid
   });
 
+  currentUser = username;
+
   document.getElementById("login").classList.remove("active");
   document.getElementById("main").classList.add("active");
 };
@@ -123,9 +138,75 @@ window.searchUser = async function() {
   snap.forEach(doc => {
     let u = doc.data();
     results.innerHTML += `
-      <div class="user">${u.username}</div>
+      <div class="user" onclick="openChat('${u.username}')">
+        ${u.username}
+      </div>
     `;
   });
+};
+
+// OPEN CHAT
+window.openChat = function(username) {
+  currentChat = username;
+
+  document.getElementById("main").classList.remove("active");
+
+  document.getElementById("chat").innerHTML = `
+    <h3>Chat with ${username}</h3>
+    <div id="messages"></div>
+    <input id="msgInput" placeholder="Type message">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="goBack()">Back</button>
+  `;
+
+  document.getElementById("chat").classList.add("active");
+
+  loadMessages();
+};
+
+// SEND MESSAGE
+window.sendMessage = async function() {
+  let text = document.getElementById("msgInput").value;
+
+  if (!text) return;
+
+  await addDoc(collection(db, "messages"), {
+    from: currentUser,
+    to: currentChat,
+    text: text,
+    time: Date.now()
+  });
+
+  document.getElementById("msgInput").value = "";
+};
+
+// LOAD MESSAGES (REAL TIME)
+function loadMessages() {
+  const q = query(collection(db, "messages"), orderBy("time"));
+
+  onSnapshot(q, (snapshot) => {
+    let messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      let m = doc.data();
+
+      if (
+        (m.from === currentUser && m.to === currentChat) ||
+        (m.from === currentChat && m.to === currentUser)
+      ) {
+        messagesDiv.innerHTML += `
+          <div>${m.from}: ${m.text}</div>
+        `;
+      }
+    });
+  });
+}
+
+// BACK BUTTON
+window.goBack = function() {
+  document.getElementById("chat").classList.remove("active");
+  document.getElementById("main").classList.add("active");
 };
 </script>
 
