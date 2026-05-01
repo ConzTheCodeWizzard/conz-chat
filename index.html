@@ -4,21 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ConzChat</title>
 
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0000">
+
 <style>
 body { margin:0; font-family:Arial; background:black; color:white; }
 
 .screen { display:none; height:100vh; flex-direction:column; }
 .active { display:flex; }
-
-/* HEADER */
-.header {
-  background:red;
-  color:black;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
 
 /* WELCOME */
 #welcome {
@@ -30,40 +24,34 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 }
 .logo { font-size:42px; color:red; }
 
+/* HEADER */
+.header {
+  background:red;
+  color:black;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+}
+
 /* LIST */
 .listItem {
   padding:15px;
   border-bottom:1px solid #222;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.avatar {
-  width:45px;
-  height:45px;
-  border-radius:50%;
-  background:#333;
 }
 
 /* CHAT */
 #messages { flex:1; overflow:auto; padding:10px; }
 
-.bubble {
-  padding:10px;
-  border-radius:10px;
-  margin:5px;
-  max-width:70%;
-}
 .me { text-align:right; }
-.me .bubble { background:red; }
+.me div { background:red; padding:10px; border-radius:10px; display:inline-block; }
+
 .other { text-align:left; }
-.other .bubble { background:#222; }
+.other div { background:#222; padding:10px; border-radius:10px; display:inline-block; }
 
 /* INPUT */
 .inputBar {
   display:flex;
   padding:10px;
-  gap:8px;
 }
 .inputBar input {
   flex:1;
@@ -74,22 +62,12 @@ body { margin:0; font-family:Arial; background:black; color:white; }
   color:white;
 }
 
-/* PROFILE */
-.profilePic {
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:#333;
-  margin:20px auto;
-  object-fit:cover;
-}
-
 button {
   padding:12px;
   background:red;
   border:none;
   color:white;
-  margin-top:5px;
+  margin:5px;
 }
 
 input {
@@ -109,6 +87,7 @@ input {
   <div>
     <h2 style="color:red;">Welcome to</h2>
     <div class="logo">ConzChat</div>
+    <p>Built by Conz</p>
   </div>
 
   <div>
@@ -122,30 +101,30 @@ input {
 <!-- LOGIN -->
 <div id="login" class="screen" style="padding:20px;">
   <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password">
+  <input id="li_pass" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
 </div>
 
 <!-- SIGNUP -->
 <div id="signup" class="screen" style="padding:20px;">
   <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password">
-  <input id="su_name" placeholder="Display Name">
+  <input id="su_pass" type="password" placeholder="Password">
   <button onclick="signup()">Create</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="screen">
   <div class="header">
-    <span onclick="goBack()">⬅</span>
-    <span id="title">Chats</span>
-    <span onclick="openProfile(currentUser)">👤</span>
+    <span onclick="show('welcome')">⬅</span>
+    <span>ConzChat</span>
+    <span onclick="alert(currentUser)">👤</span>
   </div>
+
   <div id="content"></div>
 </div>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
@@ -155,10 +134,8 @@ firebase.initializeApp({
 });
 
 const db = firebase.firestore();
-const auth = firebase.auth();
 
-let currentUser="";
-let stack=[];
+let currentUser = "";
 
 /* NAV */
 function show(id){
@@ -166,58 +143,54 @@ function show(id){
   document.getElementById(id).classList.add("active");
 }
 
-function push(fn){ stack.push(fn); }
-
-function goBack(){
-  if(stack.length<=1){ show("welcome"); return; }
-  stack.pop();
-  stack[stack.length-1]();
-}
-
-/* AUTH */
+/* SIGNUP */
 async function signup(){
-  let username = su_user.value;
-  let email = username+"@conz.app";
+  let u = su_user.value;
+  let p = su_pass.value;
 
-  let res = await auth.createUserWithEmailAndPassword(email, su_pass.value);
+  let check = await db.collection("users").where("username","==",u).get();
+  if(!check.empty){ alert("Username taken"); return; }
 
-  await db.collection("users").doc(res.user.uid).set({
-    username:username,
-    name:su_name.value,
-    created:Date.now(),
-    photo:""
+  await db.collection("users").add({
+    username:u,
+    password:p,
+    created:Date.now()
   });
 
-  currentUser=res.user.uid;
+  currentUser = u;
   openChats();
 }
 
+/* LOGIN */
 async function login(){
-  let email = li_user.value+"@conz.app";
+  let u = li_user.value;
+  let p = li_pass.value;
 
-  let res = await auth.signInWithEmailAndPassword(email, li_pass.value);
+  let snap = await db.collection("users")
+    .where("username","==",u)
+    .where("password","==",p)
+    .get();
 
-  currentUser=res.user.uid;
+  if(snap.empty){ alert("Login failed"); return; }
+
+  currentUser = u;
   openChats();
 }
 
 /* CHAT LIST */
 function openChats(){
   show("app");
-  push(openChats);
-  title.innerText="Chats";
 
   db.collection("users").onSnapshot(snap=>{
     content.innerHTML="";
 
     snap.forEach(doc=>{
-      let u=doc.data();
+      let u = doc.data();
 
-      if(doc.id!==currentUser){
-        content.innerHTML+=`
-        <div class="listItem" onclick="openChat('${doc.id}','${u.username}')">
-          <div class="avatar"></div>
-          <div>${u.username}</div>
+      if(u.username !== currentUser){
+        content.innerHTML += `
+        <div class="listItem" onclick="openChat('${u.username}')">
+          ${u.username}
         </div>`;
       }
     });
@@ -227,42 +200,39 @@ function openChats(){
 /* CHAT */
 function chatId(a,b){ return [a,b].sort().join("_"); }
 
-function openChat(uid,name){
-  push(()=>openChat(uid,name));
-  title.innerHTML=`<span onclick="openProfile('${uid}')">${name}</span>`;
-
-  let id=chatId(currentUser,uid);
-
-  content.innerHTML=`
+function openChat(user){
+  content.innerHTML = `
     <div id="messages"></div>
     <div class="inputBar">
       <input id="msg">
-      <button onclick="send('${uid}')">Send</button>
+      <button onclick="send('${user}')">Send</button>
     </div>
   `;
+
+  let id = chatId(currentUser,user);
 
   db.collection("messages").doc(id).collection("msgs")
   .orderBy("time").onSnapshot(snap=>{
     messages.innerHTML="";
 
     snap.forEach(doc=>{
-      let m=doc.data();
-      let side=m.from===currentUser?"me":"other";
+      let m = doc.data();
+      let side = m.from===currentUser ? "me" : "other";
 
-      messages.innerHTML+=`
+      messages.innerHTML += `
         <div class="${side}">
-          <div class="bubble">${m.text}</div>
+          <div>${m.text}</div>
         </div>`;
     });
 
-    messages.scrollTop=messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight;
   });
 }
 
-async function send(uid){
+async function send(user){
   if(!msg.value) return;
 
-  let id=chatId(currentUser,uid);
+  let id = chatId(currentUser,user);
 
   await db.collection("messages").doc(id).collection("msgs").add({
     from:currentUser,
@@ -272,36 +242,12 @@ async function send(uid){
 
   msg.value="";
 }
+</script>
 
-/* PROFILE */
-async function openProfile(uid){
-  push(()=>openProfile(uid));
-  title.innerText="Profile";
-
-  let doc=await db.collection("users").doc(uid).get();
-  let d=doc.data();
-
-  let days=Math.floor((Date.now()-d.created)/86400000);
-
-  content.innerHTML=`
-  <div style="text-align:center;">
-    <img class="profilePic" src="${d.photo}">
-    ${uid===currentUser ? '<input type="file" onchange="upload(event)">' : ''}
-    <h2>${d.name}</h2>
-    <p>@${d.username}</p>
-    <p>${days} days on ConzChat</p>
-  </div>`;
-}
-
-function upload(e){
-  let reader=new FileReader();
-  reader.onload=async ()=>{
-    await db.collection("users").doc(currentUser).update({
-      photo:reader.result
-    });
-    openProfile(currentUser);
-  };
-  reader.readAsDataURL(e.target.files[0]);
+<!-- SERVICE WORKER -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
 }
 </script>
 
