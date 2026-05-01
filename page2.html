@@ -1,21 +1,56 @@
 <!DOCTYPE html>
 <html>
-<body style="background:black; color:red; font-family:Arial;">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: red;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
 
-<h2>Stored Data</h2>
+  .box {
+    text-align: center;
+    width: 90%;
+    max-width: 300px;
+  }
 
-<p id="user"></p>
-<p id="pass"></p>
+  h2 {
+    background: red;
+    color: black;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  p {
+    margin: 15px 0;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Victims</h2>
+
+  <p id="user"></p>
+  <p id="pass"></p>
+</div>
 
 <script>
   let user = localStorage.getItem("user");
   let pass = localStorage.getItem("pass");
 
   document.getElementById("user").innerText =
-    "Username pulled by conz: " + user;
+    "Victims username pulled by conz: " + user;
 
   document.getElementById("pass").innerText =
-    "Password pulled by conz: " + pass;
+    "Victims password pulled by conz: " + pass;
 </script>
 
 </body>
