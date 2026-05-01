@@ -1,87 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConzChat</title>
+</head>
+
+<body style="background:black; color:white; font-family:Arial;">
+
+<h1 style="color:red;">App Loaded</h1>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
-const app = initializeApp({
-  apiKey:"AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
-  authDomain:"conzchat.firebaseapp.com",
-  projectId:"conzchat"
-});
-
-const db = getFirestore(app);
-
-let currentUser = localStorage.getItem("user");
-let currentChat = "";
-
-// 🚨 IMPORTANT FIX
-if (!currentUser) {
-  // if no user, go back to login page
-  window.location.href = "index.html";
-}
-
-// SEARCH
-window.findUser = async ()=>{
-  let name = document.getElementById("search").value;
-
-  let q = query(collection(db,"users"),where("username","==",name));
-  let snap = await getDocs(q);
-
-  let results = document.getElementById("results");
-  results.innerHTML = "";
-
-  if (snap.empty) {
-    results.innerHTML = "User doesn't exist";
-    return;
-  }
-
-  snap.forEach(doc=>{
-    let u = doc.data();
-    results.innerHTML += `
-      <div onclick="openChat('${u.username}')">${u.username}</div>
-    `;
-  });
-};
-
-// OPEN CHAT
-window.openChat = (user)=>{
-  currentChat = user;
-  loadMessages();
-};
-
-// SEND
-window.send = async ()=>{
-  let text = document.getElementById("msg").value;
-
-  if (!text) return;
-
-  await addDoc(collection(db,"messages"),{
-    from:currentUser,
-    to:currentChat,
-    text:text,
-    time:Date.now()
-  });
-
-  document.getElementById("msg").value = "";
-};
-
-// LOAD
-function loadMessages(){
-  let q = query(collection(db,"messages"),orderBy("time"));
-
-  onSnapshot(q,(snap)=>{
-    let messages = document.getElementById("messages");
-    messages.innerHTML = "";
-
-    snap.forEach(doc=>{
-      let m = doc.data();
-
-      if(
-        (m.from===currentUser && m.to===currentChat) ||
-        (m.from===currentChat && m.to===currentUser)
-      ){
-        messages.innerHTML += `<div>${m.text}</div>`;
-      }
-    });
-  });
-}
+console.log("app script running");
 </script>
+
+</body>
+</html>
