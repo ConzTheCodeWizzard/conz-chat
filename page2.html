@@ -12,12 +12,14 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    overflow: hidden;
   }
 
   .box {
     text-align: center;
     width: 90%;
     max-width: 350px;
+    z-index: 2;
   }
 
   h2 {
@@ -41,6 +43,41 @@
     cursor: pointer;
     width: 100%;
   }
+
+  /* 🔥 fire overlay */
+  #fire {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(red, orange, yellow);
+    opacity: 0.8;
+    z-index: 1;
+    transition: height 2s ease;
+  }
+
+  /* popup */
+  #popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+  }
+
+  .popup-box {
+    background: red;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -54,7 +91,17 @@
   <p id="time"></p>
   <p id="country"></p>
 
-  <button onclick="clearData()">Clear Data</button>
+  <button onclick="burnData()">burn the info</button>
+</div>
+
+<div id="fire"></div>
+
+<!-- popup -->
+<div id="popup">
+  <div class="popup-box">
+    <p>info burned 🔥</p>
+    <button onclick="closePopup()">OK</button>
+  </div>
 </div>
 
 <script>
@@ -79,8 +126,21 @@ document.getElementById("time").innerText =
 document.getElementById("country").innerText =
   "Country (approx): " + country;
 
-function clearData() {
-  localStorage.clear();
+function burnData() {
+  // start fire animation
+  document.getElementById("fire").style.height = "100%";
+
+  setTimeout(() => {
+    // clear data
+    localStorage.clear();
+
+    // show popup
+    document.getElementById("popup").style.display = "flex";
+  }, 2000);
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
   location.reload();
 }
 </script>
