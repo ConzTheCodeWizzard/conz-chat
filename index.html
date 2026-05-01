@@ -6,26 +6,9 @@
 
 <style>
 body {margin:0;font-family:Arial;background:black;color:white;}
-.screen {display:none;padding:15px;}
-.active {display:block;}
 
-button {
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  background:red;
-  border:none;
-  color:white;
-}
-
-input {
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  background:black;
-  border:1px solid red;
-  color:white;
-}
+.screen {display:none;height:100vh;}
+.active {display:flex;flex-direction:column;}
 
 .header {
   background:red;
@@ -33,27 +16,51 @@ input {
   padding:15px;
   text-align:center;
   font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+button {
+  background:red;
+  border:none;
+  color:white;
+  padding:10px;
+}
+
+input {
+  background:black;
+  border:1px solid red;
+  color:white;
+  padding:10px;
+  margin:5px;
+}
+
+.chatItem {
+  padding:12px;
+  border-bottom:1px solid red;
+}
+
+.preview {
+  font-size:12px;
+  color:gray;
 }
 
 #messages {
-  height:60vh;
+  flex:1;
   overflow:auto;
+  padding:10px;
 }
 
-.me {
-  text-align:right;
-}
-
-.other {
-  text-align:left;
-}
+.me {text-align:right;}
+.other {text-align:left;}
 
 .bubble {
   display:inline-block;
   padding:8px;
-  margin:5px;
   border-radius:10px;
   background:red;
+  margin:5px;
 }
 </style>
 </head>
@@ -61,145 +68,151 @@ input {
 <body>
 
 <!-- WELCOME -->
-<div id="welcome" class="screen active" style="text-align:center;height:100vh;display:flex;flex-direction:column;justify-content:space-between;">
-  <div>
-    <h1 style="color:red;">Welcome to</h1>
-    <h1 style="font-size:40px;">ConzChat</h1>
-    <p style="color:white;">Built from the ground up by Conz</p>
-  </div>
-
-  <div>
-    <button onclick="show('login')">Login</button>
-    <button onclick="show('signup')">Create Account</button>
-  </div>
-
-  <p style="font-size:12px;">~ Developed By Conz ~</p>
+<div id="welcome" class="screen active" style="justify-content:center;align-items:center;text-align:center;">
+  <h1 style="color:red;">ConzChat</h1>
+  <button onclick="show('login')">Login</button>
+  <button onclick="show('signup')">Create Account</button>
 </div>
 
 <!-- SIGNUP -->
-<div id="signup" class="screen">
-  <h2>Create Account</h2>
-
+<div id="signup" class="screen" style="justify-content:center;align-items:center;">
   <input id="su_user" placeholder="Username">
   <input id="su_pass" type="password" placeholder="Password">
-  <input id="su_dob" type="date">
-
   <button onclick="signup()">Create</button>
+  <button onclick="show('welcome')">Back</button>
 </div>
 
 <!-- LOGIN -->
-<div id="login" class="screen">
-  <h2>Login</h2>
-
+<div id="login" class="screen" style="justify-content:center;align-items:center;">
   <input id="li_user" placeholder="Username">
   <input id="li_pass" type="password">
-
   <button onclick="login()">Login</button>
+  <button onclick="show('welcome')">Back</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="screen">
-  <div class="header" id="header">ConzChat</div>
+
+  <div class="header">
+    <span onclick="showProfile()">👤</span>
+    <span>ConzChat</span>
+    <span onclick="showAdd()">➕</span>
+  </div>
 
   <div id="chatList"></div>
 
-  <input id="search" placeholder="Find user">
-  <button onclick="findUser()">Search</button>
-
-  <div id="results"></div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-const app = initializeApp({
-  apiKey:"AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
-  projectId:"conzchat"
-});
-
-const db = getFirestore(app);
-
-let currentUser="";
-let currentChat="";
-
-/* NAV */
-window.show=id=>{
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
+  projectId: "conzchat"
 };
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let currentUser = "";
+let currentChat = "";
+
+/* NAV */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
 /* SIGNUP */
-window.signup=async()=>{
-  let u=su_user.value;
-  let p=su_pass.value;
-  let dob=new Date(su_dob.value);
+async function signup(){
+  let u = su_user.value;
+  let p = su_pass.value;
 
-  if(new Date().getFullYear()-dob.getFullYear()<13){
-    alert("Too young"); return;
-  }
+  if(!u || !p){ alert("Fill fields"); return; }
 
-  let q=query(collection(db,"users"),where("username","==",u));
-  let snap=await getDocs(q);
+  let snap = await db.collection("users").where("username","==",u).get();
+  if(!snap.empty){ alert("Username taken"); return; }
 
-  if(!snap.empty){alert("Taken");return;}
-
-  await addDoc(collection(db,"users"),{
+  await db.collection("users").add({
     username:u,
     password:p,
     created:Date.now()
   });
 
-  currentUser=u;
+  currentUser = u;
   show("app");
   loadChats();
-};
+}
 
 /* LOGIN */
-window.login=async()=>{
-  let q=query(collection(db,"users"),
-    where("username","==",li_user.value),
-    where("password","==",li_pass.value)
-  );
+async function login(){
+  let snap = await db.collection("users")
+    .where("username","==",li_user.value)
+    .where("password","==",li_pass.value)
+    .get();
 
-  let snap=await getDocs(q);
-  if(snap.empty){alert("Login failed");return;}
+  if(snap.empty){ alert("Login failed"); return; }
 
-  currentUser=li_user.value;
+  currentUser = li_user.value;
   show("app");
   loadChats();
-};
+}
 
-/* FIND */
-window.findUser=async()=>{
-  let q=query(collection(db,"users"),where("username","==",search.value));
-  let snap=await getDocs(q);
+/* CHAT LIST */
+function loadChats(){
+  db.collection("messages").orderBy("time")
+  .onSnapshot(snap=>{
+    let chats = {};
 
-  results.innerHTML="";
-  snap.forEach(doc=>{
-    let u=doc.data();
-    results.innerHTML+=`<div onclick="openChat('${u.username}')">${u.username}</div>`;
+    snap.forEach(doc=>{
+      let m = doc.data();
+
+      if(m.from===currentUser) chats[m.to] = m.text;
+      if(m.to===currentUser) chats[m.from] = m.text;
+    });
+
+    chatList.innerHTML="";
+
+    Object.keys(chats).forEach(u=>{
+      chatList.innerHTML += `
+        <div class="chatItem" onclick="openChat('${u}')">
+          <div>${u}</div>
+          <div class="preview">${chats[u]}</div>
+        </div>
+      `;
+    });
   });
-};
+}
 
 /* OPEN CHAT */
-window.openChat=user=>{
-  currentChat=user;
+function openChat(user){
+  currentChat = user;
 
-  document.getElementById("app").innerHTML=`
-    <div class="header">${user}</div>
+  app.innerHTML = `
+    <div class="header">
+      <span onclick="location.reload()">⬅</span>
+      <span>${user}</span>
+      <span></span>
+    </div>
+
     <div id="messages"></div>
-    <input id="msg">
-    <button onclick="send()">Send</button>
-    <button onclick="location.reload()">Back</button>
+
+    <div style="display:flex;">
+      <input id="msg" style="flex:1;">
+      <button onclick="send()">Send</button>
+    </div>
   `;
 
   loadMessages();
-};
+}
 
 /* SEND */
-window.send=async()=>{
-  await addDoc(collection(db,"messages"),{
+async function send(){
+  if(!msg.value) return;
+
+  await db.collection("messages").add({
     from:currentUser,
     to:currentChat,
     text:msg.value,
@@ -208,29 +221,28 @@ window.send=async()=>{
   });
 
   msg.value="";
-};
+}
 
 /* LOAD MESSAGES */
 function loadMessages(){
-  let q=query(collection(db,"messages"),orderBy("time"));
-
-  onSnapshot(q,snap=>{
+  db.collection("messages").orderBy("time")
+  .onSnapshot(snap=>{
     messages.innerHTML="";
 
-    snap.forEach(async d=>{
-      let m=d.data();
+    snap.forEach(doc=>{
+      let m = doc.data();
 
       if(
-        (m.from===currentUser&&m.to===currentChat)||
-        (m.from===currentChat&&m.to===currentUser)
+        (m.from===currentUser && m.to===currentChat) ||
+        (m.from===currentChat && m.to===currentUser)
       ){
-        let side=m.from===currentUser?"me":"other";
+        let side = m.from===currentUser ? "me" : "other";
 
         if(m.to===currentUser && m.status!=="R"){
-          await updateDoc(doc(db,"messages",d.id),{status:"R"});
+          db.collection("messages").doc(doc.id).update({status:"R"});
         }
 
-        messages.innerHTML+=`
+        messages.innerHTML += `
           <div class="${side}">
             <div class="bubble">${m.text} (${m.status})</div>
           </div>
@@ -240,28 +252,56 @@ function loadMessages(){
   });
 }
 
-/* CHAT LIST */
-function loadChats(){
-  let q=query(collection(db,"messages"),orderBy("time"));
+/* ADD FRIEND */
+function showAdd(){
+  app.innerHTML = `
+    <div class="header">
+      <span onclick="location.reload()">⬅</span>
+      Add Friend
+      <span></span>
+    </div>
 
-  onSnapshot(q,snap=>{
-    let users={};
+    <input id="searchUser" placeholder="Username">
+    <button onclick="findUser()">Search</button>
 
-    snap.forEach(doc=>{
-      let m=doc.data();
+    <div id="results"></div>
+  `;
+}
 
-      if(m.from===currentUser) users[m.to]=true;
-      if(m.to===currentUser) users[m.from]=true;
-    });
+async function findUser(){
+  let snap = await db.collection("users")
+    .where("username","==",searchUser.value).get();
 
-    chatList.innerHTML="";
+  results.innerHTML="";
 
-    Object.keys(users).forEach(u=>{
-      chatList.innerHTML+=`
-        <div onclick="openChat('${u}')">${u}</div>
-      `;
-    });
+  if(snap.empty){
+    results.innerHTML="User not found";
+    return;
+  }
+
+  snap.forEach(doc=>{
+    let u = doc.data();
+
+    results.innerHTML += `
+      <div class="chatItem" onclick="openChat('${u.username}')">
+        ${u.username}
+      </div>
+    `;
   });
+}
+
+/* PROFILE */
+function showProfile(){
+  app.innerHTML = `
+    <div class="header">
+      <span onclick="location.reload()">⬅</span>
+      Profile
+      <span></span>
+    </div>
+
+    <h2>${currentUser}</h2>
+    <p>@${currentUser}</p>
+  `;
 }
 </script>
 
