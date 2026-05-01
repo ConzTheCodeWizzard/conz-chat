@@ -17,31 +17,9 @@ body { margin:0; font-family:Arial; background:black; color:white; }
   color:black;
   padding:12px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   font-weight:bold;
-}
-
-/* BUTTON */
-button {
-  padding:12px;
-  background:red;
-  color:white;
-  border:none;
-  border-radius:8px;
-  width:100%;
-  margin-top:10px;
-}
-
-/* INPUT */
-input {
-  padding:12px;
-  margin:6px 0;
-  background:black;
-  border:1px solid red;
-  color:white;
-  border-radius:6px;
-  width:100%;
 }
 
 /* CHAT LIST */
@@ -54,23 +32,19 @@ input {
 }
 
 .avatar {
-  width:40px;
-  height:40px;
+  width:45px;
+  height:45px;
   border-radius:50%;
   background:#333;
+  object-fit:cover;
 }
 
-.online {
-  width:10px;
-  height:10px;
-  background:lime;
+.dot {
+  width:8px;
+  height:8px;
+  background:red;
   border-radius:50%;
-  position:absolute;
-  margin-left:28px;
-  margin-top:28px;
 }
-
-.preview { font-size:12px; color:gray; }
 
 /* CHAT */
 #messages { flex:1; overflow:auto; padding:10px; }
@@ -79,7 +53,6 @@ input {
   padding:10px;
   border-radius:10px;
   margin:5px;
-  display:inline-block;
   max-width:70%;
 }
 
@@ -89,9 +62,52 @@ input {
 .other { text-align:left; }
 .other .bubble { background:#222; }
 
-.status { font-size:10px; opacity:0.7; }
+.status { font-size:10px; opacity:0.6; }
 
-.typing { font-size:12px; color:gray; padding:5px; }
+.typing {
+  font-size:12px;
+  color:gray;
+  padding:5px;
+}
+
+/* INPUT */
+.inputBar {
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-top:1px solid #222;
+}
+
+.inputBar input {
+  flex:1;
+  padding:12px;
+  border-radius:20px;
+  border:1px solid red;
+  background:black;
+  color:white;
+}
+
+.inputBar button {
+  padding:10px 15px;
+  border-radius:20px;
+  background:red;
+  border:none;
+  color:white;
+}
+
+/* PROFILE */
+.profilePic {
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:#333;
+  margin:20px auto;
+  object-fit:cover;
+}
+.center { text-align:center; }
+
+button { margin:5px 0; padding:10px; background:red; color:white; border:none; border-radius:6px; }
+input { width:100%; margin:5px 0; padding:10px; background:black; border:1px solid red; color:white; }
 
 </style>
 </head>
@@ -99,7 +115,7 @@ input {
 <body>
 
 <!-- WELCOME -->
-<div id="welcome" class="screen active" style="justify-content:center;align-items:center;text-align:center;padding:20px;">
+<div id="welcome" class="screen active" style="justify-content:center;align-items:center;">
   <h1 style="color:red;">ConzChat</h1>
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
@@ -108,32 +124,28 @@ input {
 <!-- LOGIN -->
 <div id="login" class="screen" style="padding:20px;">
   <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password" placeholder="Password">
+  <input id="li_pass" type="password">
   <button onclick="login()">Login</button>
 </div>
 
 <!-- SIGNUP -->
 <div id="signup" class="screen" style="padding:20px;">
   <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password" placeholder="Password">
+  <input id="su_pass" type="password">
   <input id="su_name" placeholder="Display Name">
   <button onclick="signup()">Create</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="screen">
-
   <div class="header">
     <span onclick="goBack()">⬅</span>
     <span id="title">Chats</span>
-    <span onclick="openAdd()">➕</span>
+    <span onclick="openProfile(currentUser)">👤</span>
   </div>
-
   <div id="content"></div>
-
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -154,14 +166,10 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
-
-function push(view){
-  historyStack.push(view);
-}
-
+function push(view){ historyStack.push(view); }
 function goBack(){
   historyStack.pop();
-  let last = historyStack[historyStack.length-1];
+  let last=historyStack[historyStack.length-1];
   if(last) last();
 }
 
@@ -169,15 +177,16 @@ function goBack(){
 async function signup(){
   let u=su_user.value;
 
-  let snap=await db.collection("users").where("username","==",u).get();
-  if(!snap.empty){ alert("Username taken"); return; }
+  let doc=await db.collection("users").doc(u).get();
+  if(doc.exists){ alert("Username taken"); return; }
 
   await db.collection("users").doc(u).set({
     username:u,
     password:su_pass.value,
     name:su_name.value,
     created:Date.now(),
-    online:true
+    photo:"",
+    lastSeen:Date.now()
   });
 
   currentUser=u;
@@ -187,17 +196,14 @@ async function signup(){
 
 /* LOGIN */
 async function login(){
-  let doc = await db.collection("users").doc(li_user.value).get();
+  let doc=await db.collection("users").doc(li_user.value).get();
 
-  if(!doc.exists || doc.data().password !== li_pass.value){
+  if(!doc.exists || doc.data().password!==li_pass.value){
     alert("Login failed");
     return;
   }
 
   currentUser=li_user.value;
-
-  await db.collection("users").doc(currentUser).update({online:true});
-
   show("app");
   openChats();
 }
@@ -216,27 +222,24 @@ function openChats(){
       if(m.to===currentUser) chats[m.from]=m;
     });
 
+    let sorted = Object.entries(chats).sort((a,b)=>b[1].time-a[1].time);
+
     content.innerHTML="";
 
-    Object.keys(chats).forEach(u=>{
-      let m=chats[u];
-
+    sorted.forEach(([u,m])=>{
       content.innerHTML+=`
       <div class="chatItem" onclick="openChat('${u}')">
-        <div style="position:relative;">
-          <div class="avatar"></div>
-          <div class="online"></div>
-        </div>
-        <div>
+        <img class="avatar" src="">
+        <div style="flex:1">
           <div>${u}</div>
-          <div class="preview">${m.text}</div>
+          <div style="font-size:12px;color:gray">${m.text}</div>
         </div>
       </div>`;
     });
   });
 }
 
-/* OPEN CHAT */
+/* CHAT */
 function openChat(user){
   currentChat=user;
   push(()=>openChat(user));
@@ -245,13 +248,22 @@ function openChat(user){
   content.innerHTML=`
     <div id="messages"></div>
     <div id="typing" class="typing"></div>
-    <div style="display:flex;">
-      <input id="msg" style="flex:1;">
+    <div class="inputBar">
+      <input id="msg" oninput="typingNow()">
       <button onclick="send()">Send</button>
     </div>
   `;
 
   loadMessages();
+}
+
+/* TYPING */
+function typingNow(){
+  db.collection("typing").doc(currentChat+currentUser).set({
+    from:currentUser,
+    to:currentChat,
+    typing:true
+  });
 }
 
 /* SEND */
@@ -269,7 +281,7 @@ async function send(){
   msg.value="";
 }
 
-/* LOAD MESSAGES */
+/* LOAD */
 function loadMessages(){
   db.collection("messages").orderBy("time")
   .onSnapshot(snap=>{
@@ -286,46 +298,63 @@ function loadMessages(){
           doc.ref.update({status:"R"});
         }
 
-        let side = m.from===currentUser ? "me" : "other";
+        let side=m.from===currentUser?"me":"other";
 
         messages.innerHTML+=`
-          <div class="${side}">
-            <div class="bubble">${m.text}</div>
-            <div class="status">${m.status}</div>
-          </div>
-        `;
+        <div class="${side}">
+          <div class="bubble">${m.text}</div>
+          <div class="status">${m.status}</div>
+        </div>`;
       }
     });
 
     messages.scrollTop=messages.scrollHeight;
   });
+
+  /* typing listener */
+  db.collection("typing").onSnapshot(snap=>{
+    snap.forEach(doc=>{
+      let t=doc.data();
+      if(t.from===currentChat && t.to===currentUser){
+        typing.innerText="typing...";
+      }
+    });
+  });
 }
 
-/* ADD USER */
-function openAdd(){
-  push(openAdd);
-  title.innerText="Add Friend";
+/* PROFILE */
+async function openProfile(user){
+  push(()=>openProfile(user));
+  title.innerText="Profile";
+
+  let doc=await db.collection("users").doc(user).get();
+  let d=doc.data();
+
+  let days=Math.floor((Date.now()-d.created)/86400000);
 
   content.innerHTML=`
-    <input id="searchUser" placeholder="Username">
-    <button onclick="findUser()">Search</button>
-    <div id="results"></div>
-  `;
+  <div class="center">
+    <img id="pfp" class="profilePic" src="${d.photo}">
+    <input type="file" onchange="uploadPic(event)">
+    <h2>${d.name}</h2>
+    <p>@${d.username}</p>
+    <p>${days} days on ConzChat</p>
+  </div>`;
 }
 
-async function findUser(){
-  let doc = await db.collection("users").doc(searchUser.value).get();
+/* UPLOAD PIC */
+function uploadPic(e){
+  let file=e.target.files[0];
+  let reader=new FileReader();
 
-  if(!doc.exists){
-    results.innerHTML="User not found";
-    return;
-  }
+  reader.onload=async ()=>{
+    await db.collection("users").doc(currentUser).update({
+      photo:reader.result
+    });
+    openProfile(currentUser);
+  };
 
-  results.innerHTML=`
-    <div class="chatItem" onclick="openChat('${searchUser.value}')">
-      ${searchUser.value}
-    </div>
-  `;
+  reader.readAsDataURL(file);
 }
 </script>
 
