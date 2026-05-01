@@ -6,22 +6,11 @@
 
 <style>
 body { margin:0; font-family:Arial; background:black; color:white; }
-
-/* SCREENS */
 .screen { display:none; height:100vh; }
-.active { display:block; }
+.active { display:flex; flex-direction:column; justify-content:center; align-items:center; }
 
-/* CENTER WELCOME */
-.center {
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  height:100%;
-  text-align:center;
-}
+h1 { color:red; }
 
-/* BUTTONS */
 button {
   width:80%;
   padding:12px;
@@ -29,57 +18,15 @@ button {
   background:red;
   border:none;
   color:white;
-  font-size:16px;
 }
 
-/* INPUTS */
 input {
   width:80%;
   padding:10px;
-  margin:6px;
+  margin:5px;
   background:black;
   border:1px solid red;
   color:white;
-}
-
-/* HEADER */
-.header {
-  background:red;
-  color:black;
-  padding:15px;
-  text-align:center;
-  font-weight:bold;
-}
-
-/* CHAT */
-#messages {
-  height:60vh;
-  overflow-y:auto;
-  padding:10px;
-}
-
-.chatBubbleMe {
-  background:red;
-  padding:10px;
-  margin:5px;
-  border-radius:10px;
-  text-align:right;
-  width:fit-content;
-  margin-left:auto;
-}
-
-.chatBubbleOther {
-  background:#222;
-  padding:10px;
-  margin:5px;
-  border-radius:10px;
-  width:fit-content;
-}
-
-/* CHAT LIST */
-.user {
-  padding:12px;
-  border-bottom:1px solid red;
 }
 </style>
 </head>
@@ -88,234 +35,122 @@ input {
 
 <!-- WELCOME -->
 <div id="welcome" class="screen active">
-  <div class="center">
-    <h2 style="color:red;">Welcome to</h2>
-    <h1 style="color:red;font-size:40px;">ConzChat</h1>
-
-    <p style="color:white;font-size:12px;">
-      ConzChat was built from the ground up by Conz
-    </p>
-
-    <button onclick="show('login')">Login</button>
-    <button onclick="show('signup')">Create Account</button>
-
-    <p style="position:absolute;bottom:10px;font-size:12px;">
-      ~ Developed By Conz ~
-    </p>
-  </div>
+  <h1>ConzChat</h1>
+  <button onclick="show('login')">Login</button>
+  <button onclick="show('signup')">Create Account</button>
 </div>
 
 <!-- SIGNUP -->
-<div id="signup" class="screen center">
+<div id="signup" class="screen">
   <h2>Create Account</h2>
-
-  <input id="su_email" placeholder="Email">
-  <input id="su_pass" type="password" placeholder="Password">
   <input id="su_user" placeholder="Username">
+  <input id="su_pass" type="password" placeholder="Password">
   <input id="su_dob" type="date">
-
   <button onclick="signup()">Create</button>
 </div>
 
 <!-- LOGIN -->
-<div id="login" class="screen center">
+<div id="login" class="screen">
   <h2>Login</h2>
-
-  <input id="li_email" placeholder="Email">
+  <input id="li_user" placeholder="Username">
   <input id="li_pass" type="password">
-
   <button onclick="login()">Login</button>
 </div>
 
-<!-- CHAT LIST -->
-<div id="chatList" class="screen">
-  <div class="header">ConzChat</div>
-
-  <div id="chatUsers"></div>
-
-  <button onclick="show('profile')">My Profile</button>
+<!-- APP -->
+<div id="app" class="screen">
+  <h2>Logged in</h2>
+  <p id="who"></p>
 </div>
 
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <div class="header" id="chatHeader">Chat</div>
+<!-- Firebase (compat = stable) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <div id="messages"></div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
+  authDomain: "conzchat.firebaseapp.com",
+  projectId: "conzchat"
+};
 
-  <input id="msg">
-  <button onclick="send()">Send</button>
-</div>
+firebase.initializeApp(firebaseConfig);
 
-<!-- PROFILE -->
-<div id="profile" class="screen center">
-  <h2 id="p_name"></h2>
-  <p id="p_user"></p>
-  <p id="p_days"></p>
-
-  <button onclick="show('chatList')">Back</button>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  onSnapshot,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
-const app = initializeApp({
-  apiKey:"AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
-  authDomain:"conzchat.firebaseapp.com",
-  projectId:"conzchat"
-});
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser="";
-let currentChat="";
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 /* NAV */
-window.show = id=>{
+function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-};
+}
 
 /* SIGNUP */
-window.signup = async ()=>{
-  let email = su_email.value;
-  let pass = su_pass.value;
-  let user = su_user.value;
+async function signup(){
+  let username = su_user.value.trim();
+  let password = su_pass.value;
   let dob = new Date(su_dob.value);
 
+  if(!username || !password){ alert("Fill all fields"); return; }
+
   let age = new Date().getFullYear() - dob.getFullYear();
-  if(age < 13){ alert("You are not old enough"); return; }
+  if(age < 13){ alert("Too young"); return; }
+
+  // 🔒 check username unique
+  let snap = await db.collection("users")
+    .where("username","==",username).get();
+
+  if(!snap.empty){
+    alert("Username already taken");
+    return;
+  }
 
   try{
-    let cred = await createUserWithEmailAndPassword(auth,email,pass);
+    // hidden email trick
+    let fakeEmail = username + "@conzchat.com";
 
-    await addDoc(collection(db,"users"),{
-      uid:cred.user.uid,
-      username:user,
-      created:Date.now()
+    let userCred = await auth.createUserWithEmailAndPassword(fakeEmail, password);
+
+    await db.collection("users").doc(userCred.user.uid).set({
+      username: username,
+      created: Date.now()
     });
 
-    currentUser = user;
-    loadChats();
-    show("chatList");
+    who.innerText = "Welcome " + username;
+    show("app");
 
-  }catch(e){ alert(e.message); }
-};
+  }catch(e){
+    alert(e.message);
+  }
+}
 
 /* LOGIN */
-window.login = async ()=>{
+async function login(){
+  let username = li_user.value.trim();
+  let password = li_pass.value;
+
+  let fakeEmail = username + "@conzchat.com";
+
   try{
-    let cred = await signInWithEmailAndPassword(auth,li_email.value,li_pass.value);
+    let userCred = await auth.signInWithEmailAndPassword(fakeEmail, password);
 
-    let q = query(collection(db,"users"), where("uid","==",cred.user.uid));
-    let snap = await getDocs(q);
+    let doc = await db.collection("users").doc(userCred.user.uid).get();
+    let data = doc.data();
 
-    snap.forEach(d=>{
-      currentUser = d.data().username;
-    });
+    who.innerText = "Welcome " + data.username;
+    show("app");
 
-    loadChats();
-    show("chatList");
-
-  }catch(e){ alert("Login failed"); }
-};
-
-/* CHAT LIST */
-function loadChats(){
-  onSnapshot(collection(db,"messages"), snap=>{
-    let users = new Set();
-
-    snap.forEach(doc=>{
-      let m = doc.data();
-      if(m.from === currentUser) users.add(m.to);
-      if(m.to === currentUser) users.add(m.from);
-    });
-
-    chatUsers.innerHTML="";
-    users.forEach(u=>{
-      chatUsers.innerHTML += `
-        <div class="user" onclick="openChat('${u}')">${u}</div>
-      `;
-    });
-  });
+  }catch(e){
+    if(e.code === "auth/user-not-found"){
+      alert("Username doesn't exist");
+    } else if(e.code === "auth/wrong-password"){
+      alert("Wrong password");
+    } else {
+      alert(e.message);
+    }
+  }
 }
-
-/* OPEN CHAT */
-window.openChat = user=>{
-  currentChat = user;
-  chatHeader.innerText = user;
-  show("chat");
-  loadMessages();
-};
-
-/* SEND */
-window.send = async ()=>{
-  if(!msg.value) return;
-
-  await addDoc(collection(db,"messages"),{
-    from:currentUser,
-    to:currentChat,
-    text:msg.value,
-    time:Date.now()
-  });
-
-  msg.value="";
-};
-
-/* LOAD MESSAGES */
-function loadMessages(){
-  let q = query(collection(db,"messages"), orderBy("time"));
-
-  onSnapshot(q, snap=>{
-    messages.innerHTML="";
-
-    snap.forEach(doc=>{
-      let m = doc.data();
-
-      if(
-        (m.from===currentUser && m.to===currentChat) ||
-        (m.from===currentChat && m.to===currentUser)
-      ){
-        let cls = m.from===currentUser ? "chatBubbleMe" : "chatBubbleOther";
-        messages.innerHTML += `<div class="${cls}">${m.text}</div>`;
-      }
-    });
-  });
-}
-
-/* PROFILE */
-window.showProfile = async ()=>{
-  let q = query(collection(db,"users"), where("username","==",currentUser));
-  let snap = await getDocs(q);
-
-  snap.forEach(d=>{
-    let u = d.data();
-    p_name.innerText = currentUser;
-    p_user.innerText = "@" + currentUser;
-
-    let days = Math.floor((Date.now()-u.created)/(1000*60*60*24));
-    p_days.innerText = days + " days on ConzChat";
-  });
-
-  show("profile");
-};
 </script>
 
 </body>
