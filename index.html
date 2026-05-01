@@ -5,139 +5,62 @@
 <title>ConzChat</title>
 
 <style>
-body { margin:0; font-family:Arial; background:black; color:white; }
-
-.screen { display:none; padding:15px; }
-.active { display:block; }
-
-.header {
-  background:red;
-  color:black;
-  padding:15px;
+body {
+  margin:0;
+  background:black;
+  color:white;
+  font-family:Arial;
   text-align:center;
-  font-weight:bold;
-  position:relative;
 }
 
-.profileIcon {
-  position:absolute;
-  left:10px;
-  top:10px;
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  background:white;
-}
+h1 { color:red; margin-top:50px; }
 
 button {
-  width:100%;
-  padding:12px;
-  margin:8px 0;
+  width:80%;
+  padding:15px;
+  margin:10px;
   background:red;
   border:none;
   color:white;
 }
 
 input {
-  width:100%;
+  width:80%;
   padding:10px;
-  margin:5px 0;
+  margin:5px;
   background:black;
   border:1px solid red;
   color:white;
 }
-
-.chatBubbleMe {
-  background:red;
-  padding:8px;
-  margin:5px;
-  text-align:right;
-}
-
-.chatBubbleOther {
-  background:red;
-  padding:8px;
-  margin:5px;
-  text-align:left;
-}
-
-.chatItem {
-  border-bottom:1px solid red;
-  padding:10px;
-}
-
-.small { font-size:12px; color:grey; }
 </style>
 </head>
 
 <body>
 
-<!-- WELCOME -->
-<div id="welcome" class="screen active">
-  <h1 style="color:red;text-align:center;">Welcome to ConzChat</h1>
+<h1>Welcome to ConzChat</h1>
+
+<div id="home">
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
-  <p class="small" style="text-align:center;">~ Developed By Conz ~</p>
+  <p style="font-size:12px;">~ Developed By Conz ~</p>
 </div>
 
-<!-- SIGNUP -->
-<div id="signup" class="screen">
-  <h2>Create Account</h2>
+<div id="signup" style="display:none;">
   <input id="su_user" placeholder="Username">
   <input id="su_pass" type="password" placeholder="Password">
   <input id="su_dob" type="date">
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- LOGIN -->
-<div id="login" class="screen">
-  <h2>Login</h2>
+<div id="login" style="display:none;">
   <input id="li_user" placeholder="Username">
   <input id="li_pass" type="password">
   <button onclick="login()">Login</button>
 </div>
 
-<!-- HOME -->
-<div id="home" class="screen">
-  <div class="header">
-    <div class="profileIcon" onclick="showProfile()"></div>
-    ConzChat
-  </div>
-
-  <div id="chatList"></div>
-
-  <button onclick="show('search')">+ Find Friend</button>
-</div>
-
-<!-- SEARCH -->
-<div id="search" class="screen">
-  <h3>Find Friend</h3>
-  <input id="searchInput">
-  <button onclick="findUser()">Search</button>
-  <div id="results"></div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <h2 id="p_name"></h2>
-  <p id="p_username"></p>
-  <p id="p_days"></p>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <div class="header" id="chatHeader"></div>
-  <div id="messages"></div>
-  <input id="msg">
-  <button onclick="send()">Send</button>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs,
-  query, where, onSnapshot, orderBy
-} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey:"AIzaSy...",
@@ -147,16 +70,13 @@ const app = initializeApp({
 
 const db = getFirestore(app);
 
-let currentUser="";
-let currentChat="";
-
-/* NAV */
 window.show = id=>{
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  home.style.display="none";
+  signup.style.display="none";
+  login.style.display="none";
+  document.getElementById(id).style.display="block";
 };
 
-/* SIGNUP */
 window.signup = async ()=>{
   let u=su_user.value;
   let p=su_pass.value;
@@ -167,6 +87,7 @@ window.signup = async ()=>{
 
   let q=query(collection(db,"users"),where("username","==",u));
   let snap=await getDocs(q);
+
   if(!snap.empty){ alert("Username taken"); return; }
 
   await addDoc(collection(db,"users"),{
@@ -175,12 +96,10 @@ window.signup = async ()=>{
     created:Date.now()
   });
 
-  currentUser=u;
-  loadChats();
-  show("home");
+  localStorage.setItem("user",u);
+  window.location.href="app.html";
 };
 
-/* LOGIN */
 window.login = async ()=>{
   let u=li_user.value;
   let p=li_pass.value;
@@ -191,121 +110,11 @@ window.login = async ()=>{
   );
 
   let snap=await getDocs(q);
+
   if(snap.empty){ alert("Incorrect"); return; }
 
-  currentUser=u;
-  loadChats();
-  show("home");
-};
-
-/* FIND USER */
-window.findUser = async ()=>{
-  let name=searchInput.value;
-  let q=query(collection(db,"users"),where("username","==",name));
-  let snap=await getDocs(q);
-
-  results.innerHTML="";
-  if(snap.empty){ results.innerHTML="User not found"; return; }
-
-  snap.forEach(doc=>{
-    let u=doc.data();
-    results.innerHTML+=`
-      <div onclick="startChat('${u.username}')">${u.username}</div>
-    `;
-  });
-};
-
-/* START CHAT */
-window.startChat = async (user)=>{
-  currentChat=user;
-
-  await addDoc(collection(db,"chats"),{
-    users:[currentUser,user],
-    last:Date.now()
-  });
-
-  openChat(user);
-};
-
-/* OPEN CHAT */
-window.openChat = user=>{
-  currentChat=user;
-  chatHeader.innerText=user;
-  show("chat");
-
-  loadMessages();
-};
-
-/* SEND */
-window.send = async ()=>{
-  let text=msg.value;
-
-  await addDoc(collection(db,"messages"),{
-    from:currentUser,
-    to:currentChat,
-    text:text,
-    time:Date.now(),
-    status:"sent"
-  });
-
-  msg.value="";
-};
-
-/* LOAD MESSAGES */
-function loadMessages(){
-  let q=query(collection(db,"messages"),orderBy("time"));
-
-  onSnapshot(q,snap=>{
-    messages.innerHTML="";
-
-    snap.forEach(doc=>{
-      let m=doc.data();
-
-      if(
-        (m.from===currentUser && m.to===currentChat) ||
-        (m.from===currentChat && m.to===currentUser)
-      ){
-        let cls=m.from===currentUser?"chatBubbleMe":"chatBubbleOther";
-        messages.innerHTML+=`<div class="${cls}">${m.text}</div>`;
-      }
-    });
-  });
-}
-
-/* CHAT LIST */
-async function loadChats(){
-  let q=query(collection(db,"chats"));
-  let snap=await getDocs(q);
-
-  chatList.innerHTML="";
-
-  snap.forEach(doc=>{
-    let c=doc.data();
-    if(c.users.includes(currentUser)){
-      let other=c.users.find(u=>u!==currentUser);
-      chatList.innerHTML+=`
-        <div class="chatItem" onclick="openChat('${other}')">${other}</div>
-      `;
-    }
-  });
-}
-
-/* PROFILE */
-window.showProfile = async ()=>{
-  let q=query(collection(db,"users"),where("username","==",currentUser));
-  let snap=await getDocs(q);
-
-  snap.forEach(doc=>{
-    let u=doc.data();
-
-    let days=Math.floor((Date.now()-u.created)/86400000);
-
-    p_name.innerText=currentUser;
-    p_username.innerText="@"+u.username;
-    p_days.innerText="Days on ConzChat: "+days;
-  });
-
-  show("profile");
+  localStorage.setItem("user",u);
+  window.location.href="app.html";
 };
 </script>
 
