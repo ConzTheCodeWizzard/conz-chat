@@ -1,13 +1,25 @@
 let currentUser = null;
 let currentChat = null;
+let navStack = [];
 
-/* 🔁 SCREEN SWITCH */
+/* 🔁 SCREEN NAV */
 function show(id){
+  const current = document.querySelector(".screen.active");
+  if(current) navStack.push(current.id);
+
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* 🔐 AUTH (NO AUTO REDIRECTS ANYMORE) */
+function goBack(){
+  let last = navStack.pop();
+  if(last){
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(last).classList.add("active");
+  }
+}
+
+/* 🔐 AUTH STATE */
 auth.onAuthStateChanged(user => {
   if(user){
     currentUser = user;
@@ -37,7 +49,6 @@ async function signup(){
 
     const res = await auth.createUserWithEmailAndPassword(u + "@app.com", p);
 
-    // save user profile
     await db.collection("users").doc(res.user.uid).set({
       username: u,
       created: Date.now(),
@@ -46,14 +57,11 @@ async function signup(){
 
     currentUser = res.user;
 
-    alert("Account created ✅");
-
     loadChats();
-    show("home");   // 🔥 FORCE NAV
+    show("home");
 
   } catch(e){
     alert(e.message);
-    console.error(e);
   }
 }
 
@@ -73,15 +81,14 @@ async function login(){
     currentUser = res.user;
 
     loadChats();
-    show("home");   // 🔥 FORCE NAV
+    show("home");
 
   } catch(e){
     alert(e.message);
-    console.error(e);
   }
 }
 
-/* 💬 LOAD CHAT LIST */
+/* 💬 LOAD CHATS */
 function loadChats(){
   db.collection("messages")
     .orderBy("time")
@@ -105,11 +112,11 @@ function loadChats(){
           div.className = "chatItem";
 
           div.innerHTML = `
-            ${data.username || "User"}
-            <span style="float:right;color:${data.online ? 'lime' : 'gray'};">●</span>
+            ${data.username}
+            <span style="float:right;color:${data.online?'lime':'gray'};">●</span>
           `;
 
-          div.onclick = () => openChat(uid, data.username || "User");
+          div.onclick = () => openChat(uid, data.username);
 
           chatList.appendChild(div);
         });
@@ -180,7 +187,7 @@ function send(){
   document.getElementById("msg").value = "";
 }
 
-/* 🔍 SEARCH */
+/* 🔍 SEARCH USERS */
 function openSearch(){
   show("search");
 }
@@ -209,3 +216,43 @@ function searchUsers(){
 
     });
 }
+
+/* 👤 MY PROFILE */
+function openMyProfile(){
+  db.collection("users").doc(currentUser.uid).get().then(doc=>{
+    let u = doc.data();
+
+    profileName.innerText = u.username;
+    profileStatus.innerText = u.online ? "Online" : "Offline";
+    profileSince.innerText = "Joined: " + new Date(u.created).toLocaleDateString();
+
+    show("profile");
+  });
+}
+
+/* 👥 OTHER PROFILE */
+function openUserProfile(uid){
+  db.collection("users").doc(uid).get().then(doc=>{
+    let u = doc.data();
+
+    profileName.innerText = u.username;
+    profileStatus.innerText = u.online ? "Online" : "Offline";
+    profileSince.innerText = "Joined: " + new Date(u.created).toLocaleDateString();
+
+    show("profile");
+  });
+}
+
+/* 📸 PROFILE PIC PREVIEW */
+document.addEventListener("change", e => {
+  if(e.target.id === "uploadPic"){
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      profilePic.style.background = `url(${reader.result}) center/cover`;
+    };
+    reader.readAsDataURL(file);
+  }
+});
