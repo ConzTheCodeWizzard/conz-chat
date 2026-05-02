@@ -54,3 +54,38 @@ input{
   display:flex;
   justify-content:space-between;
 }
+
+/* CHAT LIST */
+#chatList div{
+  padding:15px;
+  border-bottom:1px solid #222;
+  text-align:left;
+}
+
+/* MESSAGES */
+#messages{
+  height:60vh;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+}
+
+/* MESSAGE BUBBLES */
+.msg{
+  max-width:70%;
+  padding:10px;
+  margin:5px;
+  border-radius:12px;
+  word-wrap:break-word;
+}
+
+.me{
+  background:red;
+  align-self:flex-end;
+}
+
+.them{
+  background:#222;
+  align-self:flex-start;
+}
