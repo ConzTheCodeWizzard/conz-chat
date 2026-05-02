@@ -7,28 +7,13 @@ function show(id){
   document.getElementById(id).classList.add("active");
 }
 
-/* 🔐 AUTH STATE */
-auth.onAuthStateChanged(async user => {
-
+/* 🔐 AUTH (NO AUTO REDIRECTS ANYMORE) */
+auth.onAuthStateChanged(user => {
   if(user){
     currentUser = user;
-
-    await db.collection("users").doc(user.uid).set({
-      online: true,
-      lastSeen: Date.now()
-    }, { merge:true });
-
-    loadChats();
-
-    // Only go home if currently on welcome
-    if(document.getElementById("welcome").classList.contains("active")){
-      show("home");
-    }
-
   } else {
-    show("welcome");
+    currentUser = null;
   }
-
 });
 
 /* 🚪 LOGOUT */
@@ -50,9 +35,21 @@ async function signup(){
       return;
     }
 
-    await auth.createUserWithEmailAndPassword(u + "@app.com", p);
+    const res = await auth.createUserWithEmailAndPassword(u + "@app.com", p);
+
+    // save user profile
+    await db.collection("users").doc(res.user.uid).set({
+      username: u,
+      created: Date.now(),
+      online: true
+    });
+
+    currentUser = res.user;
 
     alert("Account created ✅");
+
+    loadChats();
+    show("home");   // 🔥 FORCE NAV
 
   } catch(e){
     alert(e.message);
@@ -71,7 +68,12 @@ async function login(){
       return;
     }
 
-    await auth.signInWithEmailAndPassword(u + "@app.com", p);
+    const res = await auth.signInWithEmailAndPassword(u + "@app.com", p);
+
+    currentUser = res.user;
+
+    loadChats();
+    show("home");   // 🔥 FORCE NAV
 
   } catch(e){
     alert(e.message);
