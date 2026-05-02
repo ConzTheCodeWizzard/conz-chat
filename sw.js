@@ -1,4 +1,4 @@
-const CACHE_NAME = "conzchat-v2"; // change version when updating
+const CACHE_NAME = "conzchat-v5"; // 🔥 FORCE REFRESH
 
 self.addEventListener("install", e => {
   self.skipWaiting();
