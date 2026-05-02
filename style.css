@@ -5,45 +5,61 @@ body {
   color:white;
 }
 
+/* SCREENS */
 .screen {
   display:none;
   height:100vh;
   padding:20px;
-}
 
-.active {
-  display:block;
-}
-
-.logo {
-  font-size:42px;
-  color:red;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
   text-align:center;
 }
 
+.active {
+  display:flex;
+}
+
+/* LOGO */
+.logo {
+  font-size:42px;
+  color:red;
+  margin:5px 0 20px;
+}
+
+/* BUTTONS */
 button {
-  width:100%;
+  width:80%;
+  max-width:320px;
   padding:14px;
   margin:10px 0;
   background:red;
   border:none;
   color:white;
   font-size:16px;
-  border-radius:6px;
+  border-radius:8px;
 }
 
+/* INPUTS */
 input {
-  width:100%;
+  width:80%;
+  max-width:320px;
   padding:14px;
   margin:10px 0;
   background:#111;
   border:1px solid red;
   color:white;
-  border-radius:6px;
+  border-radius:8px;
   font-size:16px;
 }
 
+/* HEADER */
 .header {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
   background:red;
   color:black;
   padding:12px;
@@ -51,4 +67,71 @@ input {
   justify-content:space-between;
   align-items:center;
   font-weight:bold;
+}
+
+/* FIX CONTENT UNDER HEADER */
+#home, #chat, #profile, #search, #login, #signup {
+  padding-top:60px;
+}
+
+/* CHAT LIST */
+#chatList {
+  width:100%;
+  margin-top:10px;
+}
+
+.chatItem {
+  padding:15px;
+  border-bottom:1px solid #222;
+  text-align:left;
+}
+
+/* MESSAGES */
+#messages {
+  flex:1;
+  width:100%;
+  overflow-y:auto;
+  padding:10px;
+  margin-top:60px;
+}
+
+/* MESSAGE BUBBLES */
+.msgMe {
+  background:red;
+  padding:10px;
+  border-radius:10px;
+  margin:5px;
+  max-width:70%;
+  margin-left:auto;
+  text-align:right;
+}
+
+.msgOther {
+  background:#222;
+  padding:10px;
+  border-radius:10px;
+  margin:5px;
+  max-width:70%;
+  text-align:left;
+}
+
+/* INPUT BAR */
+.inputBar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:flex;
+  background:black;
+  padding:10px;
+}
+
+.inputBar input {
+  flex:1;
+  margin:0;
+}
+
+.inputBar button {
+  width:auto;
+  margin:0 0 0 10px;
 }
