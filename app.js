@@ -19,25 +19,44 @@ auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
 
-    db.collection("users").doc(user.uid).get().then(doc=>{
-      let data = doc.data() || {};
+    console.log("Logged in UID:", user.uid); // 👈 debug
 
-      // 🔥 BAN CHECK
+    db.collection("users").doc(user.uid).get().then(doc=>{
+      if(!doc.exists){
+        console.log("No Firestore user found");
+        loadTheme();
+        loadChats();
+        return;
+      }
+
+      let data = doc.data();
+      console.log("User data:", data); // 👈 debug
+
+      // BAN CHECK
       if(data.banned === true){
         alert("You are banned.");
         auth.signOut();
         return;
       }
 
-      // 🔥 ADMIN CHECK (FIXED)
-      if(data.role === "admin"){
+      // ADMIN CHECK (FORCED RELIABLE)
+      if(data.role && data.role.toLowerCase() === "admin"){
         isAdmin = true;
 
         let devBtn = document.getElementById("devBtn");
         let title = document.getElementById("appTitle");
 
-        if(devBtn) devBtn.style.display = "block";
-        if(title) title.innerText = "ConzChat DEV";
+        if(devBtn){
+          devBtn.style.display = "block";
+        }
+
+        if(title){
+          title.innerText = "ConzChat DEV";
+        }
+
+        console.log("ADMIN MODE ENABLED ✅");
+      } else {
+        console.log("NOT ADMIN ❌");
       }
 
       loadTheme();
@@ -89,7 +108,7 @@ function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); loadTheme(); }
 function openDev(){ show("dev"); }
 
-// 🔥 ADMIN PANEL
+// ADMIN PANEL
 function loadAllUsers(){
   allUsers.innerHTML = "";
 
@@ -266,7 +285,7 @@ function loadChats(){
   show("home");
 }
 
-// ✅ PROFILE FIX (RESTORED)
+// PROFILE
 function openProfile(){
   db.collection("users").doc(currentUser.uid).get().then(doc=>{
     let u = doc.data();
