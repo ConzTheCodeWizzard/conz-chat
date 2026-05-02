@@ -50,10 +50,8 @@
 
   <div id="chatList"></div>
 
-  <!-- FLOAT BUTTON -->
   <div id="fab" onclick="toggleFab()">+</div>
 
-  <!-- POPUP MENU -->
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="openSettings()">Settings</div>
@@ -73,14 +71,21 @@
   <div id="results"></div>
 </div>
 
-<!-- SETTINGS -->
+<!-- SETTINGS (🔥 FULLY BUILT NOW) -->
 <div id="settings" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
     <span>Settings</span>
   </div>
 
-  <p>Theme options coming next 🔥</p>
+  <h3>Main Colour</h3>
+  <input type="color" id="mainColorPicker">
+
+  <h3>Secondary Colour</h3>
+  <input type="color" id="secondaryColorPicker">
+
+  <button onclick="saveTheme()">Save Theme</button>
+  <button onclick="resetTheme()">Reset Colours</button>
 </div>
 
 <!-- CHAT -->
