@@ -1,107 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ConzChat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    #uploadPic { display:none; }
-
-    #profilePic {
-      width:130px;
-      height:130px;
-      border-radius:50%;
-      background:#222;
-      margin:20px auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:30px;
-      cursor:pointer;
-    }
-
-    #menu {
-      position:fixed;
-      bottom:0;
-      left:0;
-      width:100%;
-      background:#111;
-      padding:20px;
-      display:none;
-    }
-
-    #menu button { width:100%; margin:10px 0; }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="welcome" class="screen active">
-  <h2>Welcome to</h2>
-  <div class="logo">ConzChat</div>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
+<!-- HOME -->
+<div id="home" class="screen active">
+
+  <div class="topbar">
+    <div class="logo">ConzChat</div>
+    <div class="profileBtn" onclick="openMyProfile()">👤</div>
+  </div>
+
+  <div class="homeContent">
+    <h3>Explore Public Groups</h3>
+    <p>Make friends with similar interests</p>
+    <button class="outline">FIND A GROUP</button>
+  </div>
+
+  <!-- FLOAT BUTTON -->
+  <div class="fab" onclick="toggleFab()">+</div>
+
+  <!-- FAB MENU -->
+  <div id="fabMenu">
+    <div onclick="openSearch()">Find People</div>
+    <div onclick="openSearch()">Start Chat</div>
+    <div>Public Groups</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomNav">
+    <div class="active">Chat</div>
+    <div>Live</div>
+    <div>Ad-Free</div>
+  </div>
+
 </div>
 
-<div id="login" class="screen">
-  <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+<!-- CHAT -->
+<div id="chat" class="screen">
+
+  <div class="topbar">
+    <div onclick="show('home')">←</div>
+    <div id="chatName"></div>
+  </div>
+
+  <div id="messages" class="chatBox"></div>
+
+  <div class="msgInput">
+    <input id="msg" placeholder="Message...">
+    <button onclick="send()">Send</button>
+  </div>
+
 </div>
 
-<div id="signup" class="screen">
-  <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password" placeholder="Password">
-  <button onclick="signup()">Create</button>
-</div>
-
-<div id="home" class="screen">
-  <button onclick="logout()">Logout</button>
-  <button onclick="openMyProfile()">My Profile</button>
-  <button onclick="openSearch()">Find Users</button>
-  <div id="chatList"></div>
-</div>
-
+<!-- SEARCH -->
 <div id="search" class="screen">
+  <div class="topbar">
+    <div onclick="show('home')">←</div>
+    <div>Find People</div>
+  </div>
+
   <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
   <div id="results"></div>
 </div>
 
-<div id="chat" class="screen">
-  <div id="messages"></div>
-
-  <input id="msg">
-  <button onclick="send()">Send</button>
-
-  <input type="file" id="sendImg">
-  <button onclick="sendImage()">Send Image</button>
-
-  <button onclick="startRecording()">🎤</button>
-</div>
-
+<!-- PROFILE -->
 <div id="profile" class="screen">
-  <div id="profilePic">👤</div>
-  <input type="file" id="uploadPic">
 
-  <h2 id="profileName"></h2>
+  <div class="topbar">
+    <div onclick="show('home')">←</div>
+    <div>Settings</div>
+  </div>
+
+  <div class="profileTop">
+    <div id="profilePic">👤</div>
+    <h2 id="profileName"></h2>
+    <p>@username</p>
+  </div>
+
   <textarea id="bioInput"></textarea>
+
   <button onclick="saveProfile()">Save</button>
-</div>
 
-<div id="menu">
-  <button onclick="viewPic()">View Picture</button>
-  <button onclick="changePic()">Change Picture</button>
-  <button onclick="closeMenu()">Cancel</button>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script src="firebase.js"></script>
 <script src="app.js"></script>
+
+<script>
+function toggleFab(){
+  fabMenu.classList.toggle("open");
+}
+</script>
 
 </body>
 </html>
