@@ -1,6 +1,7 @@
 let currentUser = null;
 let currentChatUser = null;
 let fabOpen = false;
+let isAdmin = false;
 
 // NAV
 function show(id){
@@ -11,12 +12,32 @@ function show(id){
   fabOpen = false;
 }
 
-// AUTH STATE
+// AUTH
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
-    loadTheme(); // 🔥 load saved theme
-    loadChats();
+
+    db.collection("users").doc(user.uid).get().then(doc=>{
+      let data = doc.data();
+
+      // 🔥 BAN CHECK
+      if(data.banned === true){
+        alert("You are banned.");
+        auth.signOut();
+        return;
+      }
+
+      // 🔥 ADMIN CHECK
+      if(data.role === "admin"){
+        isAdmin = true;
+        document.getElementById("devBtn").style.display = "block";
+        document.getElementById("appTitle").innerText = "ConzChat DEV";
+      }
+
+      loadTheme();
+      loadChats();
+    });
+
   } else {
     show("welcome");
   }
@@ -40,9 +61,11 @@ function signup(){
       username: signupUsername.value,
       created: Date.now(),
       mainColor:"#000000",
-      secondaryColor:"#ff0000"
+      secondaryColor:"#ff0000",
+      banned:false,
+      role:"user"
     });
-  }).catch(e=>alert(e.message));
+  });
 }
 
 // LOGOUT
@@ -56,16 +79,46 @@ function toggleFab(){
   fabMenu.style.display = fabOpen ? "flex" : "none";
 }
 
-function openSearch(){
-  show("search");
+function openSearch(){ show("search"); }
+function openSettings(){ show("settings"); loadTheme(); }
+function openDev(){ show("dev"); }
+
+// 🔥 LOAD USERS (ADMIN)
+function loadAllUsers(){
+  allUsers.innerHTML = "";
+
+  db.collection("users").get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      let u = doc.data();
+
+      let div = document.createElement("div");
+
+      div.innerHTML = `
+        <b>${u.username}</b><br>
+        <button onclick="banUser('${doc.id}')">Ban</button>
+        <button onclick="unbanUser('${doc.id}')">Unban</button>
+      `;
+
+      allUsers.appendChild(div);
+    });
+  });
 }
 
-function openSettings(){
-  show("settings");
-  loadTheme();
+// 🔥 BAN
+function banUser(uid){
+  db.collection("users").doc(uid).update({
+    banned:true
+  });
 }
 
-// 🔥 THEME SYSTEM (ACCOUNT BASED)
+// 🔥 UNBAN
+function unbanUser(uid){
+  db.collection("users").doc(uid).update({
+    banned:false
+  });
+}
+
+// THEME
 function loadTheme(){
   db.collection("users").doc(currentUser.uid).get().then(doc=>{
     let data = doc.data() || {};
@@ -129,7 +182,7 @@ function searchUsers(){
   });
 }
 
-// OPEN CHAT
+// CHAT
 function openChat(uid, name){
   currentChatUser = uid;
   chatName.innerText = name;
@@ -211,18 +264,4 @@ function loadChats(){
   });
 
   show("home");
-}
-
-// PROFILE
-function openProfile(){
-  db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    let u=doc.data();
-
-    profileName.innerText=u.username;
-
-    let days = Math.floor((Date.now()-u.created)/(1000*60*60*24));
-    daysOnApp.innerText = days + " days on ConzChat";
-
-    show("profile");
-  });
 }
