@@ -1,104 +1,157 @@
-let currentUser = null;
-let currentChat = null;
+let currentUser;
+let currentChat;
 
-/* NAVIGATION */
+/* NAV */
 function show(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function goHome(){
-  show("home");
+  document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";
 }
 
 /* AUTH */
 auth.onAuthStateChanged(u=>{
   currentUser = u;
-  if(u){
-    loadChats();
-    show("home");
-  } else {
-    show("welcome");
-  }
+  if(u){ show("home"); loadChats(); }
+  else show("welcome");
 });
 
-function logout(){
-  auth.signOut();
-}
-
-/* SIGNUP */
-async function signup(){
-  let u = su_user.value;
-  let p = su_pass.value;
-
-  let res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
-
-  await db.collection("users").doc(res.user.uid).set({
-    username: u,
-    created: Date.now(),
-    bio: "",
-    photo: ""
-  });
-}
-
-/* LOGIN */
-async function login(){
-  let u = li_user.value;
-  let p = li_pass.value;
-
-  await auth.signInWithEmailAndPassword(u+"@app.com", p);
-}
-
-/* CHAT LIST */
-function loadChats(){
-  db.collection("messages").onSnapshot(snap=>{
-    chatList.innerHTML = "";
-
-    let users = new Set();
-
-    snap.forEach(doc=>{
-      let m = doc.data();
-
-      if(m.from === currentUser.uid) users.add(m.to);
-      if(m.to === currentUser.uid) users.add(m.from);
-    });
-
-    users.forEach(uid=>{
-      db.collection("users").doc(uid).get().then(doc=>{
-        let u = doc.data();
-
-        let div = document.createElement("div");
-        div.className = "chatItem";
-        div.innerText = u.username;
-
-        div.onclick = ()=>openChat(uid, u.username);
-
-        chatList.appendChild(div);
-      });
+function signup(){
+  auth.createUserWithEmailAndPassword(su_user.value+"@app.com", su_pass.value)
+  .then(res=>{
+    db.collection("users").doc(res.user.uid).set({
+      username: su_user.value,
+      bio:"",
+      photo:"",
+      created: Date.now()
     });
   });
 }
 
-/* OPEN CHAT */
-function openChat(uid, name){
-  currentChat = uid;
-  chatName.innerText = name;
+function login(){
+  auth.signInWithEmailAndPassword(li_user.value+"@app.com", li_pass.value);
+}
 
+function logout(){ auth.signOut(); }
+
+/* PROFILE */
+function openMyProfile(){
+  db.collection("users").doc(currentUser.uid).get().then(doc=>{
+    let u = doc.data();
+    profileName.innerText = u.username;
+    bioInput.value = u.bio;
+
+    if(u.photo) setPic(u.photo);
+
+    show("profile");
+  });
+}
+
+profilePic.onclick = ()=>{
+  if(!profilePic.style.backgroundImage){
+    uploadPic.click();
+  } else {
+    menu.style.display="block";
+  }
+};
+
+function closeMenu(){ menu.style.display="none"; }
+
+function changePic(){
+  closeMenu();
+  uploadPic.click();
+}
+
+function viewPic(){
+  closeMenu();
+  let url = profilePic.style.backgroundImage.replace(/url\("|"\)/g,"");
+  window.open(url);
+}
+
+uploadPic.onchange = e=>{
+  let file = e.target.files[0];
+  let ref = storage.ref("pfp/"+currentUser.uid);
+
+  ref.put(file).then(()=>{
+    ref.getDownloadURL().then(url=>{
+      setPic(url);
+      db.collection("users").doc(currentUser.uid).update({photo:url});
+    });
+  });
+};
+
+function setPic(url){
+  profilePic.style.backgroundImage = `url(${url})`;
+  profilePic.style.backgroundSize="cover";
+  profilePic.innerHTML="";
+}
+
+function saveProfile(){
+  db.collection("users").doc(currentUser.uid).update({
+    bio: bioInput.value
+  });
+}
+
+/* SEARCH */
+function openSearch(){
+  show("search");
+  db.collection("users").get().then(snap=>renderUsers(snap.docs));
+}
+
+function searchUsers(){
+  let q = searchInput.value.toLowerCase();
+
+  db.collection("users").get().then(snap=>{
+    let list = snap.docs.filter(d=>{
+      return d.data().username.toLowerCase().includes(q);
+    });
+
+    renderUsers(list);
+  });
+}
+
+function renderUsers(list){
+  results.innerHTML="";
+  list.forEach(doc=>{
+    if(doc.id===currentUser.uid) return;
+
+    let u = doc.data();
+    let div = document.createElement("div");
+    div.innerText = u.username;
+    div.onclick = ()=>openChat(doc.id,u.username);
+    results.appendChild(div);
+  });
+}
+
+/* CHAT */
+function openChat(uid,name){
+  currentChat=uid;
   show("chat");
 
   db.collection("messages").onSnapshot(snap=>{
-    messages.innerHTML = "";
-
+    messages.innerHTML="";
     snap.forEach(doc=>{
-      let m = doc.data();
+      let m=doc.data();
 
       if(
-        (m.from === currentUser.uid && m.to === uid) ||
-        (m.from === uid && m.to === currentUser.uid)
+        (m.from===currentUser.uid && m.to===uid) ||
+        (m.from===uid && m.to===currentUser.uid)
       ){
-        let div = document.createElement("div");
-        div.className = m.from === currentUser.uid ? "msgMe" : "msgOther";
-        div.innerText = m.text;
+        let div=document.createElement("div");
+
+        if(m.text) div.innerText=m.text;
+
+        if(m.image){
+          let img=document.createElement("img");
+          img.src=m.image;
+          img.style.width="150px";
+          div.appendChild(img);
+        }
+
+        if(m.audio){
+          let audio=document.createElement("audio");
+          audio.src=m.audio;
+          audio.controls=true;
+          div.appendChild(audio);
+        }
 
         messages.appendChild(div);
       }
@@ -106,136 +159,61 @@ function openChat(uid, name){
   });
 }
 
-/* SEND */
+/* TEXT */
 function send(){
-  if(!msg.value) return;
-
   db.collection("messages").add({
-    from: currentUser.uid,
-    to: currentChat,
-    text: msg.value,
-    time: Date.now()
+    from:currentUser.uid,
+    to:currentChat,
+    text:msg.value,
+    time:Date.now()
   });
-
-  msg.value = "";
+  msg.value="";
 }
 
-/* SEARCH */
-function openSearch(){
-  show("search");
-}
+/* IMAGE */
+function sendImage(){
+  let file = sendImg.files[0];
+  let ref = storage.ref("chat/"+Date.now());
 
-function searchUsers(){
-  let q = searchInput.value.toLowerCase();
-
-  db.collection("users").onSnapshot(snap=>{
-    results.innerHTML = "";
-
-    snap.forEach(doc=>{
-      let u = doc.data();
-
-      if(u.username.toLowerCase().includes(q)){
-        let div = document.createElement("div");
-        div.className = "chatItem";
-        div.innerText = u.username;
-
-        div.onclick = ()=>openChat(doc.id, u.username);
-
-        results.appendChild(div);
-      }
+  ref.put(file).then(()=>{
+    ref.getDownloadURL().then(url=>{
+      db.collection("messages").add({
+        from:currentUser.uid,
+        to:currentChat,
+        image:url
+      });
     });
   });
 }
 
-/* PROFILE */
-function openMyProfile(){
-  loadProfile(currentUser.uid, true);
-}
+/* VOICE */
+let recorder, chunks=[];
 
-function openUserProfile(uid){
-  loadProfile(uid, false);
-}
+function startRecording(){
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    recorder = new MediaRecorder(stream);
 
-function loadProfile(uid, editable){
-  db.collection("users").doc(uid).get().then(doc=>{
-    let u = doc.data();
+    recorder.ondataavailable=e=>chunks.push(e.data);
 
-    profileName.innerText = u.username;
-    profileTag.innerText = "@"+u.username;
+    recorder.onstop=()=>{
+      let blob = new Blob(chunks);
+      chunks=[];
 
-    let days = Math.floor((Date.now()-u.created)/86400000);
-    profileSince.innerText = days + " days on ConzChat";
+      let ref = storage.ref("audio/"+Date.now());
 
-    bioInput.value = u.bio || "";
-    bioInput.disabled = !editable;
+      ref.put(blob).then(()=>{
+        ref.getDownloadURL().then(url=>{
+          db.collection("messages").add({
+            from:currentUser.uid,
+            to:currentChat,
+            audio:url
+          });
+        });
+      });
+    };
 
-    if(u.photo){
-      setProfilePic(u.photo);
-    } else {
-      profilePic.innerHTML = "👤";
-      profilePic.style.background = "#222";
-    }
+    recorder.start();
 
-    show("profile");
+    setTimeout(()=>recorder.stop(),3000);
   });
-}
-
-/* SAVE BIO */
-function saveProfile(){
-  db.collection("users").doc(currentUser.uid).update({
-    bio: bioInput.value
-  });
-}
-
-/* PROFILE PIC CLICK */
-profilePic.onclick = () => {
-
-  let hasPic = profilePic.style.backgroundImage;
-
-  if(!hasPic || hasPic === "none"){
-    uploadPic.click();
-    return;
-  }
-
-  let choice = prompt("1 View\n2 Change");
-
-  if(choice === "1"){
-    let url = profilePic.style.backgroundImage
-      .replace('url("','')
-      .replace('")','');
-
-    window.open(url);
-  }
-
-  if(choice === "2"){
-    uploadPic.click();
-  }
-};
-
-/* UPLOAD IMAGE */
-uploadPic.addEventListener("change", e=>{
-  let file = e.target.files[0];
-  if(!file) return;
-
-  let reader = new FileReader();
-
-  reader.onload = ()=>{
-    let img = reader.result;
-
-    setProfilePic(img);
-
-    db.collection("users").doc(currentUser.uid).update({
-      photo: img
-    });
-  };
-
-  reader.readAsDataURL(file);
-});
-
-/* APPLY IMAGE */
-function setProfilePic(img){
-  profilePic.style.backgroundImage = `url(${img})`;
-  profilePic.style.backgroundSize = "cover";
-  profilePic.style.backgroundPosition = "center";
-  profilePic.innerHTML = "";
 }
