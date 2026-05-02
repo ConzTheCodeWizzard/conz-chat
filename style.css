@@ -1,5 +1,10 @@
+:root{
+  --main:#000000;
+  --secondary:#ff0000;
+}
+
 body{
-  background:#000;
+  background:var(--main);
   color:#fff;
   font-family:Arial;
   text-align:center;
@@ -18,7 +23,7 @@ body{
 /* TITLE */
 .title{
   font-size:50px;
-  color:red;
+  color:var(--secondary);
   margin:20px 0;
 }
 
@@ -28,7 +33,7 @@ button{
   max-width:300px;
   padding:15px;
   margin:10px;
-  background:red;
+  background:var(--secondary);
   color:#fff;
   border:none;
   border-radius:10px;
@@ -42,14 +47,14 @@ input{
   padding:12px;
   margin:10px;
   border-radius:8px;
-  border:1px solid red;
+  border:1px solid var(--secondary);
   background:#111;
   color:#fff;
 }
 
 /* TOP BAR */
 .topbar{
-  background:red;
+  background:var(--secondary);
   padding:15px;
   display:flex;
   justify-content:space-between;
@@ -77,11 +82,10 @@ input{
   padding:10px;
   margin:5px;
   border-radius:12px;
-  word-wrap:break-word;
 }
 
 .me{
-  background:red;
+  background:var(--secondary);
   align-self:flex-end;
 }
 
@@ -97,14 +101,13 @@ input{
   right:20px;
   width:60px;
   height:60px;
-  background:red;
+  background:var(--secondary);
   color:#fff;
   font-size:30px;
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius:50%;
-  cursor:pointer;
 }
 
 /* FAB MENU */
@@ -117,10 +120,9 @@ input{
 }
 
 #fabMenu div{
-  background:red;
+  background:var(--secondary);
   color:#fff;
   padding:12px;
   margin-top:10px;
   border-radius:8px;
-  cursor:pointer;
 }
