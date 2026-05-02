@@ -1,23 +1,27 @@
-const CACHE_NAME = "conzchat-v5"; // 🔥 FORCE REFRESH
+const CACHE_NAME = "conzchat-v7"; // 🔥 change version whenever you update app
 
-self.addEventListener("install", e => {
+self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
         })
-      )
-    )
+      );
+    })
   );
+  self.clients.claim();
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(fetch(e.request));
+// 🚀 ALWAYS FETCH FRESH (no stale bugs)
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
