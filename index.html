@@ -21,7 +21,6 @@
 <!-- LOGIN -->
 <div id="login" class="screen">
   <h2>Login</h2>
-
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password" placeholder="Password">
 
@@ -41,13 +40,15 @@
   <button onclick="show('welcome')">Back</button>
 </div>
 
-<!-- HOME -->
+<!-- HOME (CHAT LIST) -->
 <div id="home" class="screen">
   <div class="topbar">
     <span onclick="logout()">Logout</span>
     <span>ConzChat</span>
     <span onclick="openProfile()">👤</span>
   </div>
+
+  <div id="chatList"></div>
 
   <button onclick="show('search')">Find Users</button>
 </div>
@@ -57,13 +58,36 @@
   <div class="topbar">
     <span onclick="show('home')">←</span>
     <span>Find Users</span>
-    <span></span>
   </div>
 
   <input id="searchInput" placeholder="Search...">
   <button onclick="searchUsers()">Search</button>
 
   <div id="results"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="screen">
+  <div class="topbar">
+    <span onclick="show('home')">←</span>
+    <span id="chatName"></span>
+  </div>
+
+  <div id="messages"></div>
+
+  <input id="msgInput" placeholder="Message...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="topbar">
+    <span onclick="show('home')">←</span>
+    <span>Profile</span>
+  </div>
+
+  <h2 id="profileName"></h2>
+  <p id="daysOnApp"></p>
 </div>
 
 <!-- FIREBASE -->
