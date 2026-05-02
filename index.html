@@ -20,7 +20,7 @@
 <div id="login" class="screen">
   <h2>Login</h2>
   <input id="loginEmail" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
+  <input id="loginPassword" type="password">
 
   <button onclick="login()">Login</button>
   <button onclick="show('welcome')">Back</button>
@@ -29,9 +29,9 @@
 <div id="signup" class="screen">
   <h2>Create Account</h2>
 
-  <input id="signupUsername" placeholder="Username">
-  <input id="signupEmail" placeholder="Email">
-  <input id="signupPassword" type="password" placeholder="Password">
+  <input id="signupUsername">
+  <input id="signupEmail">
+  <input id="signupPassword" type="password">
 
   <button onclick="signup()">Create</button>
   <button onclick="show('welcome')">Back</button>
@@ -55,6 +55,17 @@
   </div>
 </div>
 
+<!-- 🔥 PROFILE SCREEN (FIX) -->
+<div id="profile" class="screen">
+  <div class="topbar">
+    <span onclick="show('home')">←</span>
+    <span>Profile</span>
+  </div>
+
+  <h2 id="profileName"></h2>
+  <p id="daysOnApp"></p>
+</div>
+
 <!-- DEV PANEL -->
 <div id="dev" class="screen">
   <div class="topbar">
@@ -63,41 +74,34 @@
   </div>
 
   <button onclick="loadAllUsers()">View Users</button>
-
   <div id="allUsers"></div>
 </div>
 
-<!-- SETTINGS -->
 <div id="settings" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
     <span>Settings</span>
   </div>
 
-  <h3>Main Colour</h3>
   <input type="color" id="mainColorPicker">
-
-  <h3>Secondary Colour</h3>
   <input type="color" id="secondaryColorPicker">
 
-  <button onclick="saveTheme()">Save Theme</button>
-  <button onclick="resetTheme()">Reset Colours</button>
+  <button onclick="saveTheme()">Save</button>
+  <button onclick="resetTheme()">Reset</button>
 </div>
 
-<!-- SEARCH -->
 <div id="search" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
     <span>Find Users</span>
   </div>
 
-  <input id="searchInput" placeholder="Search...">
+  <input id="searchInput">
   <button onclick="searchUsers()">Search</button>
 
   <div id="results"></div>
 </div>
 
-<!-- CHAT -->
 <div id="chat" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
@@ -106,7 +110,7 @@
 
   <div id="messages"></div>
 
-  <input id="msgInput" placeholder="Message...">
+  <input id="msgInput">
   <button onclick="sendMessage()">Send</button>
 </div>
 
