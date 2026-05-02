@@ -10,10 +10,8 @@
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
   <h1 class="title">ConzChat</h1>
-
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
-
   <p>~ Developed by Conz ~</p>
 </div>
 
@@ -21,18 +19,15 @@
   <h2>Login</h2>
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password">
-
   <button onclick="login()">Login</button>
   <button onclick="show('welcome')">Back</button>
 </div>
 
 <div id="signup" class="screen">
   <h2>Create Account</h2>
-
-  <input id="signupUsername">
-  <input id="signupEmail">
+  <input id="signupUsername" placeholder="Username">
+  <input id="signupEmail" placeholder="Email">
   <input id="signupPassword" type="password">
-
   <button onclick="signup()">Create</button>
   <button onclick="show('welcome')">Back</button>
 </div>
@@ -50,40 +45,47 @@
 
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
-    <div onclick="openSettings()">Settings</div>
-    <div id="devBtn" style="display:none;" onclick="openDev()">Developer Options</div>
+    <div onclick="openSettings()">Colour Editor</div>
+    <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
 
-<!-- 🔥 PROFILE SCREEN (FIX) -->
 <div id="profile" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
     <span>Profile</span>
   </div>
-
   <h2 id="profileName"></h2>
   <p id="daysOnApp"></p>
 </div>
 
-<!-- DEV PANEL -->
-<div id="dev" class="screen">
+<!-- 🔥 UPDATE LOG -->
+<div id="updates" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
-    <span>Developer Panel</span>
+    <span>Update Log</span>
   </div>
 
-  <button onclick="loadAllUsers()">View Users</button>
-  <div id="allUsers"></div>
+  <div style="text-align:left">
+    <p>🔥 Added Update Log system</p>
+    <p>🎨 Renamed Settings → Colour Editor</p>
+    <p>💬 Added message timestamps</p>
+    <p>🔍 Improved search filtering</p>
+    <p>⚡ Added live theme preview</p>
+    <p>👤 Improved profile screen</p>
+  </div>
 </div>
 
 <div id="settings" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
-    <span>Settings</span>
+    <span>Colour Editor</span>
   </div>
 
+  <h3>Main Colour</h3>
   <input type="color" id="mainColorPicker">
+
+  <h3>Secondary Colour</h3>
   <input type="color" id="secondaryColorPicker">
 
   <button onclick="saveTheme()">Save</button>
@@ -96,9 +98,7 @@
     <span>Find Users</span>
   </div>
 
-  <input id="searchInput">
-  <button onclick="searchUsers()">Search</button>
-
+  <input id="searchInput" oninput="searchUsers()" placeholder="Search users...">
   <div id="results"></div>
 </div>
 
@@ -110,7 +110,7 @@
 
   <div id="messages"></div>
 
-  <input id="msgInput">
+  <input id="msgInput" placeholder="Message...">
   <button onclick="sendMessage()">Send</button>
 </div>
 
