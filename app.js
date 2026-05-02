@@ -52,7 +52,7 @@ function searchUsers(){
       let user = doc.data();
 
       let div = document.createElement("div");
-      div.innerText = user.username;
+      div.innerHTML = "<b>"+user.username+"</b>";
       div.onclick = ()=>openChat(doc.id, user.username);
 
       results.appendChild(div);
@@ -80,14 +80,27 @@ function openChat(uid, name){
       ){
         let div = document.createElement("div");
         div.innerText = m.text;
+
+        div.classList.add("msg");
+
+        if(m.from === currentUser.uid){
+          div.classList.add("me");
+        } else {
+          div.classList.add("them");
+        }
+
         messages.appendChild(div);
       }
     });
+
+    messages.scrollTop = messages.scrollHeight;
   });
 }
 
 // SEND
 function sendMessage(){
+  if(!msgInput.value) return;
+
   db.collection("messages").add({
     text: msgInput.value,
     from: currentUser.uid,
@@ -117,8 +130,11 @@ function loadChats(){
 
         db.collection("users").doc(other).get().then(u=>{
           let div=document.createElement("div");
-          div.innerText=u.data().username;
+
+          div.innerHTML = "<b>"+u.data().username+"</b><br><small>Tap to chat</small>";
+
           div.onclick=()=>openChat(other,u.data().username);
+
           chatList.appendChild(div);
         });
       }
