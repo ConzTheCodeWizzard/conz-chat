@@ -7,7 +7,7 @@
 
 <body>
 
-<!-- WELCOME SCREEN -->
+<!-- WELCOME -->
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
   <h1 class="title">ConzChat</h1>
@@ -33,6 +33,7 @@
 <div id="signup" class="screen">
   <h2>Create Account</h2>
 
+  <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
   <input id="signupPassword" type="password" placeholder="Password">
 
@@ -65,12 +66,11 @@
   <div id="results"></div>
 </div>
 
-<!-- 🔥 ADD THESE 3 LINES (THIS IS THE FIX) -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-<!-- YOUR FILES -->
 <script src="firebase.js"></script>
 <script src="app.js"></script>
 
