@@ -7,7 +7,6 @@
 
 <body>
 
-<!-- WELCOME -->
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
   <h1 class="title">ConzChat</h1>
@@ -18,7 +17,6 @@
   <p>~ Developed by Conz ~</p>
 </div>
 
-<!-- LOGIN -->
 <div id="login" class="screen">
   <h2>Login</h2>
   <input id="loginEmail" placeholder="Email">
@@ -28,7 +26,6 @@
   <button onclick="show('welcome')">Back</button>
 </div>
 
-<!-- SIGNUP -->
 <div id="signup" class="screen">
   <h2>Create Account</h2>
 
@@ -40,11 +37,10 @@
   <button onclick="show('welcome')">Back</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="screen">
   <div class="topbar">
     <span onclick="logout()">Logout</span>
-    <span>ConzChat</span>
+    <span id="appTitle">ConzChat</span>
     <span onclick="openProfile()">👤</span>
   </div>
 
@@ -55,23 +51,23 @@
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="openSettings()">Settings</div>
+    <div id="devBtn" style="display:none;" onclick="openDev()">Developer Options</div>
   </div>
 </div>
 
-<!-- SEARCH -->
-<div id="search" class="screen">
+<!-- DEV PANEL -->
+<div id="dev" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
-    <span>Find Users</span>
+    <span>Developer Panel</span>
   </div>
 
-  <input id="searchInput" placeholder="Search...">
-  <button onclick="searchUsers()">Search</button>
+  <button onclick="loadAllUsers()">View Users</button>
 
-  <div id="results"></div>
+  <div id="allUsers"></div>
 </div>
 
-<!-- SETTINGS (🔥 FULLY BUILT NOW) -->
+<!-- SETTINGS -->
 <div id="settings" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
@@ -88,6 +84,19 @@
   <button onclick="resetTheme()">Reset Colours</button>
 </div>
 
+<!-- SEARCH -->
+<div id="search" class="screen">
+  <div class="topbar">
+    <span onclick="show('home')">←</span>
+    <span>Find Users</span>
+  </div>
+
+  <input id="searchInput" placeholder="Search...">
+  <button onclick="searchUsers()">Search</button>
+
+  <div id="results"></div>
+</div>
+
 <!-- CHAT -->
 <div id="chat" class="screen">
   <div class="topbar">
@@ -99,17 +108,6 @@
 
   <input id="msgInput" placeholder="Message...">
   <button onclick="sendMessage()">Send</button>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="topbar">
-    <span onclick="show('home')">←</span>
-    <span>Profile</span>
-  </div>
-
-  <h2 id="profileName"></h2>
-  <p id="daysOnApp"></p>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
