@@ -9,16 +9,16 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   fabMenu.style.display="none";
-  fabOpen = false;
+  fabOpen=false;
 }
 
 // AUTH
 auth.onAuthStateChanged(user=>{
   if(user){
-    currentUser = user;
+    currentUser=user;
 
     db.collection("users").doc(user.uid).get().then(doc=>{
-      myData = doc.data() || {};
+      myData=doc.data()||{};
       loadTheme();
       loadChats();
       loadAvatar();
@@ -38,10 +38,10 @@ function signup(){
   auth.createUserWithEmailAndPassword(signupEmail.value,signupPassword.value)
   .then(res=>{
     return db.collection("users").doc(res.user.uid).set({
-      username: signupUsername.value,
-      displayName: signupUsername.value,
-      photo: "",
-      created: Date.now(),
+      username:signupUsername.value,
+      displayName:signupUsername.value,
+      photo:"",
+      created:Date.now(),
       mainColor:"#000000",
       secondaryColor:"#ff0000"
     });
@@ -59,55 +59,55 @@ function toggleFab(){
 
 // THEME
 function loadTheme(){
-  let m = myData.mainColor || "#000000";
-  let s = myData.secondaryColor || "#ff0000";
+  let m=myData.mainColor||"#000";
+  let s=myData.secondaryColor||"#ff0000";
 
-  applyTheme(m,s);
-
-  if(mainColorPicker) mainColorPicker.value = m;
-  if(secondaryColorPicker) secondaryColorPicker.value = s;
-}
-
-function applyTheme(m,s){
   document.documentElement.style.setProperty('--main',m);
   document.documentElement.style.setProperty('--secondary',s);
+
+  if(mainColorPicker) mainColorPicker.value=m;
+  if(secondaryColorPicker) secondaryColorPicker.value=s;
 }
 
 function saveTheme(){
   db.collection("users").doc(currentUser.uid).update({
-    mainColor: mainColorPicker.value,
-    secondaryColor: secondaryColorPicker.value
-  }).then(()=>loadTheme());
+    mainColor:mainColorPicker.value,
+    secondaryColor:secondaryColorPicker.value
+  }).then(loadTheme);
 }
 
 function resetTheme(){
-  applyTheme("#000","#ff0000");
+  document.documentElement.style.setProperty('--main',"#000");
+  document.documentElement.style.setProperty('--secondary',"#ff0000");
 }
 
 // PROFILE
 function openProfile(uid=currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
-    let u = doc.data() || {};
+    let u=doc.data()||{};
 
-    let display = u.displayName || u.username || "User";
-
-    profileContent.innerHTML = `
+    profileContent.innerHTML=`
       <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"':''}>
-        ${u.photo ? `<img src="${u.photo}">` : ""}
+        ${u.photo?`<img src="${u.photo}">`:""}
       </div>
-      <div class="displayName">${display}</div>
-      <div class="username">@${u.username || "unknown"}</div>
+      <div class="displayName">${u.displayName||u.username}</div>
+      <div class="username">@${u.username}</div>
     `;
 
-    daysOnApp.innerText =
-      Math.floor((Date.now()-(u.created||Date.now()))/86400000)
-      + " days on ConzChat";
+    daysOnApp.innerText=
+      Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
 
     show("profile");
   });
 }
 
-// ✅ FIXED PROFILE IMAGE (GUARANTEED SAVE + REFRESH)
+function saveDisplayName(){
+  db.collection("users").doc(currentUser.uid).update({
+    displayName:editName.value
+  }).then(()=>openProfile());
+}
+
+// IMAGE
 function pickImage(){
   let input=document.createElement("input");
   input.type="file";
@@ -115,22 +115,13 @@ function pickImage(){
 
   input.onchange=e=>{
     let file=e.target.files[0];
-    if(!file) return;
-
     let reader=new FileReader();
 
-    reader.onload=function(ev){
-      let base64=ev.target.result;
-
+    reader.onload=ev=>{
       db.collection("users").doc(currentUser.uid).update({
-        photo: base64
+        photo:ev.target.result
       }).then(()=>{
-
-        // FORCE FULL REFRESH
-        return db.collection("users").doc(currentUser.uid).get();
-
-      }).then(doc=>{
-        myData = doc.data() || {};
+        myData.photo=ev.target.result;
         loadAvatar();
         openProfile();
       });
@@ -142,21 +133,16 @@ function pickImage(){
   input.click();
 }
 
-// TOP RIGHT AVATAR
 function loadAvatar(){
-  if(myData.photo){
-    profileBtn.innerHTML =
-      `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`;
-  } else {
-    profileBtn.innerHTML = "👤";
-  }
+  profileBtn.innerHTML=myData.photo
+    ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`
+    : "👤";
 }
 
-// NAV
+// SEARCH
 function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); }
 
-// ✅ FIXED FIND FRIENDS
 function searchUsers(){
   results.innerHTML="";
 
@@ -164,22 +150,16 @@ function searchUsers(){
     snap.forEach(doc=>{
       let u=doc.data();
 
-      let d=document.createElement("div");
-      d.style.padding="15px";
-      d.style.borderBottom="1px solid #222";
-      d.style.display="flex";
-      d.style.alignItems="center";
+      let div=document.createElement("div");
 
-      d.innerHTML = `
-        <div class="chatAvatar">
-          ${u.photo ? `<img src="${u.photo}">` : ""}
-        </div>
+      div.innerHTML=`
+        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
         <div>${u.username}</div>
       `;
 
-      d.onclick=()=>openChat(doc.id,u.username);
+      div.onclick=()=>openChat(doc.id,u.username);
 
-      results.appendChild(d);
+      results.appendChild(div);
     });
   });
 }
@@ -192,7 +172,7 @@ function openChat(uid,name){
 
   if(unsubscribeMessages) unsubscribeMessages();
 
-  unsubscribeMessages = db.collection("messages")
+  unsubscribeMessages=db.collection("messages")
   .orderBy("time")
   .onSnapshot(snap=>{
 
@@ -201,42 +181,25 @@ function openChat(uid,name){
     snap.forEach(doc=>{
       let m=doc.data();
 
-      // ✅ SUPPORT OLD + NEW SYSTEM
-      let isMine = m.from===currentUser.uid;
-      let isThem = m.to===currentUser.uid;
+      if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
 
-      if(!(isMine || isThem)) return;
-
-      let other = isMine ? m.to : m.from;
-      if(other !== uid) return;
+      let other=m.from===currentUser.uid?m.to:m.from;
+      if(other!==uid) return;
 
       let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(isMine?"me":"them");
-
-      let avatar=document.createElement("div");
-      avatar.className="msgAvatar";
+      wrap.className="msgWrap "+(m.from===currentUser.uid?"me":"them");
 
       let bubble=document.createElement("div");
       bubble.className="msg";
-      bubble.innerText=m.text;
 
-      if(isMine){
-        if(myData.photo){
-          avatar.innerHTML=`<img src="${myData.photo}">`;
-        }
-        wrap.appendChild(bubble);
-        wrap.appendChild(avatar);
-      } else {
-        db.collection("users").doc(uid).get().then(u=>{
-          if(u.data()?.photo){
-            avatar.innerHTML=`<img src="${u.data().photo}">`;
-          }
-        });
+      bubble.innerHTML=`
+        ${m.text}
+        <div style="font-size:10px;opacity:0.6">
+          ${new Date(m.time).toLocaleTimeString()}
+        </div>
+      `;
 
-        wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
-      }
-
+      wrap.appendChild(bubble);
       messages.appendChild(wrap);
     });
 
@@ -258,10 +221,9 @@ function sendMessage(){
   msgInput.value="";
 }
 
-// ✅ FIXED CHAT LIST (OLD SYSTEM COMPATIBLE)
+// CHAT LIST
 function loadChats(){
-  db.collection("messages")
-  .orderBy("time","desc")
+  db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
 
     chatList.innerHTML="";
@@ -270,26 +232,23 @@ function loadChats(){
     snap.forEach(doc=>{
       let m=doc.data();
 
-      if(m.from!==currentUser.uid && m.to!==currentUser.uid) return;
+      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
 
       let other=m.from===currentUser.uid?m.to:m.from;
-
       if(seen[other]) return;
       seen[other]=true;
 
       db.collection("users").doc(other).get().then(u=>{
-        let data=u.data()||{};
+        let d=u.data()||{};
 
         let div=document.createElement("div");
 
         div.innerHTML=`
-          <div class="chatAvatar">
-            ${data.photo ? `<img src="${data.photo}">` : ""}
-          </div>
-          <div>${data.username || "User"}</div>
+          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+          <div>${d.username}</div>
         `;
 
-        div.onclick=()=>openChat(other,data.username);
+        div.onclick=()=>openChat(other,d.username);
 
         chatList.appendChild(div);
       });
@@ -298,4 +257,4 @@ function loadChats(){
   });
 
   show("home");
-        }
+}
