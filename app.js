@@ -1,10 +1,15 @@
 let currentUser = null;
 let currentChatUser = null;
+let fabOpen = false;
 
 // NAV
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
+  // close fab when switching
+  fabMenu.style.display = "none";
+  fabOpen = false;
 }
 
 // AUTH STATE
@@ -41,6 +46,20 @@ function signup(){
 // LOGOUT
 function logout(){
   auth.signOut();
+}
+
+// FAB
+function toggleFab(){
+  fabOpen = !fabOpen;
+  fabMenu.style.display = fabOpen ? "flex" : "none";
+}
+
+function openSearch(){
+  show("search");
+}
+
+function openSettings(){
+  show("settings");
 }
 
 // SEARCH
