@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ConzChat</title>
-<link rel="stylesheet" href="style.css">
+  <title>ConzChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- ================= WELCOME ================= -->
+<!-- 🔥 WELCOME -->
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
-  <h1 class="logo">ConzChat</h1>
+  <div class="logo">ConzChat</div>
 
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
@@ -19,12 +21,12 @@
   <p>~ Developed by Conz ~</p>
 </div>
 
-<!-- ================= LOGIN ================= -->
+
+<!-- 🔐 LOGIN -->
 <div id="login" class="screen">
   <div class="header">
-    <span onclick="show('welcome')">⬅</span>
-    <span>Login</span>
-    <span></span>
+    <span onclick="show('welcome')">←</span>
+    Login
   </div>
 
   <input id="li_user" placeholder="Username">
@@ -33,12 +35,12 @@
   <button onclick="login()">Login</button>
 </div>
 
-<!-- ================= SIGNUP ================= -->
+
+<!-- 🆕 SIGNUP -->
 <div id="signup" class="screen">
   <div class="header">
-    <span onclick="show('welcome')">⬅</span>
-    <span>Create Account</span>
-    <span></span>
+    <span onclick="show('welcome')">←</span>
+    Create Account
   </div>
 
   <input id="su_user" placeholder="Username">
@@ -47,64 +49,67 @@
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- ================= HOME ================= -->
+
+<!-- 🏠 HOME -->
 <div id="home" class="screen">
   <div class="header">
-    <span onclick="openProfile()">👤</span>
-    <span>ConzChat</span>
-    <span onclick="openSearch()">＋</span>
+    <span onclick="logout()">Logout</span>
+    ConzChat
+    <span onclick="openSearch()">+</span>
   </div>
 
   <div id="chatList"></div>
 </div>
 
-<!-- ================= SEARCH USERS ================= -->
+
+<!-- 🔍 SEARCH USERS -->
 <div id="search" class="screen">
   <div class="header">
-    <span onclick="show('home')">⬅</span>
-    <span>Find Users</span>
-    <span></span>
+    <span onclick="show('home')">←</span>
+    Find Users
   </div>
 
-  <input id="searchInput" placeholder="Search username">
-  <button onclick="searchUsers()">Search</button>
-
+  <input id="searchInput" placeholder="Search username..." oninput="searchUsers()">
   <div id="results"></div>
 </div>
 
-<!-- ================= PROFILE ================= -->
-<div id="profile" class="screen">
-  <div class="header">
-    <span onclick="show('home')">⬅</span>
-    <span>Profile</span>
-    <span></span>
-  </div>
 
-  <div id="profileContent"></div>
-</div>
-
-<!-- ================= CHAT ================= -->
+<!-- 💬 CHAT -->
 <div id="chat" class="screen">
   <div class="header">
-    <span onclick="show('home')">⬅</span>
-    <span id="chatName"></span>
-    <span onclick="openProfile(otherUser)">👤</span>
+    <span onclick="show('home')">←</span>
+    <span id="chatName">Chat</span>
+    <span onclick="openProfile()">👤</span>
   </div>
 
   <div id="messages"></div>
 
   <div class="inputBar">
-    <input id="msg" placeholder="Type message...">
+    <input id="msg" placeholder="Type a message...">
     <button onclick="send()">Send</button>
   </div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
+
+<!-- 👤 PROFILE -->
+<div id="profile" class="screen">
+  <div class="header">
+    <span onclick="show('home')">←</span>
+    Profile
+  </div>
+
+  <h3 id="profileName"></h3>
+  <input id="profilePic" placeholder="Profile picture URL">
+  <button onclick="saveProfile()">Save</button>
+</div>
+
+
+<!-- 🔥 FIREBASE (ORDER MATTERS) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-<!-- ================= YOUR CODE ================= -->
+<!-- YOUR FILES -->
 <script src="firebase.js"></script>
 <script src="app.js"></script>
 
