@@ -40,7 +40,7 @@ function signup(){
     return db.collection("users").doc(res.user.uid).set({
       username: signupUsername.value,
       displayName: signupUsername.value,
-      photo: "", // 🔥 base64 image
+      photo: "",
       created: Date.now(),
       mainColor:"#000000",
       secondaryColor:"#ff0000"
@@ -59,7 +59,13 @@ function toggleFab(){
 
 // THEME
 function loadTheme(){
-  applyTheme(myData.mainColor || "#000", myData.secondaryColor || "#f00");
+  let m = myData.mainColor || "#000000";
+  let s = myData.secondaryColor || "#ff0000";
+
+  applyTheme(m,s);
+
+  if(mainColorPicker) mainColorPicker.value = m;
+  if(secondaryColorPicker) secondaryColorPicker.value = s;
 }
 
 function applyTheme(m,s){
@@ -71,11 +77,11 @@ function saveTheme(){
   db.collection("users").doc(currentUser.uid).update({
     mainColor: mainColorPicker.value,
     secondaryColor: secondaryColorPicker.value
-  });
+  }).then(()=>loadTheme());
 }
 
 function resetTheme(){
-  applyTheme("#000","#f00");
+  applyTheme("#000","#ff0000");
 }
 
 // PROFILE
@@ -86,7 +92,7 @@ function openProfile(uid=currentUser.uid){
     let display = u.displayName || u.username || "User";
 
     profileContent.innerHTML = `
-      <div class="avatar" onclick="${uid===currentUser.uid?'pickImage()':''}">
+      <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"':''}>
         ${u.photo ? `<img src="${u.photo}">` : ""}
       </div>
       <div class="displayName">${display}</div>
@@ -101,7 +107,7 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-// 🔥 BASE64 IMAGE UPLOAD (NO STORAGE)
+// ✅ FIXED PROFILE IMAGE (GUARANTEED SAVE + REFRESH)
 function pickImage(){
   let input=document.createElement("input");
   input.type="file";
@@ -113,13 +119,18 @@ function pickImage(){
 
     let reader=new FileReader();
 
-    reader.onload=function(e){
-      let base64=e.target.result;
+    reader.onload=function(ev){
+      let base64=ev.target.result;
 
       db.collection("users").doc(currentUser.uid).update({
         photo: base64
       }).then(()=>{
-        myData.photo = base64;
+
+        // FORCE FULL REFRESH
+        return db.collection("users").doc(currentUser.uid).get();
+
+      }).then(doc=>{
+        myData = doc.data() || {};
         loadAvatar();
         openProfile();
       });
@@ -141,11 +152,11 @@ function loadAvatar(){
   }
 }
 
-// NAV HELPERS
+// NAV
 function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); }
 
-// SEARCH
+// ✅ FIXED FIND FRIENDS
 function searchUsers(){
   results.innerHTML="";
 
@@ -154,7 +165,17 @@ function searchUsers(){
       let u=doc.data();
 
       let d=document.createElement("div");
-      d.innerText=u.username;
+      d.style.padding="15px";
+      d.style.borderBottom="1px solid #222";
+      d.style.display="flex";
+      d.style.alignItems="center";
+
+      d.innerHTML = `
+        <div class="chatAvatar">
+          ${u.photo ? `<img src="${u.photo}">` : ""}
+        </div>
+        <div>${u.username}</div>
+      `;
 
       d.onclick=()=>openChat(doc.id,u.username);
 
@@ -172,7 +193,6 @@ function openChat(uid,name){
   if(unsubscribeMessages) unsubscribeMessages();
 
   unsubscribeMessages = db.collection("messages")
-  .where("participants","array-contains",currentUser.uid)
   .orderBy("time")
   .onSnapshot(snap=>{
 
@@ -181,10 +201,17 @@ function openChat(uid,name){
     snap.forEach(doc=>{
       let m=doc.data();
 
-      if(!m.participants.includes(uid)) return;
+      // ✅ SUPPORT OLD + NEW SYSTEM
+      let isMine = m.from===currentUser.uid;
+      let isThem = m.to===currentUser.uid;
+
+      if(!(isMine || isThem)) return;
+
+      let other = isMine ? m.to : m.from;
+      if(other !== uid) return;
 
       let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(m.from===currentUser.uid?"me":"them");
+      wrap.className="msgWrap "+(isMine?"me":"them");
 
       let avatar=document.createElement("div");
       avatar.className="msgAvatar";
@@ -193,7 +220,7 @@ function openChat(uid,name){
       bubble.className="msg";
       bubble.innerText=m.text;
 
-      if(m.from===currentUser.uid){
+      if(isMine){
         if(myData.photo){
           avatar.innerHTML=`<img src="${myData.photo}">`;
         }
@@ -225,17 +252,15 @@ function sendMessage(){
     text:msgInput.value,
     from:currentUser.uid,
     to:currentChatUser,
-    participants:[currentUser.uid,currentChatUser],
     time:Date.now()
   });
 
   msgInput.value="";
 }
 
-// CHAT LIST (ONLY REAL CHATS)
+// ✅ FIXED CHAT LIST (OLD SYSTEM COMPATIBLE)
 function loadChats(){
   db.collection("messages")
-  .where("participants","array-contains",currentUser.uid)
   .orderBy("time","desc")
   .onSnapshot(snap=>{
 
@@ -244,6 +269,8 @@ function loadChats(){
 
     snap.forEach(doc=>{
       let m=doc.data();
+
+      if(m.from!==currentUser.uid && m.to!==currentUser.uid) return;
 
       let other=m.from===currentUser.uid?m.to:m.from;
 
@@ -271,4 +298,4 @@ function loadChats(){
   });
 
   show("home");
-}
+        }
