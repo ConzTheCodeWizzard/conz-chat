@@ -26,6 +26,7 @@ button {
   color:white;
   padding:12px;
   margin:5px;
+  font-size:16px;
 }
 
 /* INPUT */
@@ -35,6 +36,21 @@ input {
   background:black;
   border:1px solid red;
   color:white;
+}
+
+/* WELCOME */
+#welcome {
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-align:center;
+  padding:20px;
+}
+
+.logo {
+  font-size:48px;
+  color:red;
+  text-shadow:0 0 20px red;
 }
 
 /* LIST */
@@ -54,16 +70,40 @@ input {
 
 .inputBar { display:flex; padding:10px; }
 .inputBar input { flex:1; }
+
+/* PROFILE */
+.avatar {
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:#333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  margin:20px auto;
+}
 </style>
 </head>
 
 <body>
 
 <!-- WELCOME -->
-<div id="welcome" class="screen active" style="justify-content:center;align-items:center;">
-  <h1 style="color:red;">ConzChat</h1>
-  <button onclick="nav('login')">Login</button>
-  <button onclick="nav('signup')">Create Account</button>
+<div id="welcome" class="screen active">
+  <div>
+    <h2 style="color:red;">Welcome to</h2>
+    <div class="logo">ConzChat</div>
+    <p style="color:#ccc;">
+      Built from the ground up by Conz
+    </p>
+  </div>
+
+  <div>
+    <button onclick="nav('login')">Login</button>
+    <button onclick="nav('signup')">Create Account</button>
+  </div>
+
+  <div style="font-size:12px;">~ Developed By Conz ~</div>
 </div>
 
 <!-- LOGIN -->
@@ -75,7 +115,7 @@ input {
   </div>
 
   <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password" placeholder="Password">
+  <input id="li_pass" type="password">
   <button onclick="login()">Login</button>
 </div>
 
@@ -88,30 +128,48 @@ input {
   </div>
 
   <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password" placeholder="Password">
+  <input id="su_pass" type="password">
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- CHAT LIST -->
+<!-- HOME -->
 <div id="home" class="screen">
   <div class="header">
-    <span onclick="logout()">⬅</span>
+    <span onclick="viewProfile(currentUser)">👤</span>
     ConzChat
-    <span onclick="nav('users')">＋</span>
+    <span onclick="nav('search')">＋</span>
   </div>
 
   <div id="chatList"></div>
 </div>
 
-<!-- USER LIST -->
-<div id="users" class="screen">
+<!-- SEARCH -->
+<div id="search" class="screen">
   <div class="header">
     <span onclick="nav('home')">⬅</span>
     Find Users
     <span></span>
   </div>
 
-  <div id="userList"></div>
+  <input id="searchInput" placeholder="Search username">
+  <button onclick="searchUsers()">Search</button>
+
+  <div id="results"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="header">
+    <span onclick="nav('home')">⬅</span>
+    Profile
+    <span></span>
+  </div>
+
+  <div style="text-align:center;">
+    <div class="avatar" id="avatar"></div>
+    <h2 id="displayName"></h2>
+    <p id="usernameText"></p>
+  </div>
 </div>
 
 <!-- CHAT -->
@@ -119,7 +177,7 @@ input {
   <div class="header">
     <span onclick="nav('home')">⬅</span>
     <span id="chatName"></span>
-    <span></span>
+    <span onclick="viewProfile(otherUser)">👤</span>
   </div>
 
   <div id="messages"></div>
@@ -145,7 +203,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 let currentUser = "";
-let currentChat = "";
+let otherUser = "";
 
 /* NAV */
 function nav(id){
@@ -160,7 +218,9 @@ async function signup(){
 
   let res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
 
-  await db.collection("users").doc(res.user.uid).set({ username:u });
+  await db.collection("users").doc(res.user.uid).set({
+    username:u
+  });
 
   currentUser = res.user.uid;
   loadChats();
@@ -178,9 +238,35 @@ async function login(){
   nav("home");
 }
 
-function logout(){
-  auth.signOut();
-  nav("welcome");
+/* PROFILE */
+function viewProfile(uid){
+  db.collection("users").doc(uid).get().then(doc=>{
+    let u = doc.data();
+    displayName.innerText = u.username;
+    usernameText.innerText = "@"+u.username;
+    avatar.innerText = u.username[0].toUpperCase();
+    nav("profile");
+  });
+}
+
+/* SEARCH */
+function searchUsers(){
+  let input = searchInput.value.toLowerCase();
+
+  db.collection("users").get().then(snap=>{
+    results.innerHTML="";
+
+    snap.forEach(doc=>{
+      let u = doc.data();
+      if(u.username.toLowerCase().includes(input)){
+        results.innerHTML += `
+          <div class="item" onclick="openChat('${doc.id}','${u.username}')">
+            ${u.username}
+          </div>
+        `;
+      }
+    });
+  });
 }
 
 /* CHAT LIST */
@@ -188,10 +274,10 @@ function loadChats(){
   db.collection("messages").onSnapshot(snap=>{
     let chats = {};
     snap.forEach(doc=>{
-      let id = doc.id.split("_");
-      if(id.includes(currentUser)){
-        let other = id[0]===currentUser ? id[1] : id[0];
-        chats[other] = true;
+      let ids = doc.id.split("_");
+      if(ids.includes(currentUser)){
+        let other = ids[0]===currentUser ? ids[1] : ids[0];
+        chats[other]=true;
       }
     });
 
@@ -209,30 +295,11 @@ function loadChats(){
   });
 }
 
-/* USER LIST */
-function loadUsers(){
-  db.collection("users").get().then(snap=>{
-    userList.innerHTML="";
-    snap.forEach(doc=>{
-      if(doc.id!==currentUser){
-        userList.innerHTML += `
-          <div class="item" onclick="openChat('${doc.id}','${doc.data().username}')">
-            ${doc.data().username}
-          </div>
-        `;
-      }
-    });
-  });
-}
-
-/* OPEN USER LIST */
-document.getElementById("users").addEventListener("click", loadUsers);
-
 /* CHAT */
 function chatId(a,b){ return [a,b].sort().join("_"); }
 
 function openChat(uid,name){
-  currentChat = uid;
+  otherUser = uid;
   chatName.innerText = name;
   nav("chat");
 
@@ -242,6 +309,7 @@ function openChat(uid,name){
   .orderBy("time")
   .onSnapshot(snap=>{
     messages.innerHTML="";
+
     snap.forEach(doc=>{
       let m = doc.data();
       let cls = m.from===currentUser ? "me":"other";
@@ -261,7 +329,7 @@ function openChat(uid,name){
 async function send(){
   if(!msg.value) return;
 
-  let id = chatId(currentUser,currentChat);
+  let id = chatId(currentUser,otherUser);
 
   await db.collection("messages").doc(id).collection("msgs").add({
     from:currentUser,
