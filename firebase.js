@@ -1,4 +1,4 @@
-/const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
   authDomain: "conzchat.firebaseapp.com",
   projectId: "conzchat",
