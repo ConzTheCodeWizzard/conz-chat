@@ -12,9 +12,9 @@
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
   <div class="logo">ConzChat</div>
-
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
+  <p>~ Developed by Conz ~</p>
 </div>
 
 <!-- LOGIN -->
@@ -27,7 +27,6 @@
 
   <input id="li_user" placeholder="Username">
   <input id="li_pass" type="password" placeholder="Password">
-
   <button onclick="login()">Login</button>
 </div>
 
@@ -41,7 +40,6 @@
 
   <input id="su_user" placeholder="Username">
   <input id="su_pass" type="password" placeholder="Password">
-
   <button onclick="signup()">Create</button>
 </div>
 
@@ -59,7 +57,7 @@
 <!-- SEARCH -->
 <div id="search" class="screen">
   <div class="header">
-    <span onclick="goBack()">←</span>
+    <span onclick="goHome()">←</span>
     <span>Find Users</span>
     <span></span>
   </div>
@@ -71,7 +69,7 @@
 <!-- CHAT -->
 <div id="chat" class="screen">
   <div class="header">
-    <span onclick="goBack()">←</span>
+    <span onclick="goHome()">←</span>
     <span id="chatName" onclick="openUserProfile(currentChat)">Chat</span>
     <span></span>
   </div>
@@ -87,26 +85,36 @@
 <!-- PROFILE -->
 <div id="profile" class="screen">
   <div class="header">
-    <span onclick="goBack()">←</span>
+    <span onclick="goHome()">←</span>
     <span>Settings</span>
     <span></span>
   </div>
 
-  <div class="profileTop">
+  <div style="text-align:center;padding:20px;">
 
-    <div id="profilePic" class="profilePic">👤</div>
+    <div id="profilePic" style="
+      width:130px;
+      height:130px;
+      border-radius:50%;
+      background:#222;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:30px;
+      cursor:pointer;
+    ">👤</div>
 
-    <input type="file" id="uploadPic">
+    <input type="file" id="uploadPic" hidden>
 
     <h2 id="profileName"></h2>
     <p id="profileTag"></p>
     <p id="profileSince"></p>
 
     <textarea id="bioInput" placeholder="Describe yourself..."></textarea>
-
     <button onclick="saveProfile()">Save Profile</button>
-  </div>
 
+  </div>
 </div>
 
 <!-- FIREBASE -->
