@@ -13,7 +13,7 @@ function show(id){
   }
 }
 
-// AUTH STATE
+// AUTH
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
@@ -26,31 +26,21 @@ auth.onAuthStateChanged(user=>{
 
 // LOGIN
 function login(){
-  auth.signInWithEmailAndPassword(
-    loginEmail.value,
-    loginPassword.value
-  ).catch(e=>alert(e.message));
+  auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value)
+  .catch(e=>alert(e.message));
 }
 
 // SIGNUP
 function signup(){
-  auth.createUserWithEmailAndPassword(
-    signupEmail.value,
-    signupPassword.value
-  ).then(res=>{
+  auth.createUserWithEmailAndPassword(signupEmail.value, signupPassword.value)
+  .then(res=>{
     return db.collection("users").doc(res.user.uid).set({
       username: signupUsername.value,
       created: Date.now(),
       mainColor:"#000000",
-      secondaryColor:"#ff0000",
-      banned:false
+      secondaryColor:"#ff0000"
     });
   }).catch(e=>alert(e.message));
-}
-
-// LOGOUT
-function logout(){
-  auth.signOut();
 }
 
 // FAB
@@ -62,116 +52,94 @@ function toggleFab(){
 function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); loadTheme(); }
 
-// THEME
+// THEME LIVE
 function loadTheme(){
   db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    let data = doc.data() || {};
+    let d = doc.data() || {};
+    let main = d.mainColor || "#000";
+    let sec = d.secondaryColor || "#f00";
 
-    let main = data.mainColor || "#000000";
-    let secondary = data.secondaryColor || "#ff0000";
+    applyTheme(main, sec);
 
-    applyTheme(main, secondary);
-
-    if(window.mainColorPicker){
+    if(mainColorPicker){
       mainColorPicker.value = main;
-      secondaryColorPicker.value = secondary;
+      secondaryColorPicker.value = sec;
+
+      mainColorPicker.oninput = ()=>applyTheme(mainColorPicker.value, secondaryColorPicker.value);
+      secondaryColorPicker.oninput = ()=>applyTheme(mainColorPicker.value, secondaryColorPicker.value);
     }
   });
 }
 
-function applyTheme(main, secondary){
-  document.documentElement.style.setProperty('--main', main);
-  document.documentElement.style.setProperty('--secondary', secondary);
+function applyTheme(m,s){
+  document.documentElement.style.setProperty('--main', m);
+  document.documentElement.style.setProperty('--secondary', s);
 }
 
 function saveTheme(){
-  let main = mainColorPicker.value;
-  let secondary = secondaryColorPicker.value;
-
   db.collection("users").doc(currentUser.uid).update({
-    mainColor: main,
-    secondaryColor: secondary
-  }).then(()=>{
-    applyTheme(main, secondary);
+    mainColor: mainColorPicker.value,
+    secondaryColor: secondaryColorPicker.value
   });
 }
 
 function resetTheme(){
-  let main = "#000000";
-  let secondary = "#ff0000";
-
-  db.collection("users").doc(currentUser.uid).update({
-    mainColor: main,
-    secondaryColor: secondary
-  }).then(()=>{
-    applyTheme(main, secondary);
-    loadTheme();
-  });
+  applyTheme("#000","#f00");
 }
 
 // SEARCH
 function searchUsers(){
+  let term = searchInput.value.toLowerCase();
   results.innerHTML = "";
 
-  db.collection("users").get().then(snapshot=>{
-    snapshot.forEach(doc=>{
-      let user = doc.data();
-
-      let div = document.createElement("div");
-      div.innerHTML = "<b>"+user.username+"</b>";
-      div.onclick = ()=>openChat(doc.id, user.username);
-
-      results.appendChild(div);
+  db.collection("users").get().then(snap=>{
+    snap.forEach(doc=>{
+      let u = doc.data();
+      if(u.username.toLowerCase().includes(term)){
+        let d = document.createElement("div");
+        d.innerText = u.username;
+        d.onclick = ()=>openChat(doc.id,u.username);
+        results.appendChild(d);
+      }
     });
   });
 }
 
 // CHAT
-function openChat(uid, name){
+function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
   show("chat");
 
-  db.collection("messages")
-  .orderBy("time")
-  .onSnapshot(snapshot=>{
-    messages.innerHTML = "";
+  db.collection("messages").orderBy("time")
+  .onSnapshot(snap=>{
+    messages.innerHTML="";
+    snap.forEach(doc=>{
+      let m=doc.data();
 
-    snapshot.forEach(doc=>{
-      let m = doc.data();
+      if((m.from===currentUser.uid && m.to===uid)||(m.from===uid && m.to===currentUser.uid)){
+        let d=document.createElement("div");
 
-      if(
-        (m.from===currentUser.uid && m.to===uid) ||
-        (m.from===uid && m.to===currentUser.uid)
-      ){
-        let div = document.createElement("div");
-        div.innerText = m.text;
+        let time=new Date(m.time).toLocaleTimeString();
 
-        div.classList.add("msg");
+        d.innerHTML=`${m.text}<br><small>${time}</small>`;
+        d.className="msg "+(m.from===currentUser.uid?"me":"them");
 
-        if(m.from === currentUser.uid){
-          div.classList.add("me");
-        } else {
-          div.classList.add("them");
-        }
-
-        messages.appendChild(div);
+        messages.appendChild(d);
       }
     });
-
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop=messages.scrollHeight;
   });
 }
 
-// SEND
 function sendMessage(){
   if(!msgInput.value) return;
 
   db.collection("messages").add({
-    text: msgInput.value,
-    from: currentUser.uid,
-    to: currentChatUser,
-    time: Date.now()
+    text:msgInput.value,
+    from:currentUser.uid,
+    to:currentChatUser,
+    time:Date.now()
   });
 
   msgInput.value="";
@@ -179,29 +147,23 @@ function sendMessage(){
 
 // CHAT LIST
 function loadChats(){
-  db.collection("messages")
-  .orderBy("time","desc")
-  .onSnapshot(snapshot=>{
-    chatList.innerHTML = "";
-    let done = {};
+  db.collection("messages").orderBy("time","desc")
+  .onSnapshot(snap=>{
+    chatList.innerHTML="";
+    let done={};
 
-    snapshot.forEach(doc=>{
-      let m = doc.data();
-
-      if(m.from===currentUser.uid || m.to===currentUser.uid){
-        let other = m.from===currentUser.uid ? m.to : m.from;
-
-        if(done[other]) return;
+    snap.forEach(doc=>{
+      let m=doc.data();
+      if(m.from===currentUser.uid||m.to===currentUser.uid){
+        let other=m.from===currentUser.uid?m.to:m.from;
+        if(done[other])return;
         done[other]=true;
 
         db.collection("users").doc(other).get().then(u=>{
-          let div=document.createElement("div");
-
-          div.innerHTML = "<b>"+u.data().username+"</b><br><small>Tap to chat</small>";
-
-          div.onclick=()=>openChat(other,u.data().username);
-
-          chatList.appendChild(div);
+          let d=document.createElement("div");
+          d.innerHTML=`<b>${u.data().username}</b>`;
+          d.onclick=()=>openChat(other,u.data().username);
+          chatList.appendChild(d);
         });
       }
     });
@@ -213,13 +175,9 @@ function loadChats(){
 // PROFILE
 function openProfile(){
   db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    let u = doc.data();
-
-    profileName.innerText = u.username;
-
-    let days = Math.floor((Date.now()-u.created)/(1000*60*60*24));
-    daysOnApp.innerText = days + " days on ConzChat";
-
+    let u=doc.data();
+    profileName.innerText=u.username;
+    daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
     show("profile");
   });
 }
