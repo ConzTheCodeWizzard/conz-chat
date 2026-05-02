@@ -4,123 +4,101 @@
   <title>ConzChat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-</head>
 
-<body>
+  <style>
+    #uploadPic { display:none; }
 
-<!-- WELCOME -->
-<div id="welcome" class="screen active">
-  <h2>Welcome to</h2>
-  <div class="logo">ConzChat</div>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
-  <p>~ Developed by Conz ~</p>
-</div>
-
-<!-- LOGIN -->
-<div id="login" class="screen">
-  <div class="header">
-    <span onclick="show('welcome')">←</span>
-    <span>Login</span>
-    <span></span>
-  </div>
-
-  <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
-
-<!-- SIGNUP -->
-<div id="signup" class="screen">
-  <div class="header">
-    <span onclick="show('welcome')">←</span>
-    <span>Create Account</span>
-    <span></span>
-  </div>
-
-  <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password" placeholder="Password">
-  <button onclick="signup()">Create</button>
-</div>
-
-<!-- HOME -->
-<div id="home" class="screen">
-  <div class="header">
-    <span onclick="logout()">Logout</span>
-    <span onclick="openMyProfile()">ConzChat</span>
-    <span onclick="openSearch()">＋</span>
-  </div>
-
-  <div id="chatList"></div>
-</div>
-
-<!-- SEARCH -->
-<div id="search" class="screen">
-  <div class="header">
-    <span onclick="goHome()">←</span>
-    <span>Find Users</span>
-    <span></span>
-  </div>
-
-  <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
-  <div id="results"></div>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <div class="header">
-    <span onclick="goHome()">←</span>
-    <span id="chatName" onclick="openUserProfile(currentChat)">Chat</span>
-    <span></span>
-  </div>
-
-  <div id="messages"></div>
-
-  <div class="inputBar">
-    <input id="msg" placeholder="Type message...">
-    <button onclick="send()">Send</button>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="header">
-    <span onclick="goHome()">←</span>
-    <span>Settings</span>
-    <span></span>
-  </div>
-
-  <div style="text-align:center;padding:20px;">
-
-    <div id="profilePic" style="
+    #profilePic {
       width:130px;
       height:130px;
       border-radius:50%;
       background:#222;
-      margin:auto;
+      margin:20px auto;
       display:flex;
       align-items:center;
       justify-content:center;
       font-size:30px;
       cursor:pointer;
-    ">👤</div>
+    }
 
-    <input type="file" id="uploadPic" hidden>
+    #menu {
+      position:fixed;
+      bottom:0;
+      left:0;
+      width:100%;
+      background:#111;
+      padding:20px;
+      display:none;
+    }
 
-    <h2 id="profileName"></h2>
-    <p id="profileTag"></p>
-    <p id="profileSince"></p>
+    #menu button { width:100%; margin:10px 0; }
+  </style>
+</head>
 
-    <textarea id="bioInput" placeholder="Describe yourself..."></textarea>
-    <button onclick="saveProfile()">Save Profile</button>
+<body>
 
-  </div>
+<div id="welcome" class="screen active">
+  <h2>Welcome to</h2>
+  <div class="logo">ConzChat</div>
+  <button onclick="show('login')">Login</button>
+  <button onclick="show('signup')">Create Account</button>
 </div>
 
-<!-- FIREBASE -->
+<div id="login" class="screen">
+  <input id="li_user" placeholder="Username">
+  <input id="li_pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="signup" class="screen">
+  <input id="su_user" placeholder="Username">
+  <input id="su_pass" type="password" placeholder="Password">
+  <button onclick="signup()">Create</button>
+</div>
+
+<div id="home" class="screen">
+  <button onclick="logout()">Logout</button>
+  <button onclick="openMyProfile()">My Profile</button>
+  <button onclick="openSearch()">Find Users</button>
+  <div id="chatList"></div>
+</div>
+
+<div id="search" class="screen">
+  <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
+  <div id="results"></div>
+</div>
+
+<div id="chat" class="screen">
+  <div id="messages"></div>
+
+  <input id="msg">
+  <button onclick="send()">Send</button>
+
+  <input type="file" id="sendImg">
+  <button onclick="sendImage()">Send Image</button>
+
+  <button onclick="startRecording()">🎤</button>
+</div>
+
+<div id="profile" class="screen">
+  <div id="profilePic">👤</div>
+  <input type="file" id="uploadPic">
+
+  <h2 id="profileName"></h2>
+  <textarea id="bioInput"></textarea>
+  <button onclick="saveProfile()">Save</button>
+</div>
+
+<div id="menu">
+  <button onclick="viewPic()">View Picture</button>
+  <button onclick="changePic()">Change Picture</button>
+  <button onclick="closeMenu()">Cancel</button>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script src="firebase.js"></script>
 <script src="app.js"></script>
