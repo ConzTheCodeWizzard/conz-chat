@@ -1,7 +1,47 @@
-body { margin:0; font-family:Arial; background:black; color:white; }
+body {
+  margin:0;
+  font-family:Arial;
+  background:black;
+  color:white;
+}
 
-.screen { display:none; height:100vh; flex-direction:column; }
-.active { display:flex; }
+.screen {
+  display:none;
+  height:100vh;
+  padding:20px;
+}
+
+.active {
+  display:block;
+}
+
+.logo {
+  font-size:42px;
+  color:red;
+  text-align:center;
+}
+
+button {
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  background:red;
+  border:none;
+  color:white;
+  font-size:16px;
+  border-radius:6px;
+}
+
+input {
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  background:#111;
+  border:1px solid red;
+  color:white;
+  border-radius:6px;
+  font-size:16px;
+}
 
 .header {
   background:red;
@@ -9,40 +49,6 @@ body { margin:0; font-family:Arial; background:black; color:white; }
   padding:12px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
 }
-
-.logo {
-  font-size:48px;
-  color:red;
-}
-
-button {
-  background:red;
-  border:none;
-  color:white;
-  padding:12px;
-  margin:5px;
-}
-
-input {
-  padding:12px;
-  margin:5px;
-  background:black;
-  border:1px solid red;
-  color:white;
-}
-
-.item {
-  padding:12px;
-  border-bottom:1px solid #222;
-}
-
-#messages { flex:1; overflow:auto; padding:10px; }
-
-.me { text-align:right; }
-.me div { background:red; padding:10px; border-radius:10px; }
-
-.other div { background:#222; padding:10px; border-radius:10px; }
-
-.inputBar { display:flex; padding:10px; }
-.inputBar input { flex:1; }
