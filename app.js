@@ -1,46 +1,8 @@
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser;
-let currentChatUser;
-
 // ===================
-// AUTH
-// ===================
-auth.onAuthStateChanged(user => {
-  if(user){
-    currentUser = user;
-    show("home");
-    loadChats();
-  } else {
-    show("loginScreen");
-  }
-});
-
-function login(){
-  auth.signInWithEmailAndPassword(
-    email.value,
-    password.value
-  ).catch(e => alert(e.message));
-}
-
-function signup(){
-  auth.createUserWithEmailAndPassword(
-    email.value,
-    password.value
-  ).then(res=>{
-    db.collection("users").doc(res.user.uid).set({
-      username: email.value.split("@")[0]
-    });
-  }).catch(e => alert(e.message));
-}
-
-function logout(){
-  auth.signOut();
-}
-
-// ===================
-// NAV
+// SCREEN SWITCH
 // ===================
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -48,37 +10,71 @@ function show(id){
 }
 
 // ===================
-// PROFILE
+// LOGIN
 // ===================
-function openProfile(){
-  show("profile");
+function login(){
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
 
-  db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    profileName.innerText = doc.data().username;
+  auth.signInWithEmailAndPassword(email, password)
+  .then(()=>{
+    show("home");
+  })
+  .catch(e=>{
+    alert(e.message);
+  });
+}
+
+// ===================
+// SIGNUP
+// ===================
+function signup(){
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+  .then(userCred=>{
+    const uid = userCred.user.uid;
+
+    // create user profile in firestore
+    db.collection("users").doc(uid).set({
+      username: email.split("@")[0],
+      created: Date.now()
+    });
+
+    show("home");
+  })
+  .catch(e=>{
+    alert(e.message);
+  });
+}
+
+// ===================
+// LOGOUT
+// ===================
+function logout(){
+  auth.signOut().then(()=>{
+    show("welcome");
   });
 }
 
 // ===================
 // SEARCH USERS (FIXED)
 // ===================
-function openSearch(){
-  show("search");
-}
-
 function searchUsers(){
-  let q = searchInput.value.toLowerCase();
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const results = document.getElementById("results");
+
   results.innerHTML = "";
 
   db.collection("users").get().then(snapshot=>{
     snapshot.forEach(doc=>{
-      let user = doc.data();
+      const user = doc.data();
 
       if(user.username.toLowerCase().includes(q)){
-        let div = document.createElement("div");
-        div.className = "chatItem";
+        const div = document.createElement("div");
+        div.style.padding = "10px";
         div.innerText = user.username;
-
-        div.onclick = ()=> openChat(doc.id, user.username);
 
         results.appendChild(div);
       }
@@ -87,80 +83,8 @@ function searchUsers(){
 }
 
 // ===================
-// CHAT LIST
+// PROFILE (TEMP)
 // ===================
-function loadChats(){
-  db.collection("messages")
-  .orderBy("time","desc")
-  .onSnapshot(snapshot=>{
-    chatList.innerHTML = "";
-
-    let done = {};
-
-    snapshot.forEach(doc=>{
-      let m = doc.data();
-
-      if(m.from === currentUser.uid || m.to === currentUser.uid){
-        let other = m.from === currentUser.uid ? m.to : m.from;
-
-        if(done[other]) return;
-        done[other] = true;
-
-        db.collection("users").doc(other).get().then(userDoc=>{
-          let user = userDoc.data();
-
-          let div = document.createElement("div");
-          div.className = "chatItem";
-          div.innerText = user.username;
-
-          div.onclick = ()=> openChat(other, user.username);
-
-          chatList.appendChild(div);
-        });
-      }
-    });
-  });
-}
-
-// ===================
-// CHAT
-// ===================
-function openChat(uid, name){
-  currentChatUser = uid;
-  chatName.innerText = name;
-  show("chat");
-
-  db.collection("messages")
-  .orderBy("time")
-  .onSnapshot(snapshot=>{
-    messages.innerHTML = "";
-
-    snapshot.forEach(doc=>{
-      let m = doc.data();
-
-      if(
-        (m.from === currentUser.uid && m.to === uid) ||
-        (m.from === uid && m.to === currentUser.uid)
-      ){
-        let div = document.createElement("div");
-        div.className = m.from === currentUser.uid ? "me" : "them";
-        div.innerText = m.text;
-
-        messages.appendChild(div);
-      }
-    });
-  });
-}
-
-function send(){
-  if(!msg.value) return;
-
-  db.collection("messages").add({
-    text: msg.value,
-    from: currentUser.uid,
-    to: currentChatUser,
-    time: Date.now()
-  });
-
-  msg.value = "";
+function openProfile(){
+  alert("Profile coming next step");
 }
