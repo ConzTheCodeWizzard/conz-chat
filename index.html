@@ -26,9 +26,10 @@
   <button onclick="signup()">Create</button>
 </div>
 
+<!-- HOME -->
 <div id="home" class="screen">
   <div class="topbar">
-    <span onclick="logout()">Logout</span>
+    <button onclick="logout()">Logout</button>
     <span>ConzChat</span>
     <span id="profileBtn" onclick="openProfile()">👤</span>
   </div>
@@ -44,69 +45,50 @@
   </div>
 </div>
 
+<!-- PROFILE -->
 <div id="profile" class="screen">
   <div class="topbar">
-    <span onclick="show('home')">←</span>
+    <button onclick="show('home')">Back</button>
     <span>Profile</span>
   </div>
 
   <div id="profileContent"></div>
+
+  <input id="editName" placeholder="Edit display name">
+  <button onclick="saveDisplayName()">Save Name</button>
+
   <p id="daysOnApp"></p>
 </div>
 
-<!-- 🔥 FULLY UPDATED -->
-<div id="updates" class="screen">
+<!-- FIND FRIENDS -->
+<div id="search" class="screen">
   <div class="topbar">
-    <span onclick="show('home')">←</span>
-    <span>Update Log</span>
+    <button onclick="show('home')">Back</button>
+    <span>Find Friends</span>
   </div>
 
-  <div style="text-align:left">
-
-    <p>🚀 Major Profile System Upgrade</p>
-    <p>👤 Added profile pictures (upload + saved across devices)</p>
-    <p>🖼 Tap profile circle to change picture</p>
-    <p>📛 Added display name system</p>
-    <p>🏷 Usernames now shown as @username in grey</p>
-
-    <p>💬 Chat System Upgrade</p>
-    <p>👥 Avatars added beside messages (left/right)</p>
-    <p>🧠 Messages visually linked to users</p>
-    <p>👆 Clicking username opens profile</p>
-
-    <p>📋 Chat List Upgrade</p>
-    <p>🖼 Profile pictures now shown in chat list</p>
-
-    <p>📱 UI Improvements</p>
-    <p>🎯 All app bar titles centered</p>
-    <p>✨ Cleaner profile layout</p>
-    <p>👤 Profile picture shown in top bar</p>
-
-    <p>🎨 Colour System</p>
-    <p>🎨 Settings renamed to Colour Editor</p>
-
-    <p>🧾 System</p>
-    <p>📝 Update Log tracks all changes</p>
-
-  </div>
+  <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
+  <div id="results"></div>
 </div>
 
+<!-- COLOUR EDITOR -->
 <div id="settings" class="screen">
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Colour Editor</span>
+  </div>
+
   <input type="color" id="mainColorPicker">
   <input type="color" id="secondaryColorPicker">
   <button onclick="saveTheme()">Save</button>
   <button onclick="resetTheme()">Reset</button>
 </div>
 
-<div id="search" class="screen">
-  <input id="searchInput" oninput="searchUsers()">
-  <div id="results"></div>
-</div>
-
+<!-- CHAT -->
 <div id="chat" class="screen">
   <div class="topbar">
-    <span onclick="show('home')">←</span>
-    <span id="chatName"></span>
+    <button onclick="show('home')">Back</button>
+    <span id="chatName" onclick="openProfile(currentChatUser)"></span>
   </div>
 
   <div id="messages"></div>
@@ -115,11 +97,26 @@
   <button onclick="sendMessage()">Send</button>
 </div>
 
+<!-- UPDATE LOG -->
+<div id="updates" class="screen">
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Update Log</span>
+  </div>
+
+  <div style="text-align:left">
+    <p>✅ Full UI rewrite</p>
+    <p>✅ Fixed Find Friends</p>
+    <p>✅ Fixed Colour Editor</p>
+    <p>🆕 Added timestamps</p>
+    <p>🆕 Click profile from chat</p>
+    <p>🆕 Editable display name</p>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
 <script src="firebase.js"></script>
 <script src="app.js"></script>
 
