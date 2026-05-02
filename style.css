@@ -1,0 +1,48 @@
+body { margin:0; font-family:Arial; background:black; color:white; }
+
+.screen { display:none; height:100vh; flex-direction:column; }
+.active { display:flex; }
+
+.header {
+  background:red;
+  color:black;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.logo {
+  font-size:48px;
+  color:red;
+}
+
+button {
+  background:red;
+  border:none;
+  color:white;
+  padding:12px;
+  margin:5px;
+}
+
+input {
+  padding:12px;
+  margin:5px;
+  background:black;
+  border:1px solid red;
+  color:white;
+}
+
+.item {
+  padding:12px;
+  border-bottom:1px solid #222;
+}
+
+#messages { flex:1; overflow:auto; padding:10px; }
+
+.me { text-align:right; }
+.me div { background:red; padding:10px; border-radius:10px; }
+
+.other div { background:#222; padding:10px; border-radius:10px; }
+
+.inputBar { display:flex; padding:10px; }
+.inputBar input { flex:1; }
