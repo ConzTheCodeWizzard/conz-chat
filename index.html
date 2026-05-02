@@ -8,7 +8,7 @@
 
 <body>
 
-<!-- WELCOME -->
+<!-- ================= WELCOME ================= -->
 <div id="welcome" class="screen active">
   <h2>Welcome to</h2>
   <h1 class="logo">ConzChat</h1>
@@ -19,46 +19,51 @@
   <p>~ Developed by Conz ~</p>
 </div>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 <div id="login" class="screen">
   <div class="header">
     <span onclick="show('welcome')">⬅</span>
-    Login
+    <span>Login</span>
+    <span></span>
   </div>
 
   <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password">
+  <input id="li_pass" type="password" placeholder="Password">
+
   <button onclick="login()">Login</button>
 </div>
 
-<!-- SIGNUP -->
+<!-- ================= SIGNUP ================= -->
 <div id="signup" class="screen">
   <div class="header">
     <span onclick="show('welcome')">⬅</span>
-    Create Account
+    <span>Create Account</span>
+    <span></span>
   </div>
 
   <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password">
+  <input id="su_pass" type="password" placeholder="Password">
+
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- HOME -->
+<!-- ================= HOME ================= -->
 <div id="home" class="screen">
   <div class="header">
     <span onclick="openProfile()">👤</span>
-    ConzChat
+    <span>ConzChat</span>
     <span onclick="openSearch()">＋</span>
   </div>
 
   <div id="chatList"></div>
 </div>
 
-<!-- SEARCH -->
+<!-- ================= SEARCH USERS ================= -->
 <div id="search" class="screen">
   <div class="header">
     <span onclick="show('home')">⬅</span>
-    Find Users
+    <span>Find Users</span>
+    <span></span>
   </div>
 
   <input id="searchInput" placeholder="Search username">
@@ -67,17 +72,18 @@
   <div id="results"></div>
 </div>
 
-<!-- PROFILE -->
+<!-- ================= PROFILE ================= -->
 <div id="profile" class="screen">
   <div class="header">
     <span onclick="show('home')">⬅</span>
-    Profile
+    <span>Profile</span>
+    <span></span>
   </div>
 
   <div id="profileContent"></div>
 </div>
 
-<!-- CHAT -->
+<!-- ================= CHAT ================= -->
 <div id="chat" class="screen">
   <div class="header">
     <span onclick="show('home')">⬅</span>
@@ -88,17 +94,17 @@
   <div id="messages"></div>
 
   <div class="inputBar">
-    <input id="msg">
+    <input id="msg" placeholder="Type message...">
     <button onclick="send()">Send</button>
   </div>
 </div>
 
-<!-- 🔥 FIREBASE (ALREADY IN RIGHT PLACE) -->
+<!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-<!-- YOUR FILES -->
+<!-- ================= YOUR CODE ================= -->
 <script src="firebase.js"></script>
 <script src="app.js"></script>
 
