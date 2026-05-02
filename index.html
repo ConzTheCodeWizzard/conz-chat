@@ -7,29 +7,44 @@
 
 <body>
 
-<!-- HOME / CHAT LIST -->
-<div id="home" class="screen active">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <h1>ConzChat</h1>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Create Account</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
 
   <div class="topbar">
-    <div class="logo">ConzChat</div>
-    <div onclick="openMyProfile()">👤</div>
+    <div>ConzChat</div>
+    <div onclick="openProfile()">👤</div>
   </div>
 
-  <!-- CHAT LIST -->
   <div id="chatList"></div>
 
-  <!-- FAB -->
-  <div class="fab" onclick="toggleFab()">+</div>
-
-  <div id="fabMenu">
-    <div onclick="openSearch()">Find People</div>
-  </div>
+  <div class="fab" onclick="openSearch()">+</div>
 
 </div>
 
-<!-- CHAT SCREEN -->
-<div id="chat" class="screen">
+<!-- SEARCH -->
+<div id="search" class="screen">
+  <div class="topbar">
+    <div onclick="show('home')">←</div>
+    <div>Find People</div>
+  </div>
 
+  <input id="searchInput" placeholder="Search username..." oninput="searchUsers()">
+  <div id="results"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="screen">
   <div class="topbar">
     <div onclick="show('home')">←</div>
     <div id="chatName"></div>
@@ -41,45 +56,21 @@
     <input id="msg" placeholder="Message...">
     <button onclick="send()">Send</button>
   </div>
-
-</div>
-
-<!-- SEARCH -->
-<div id="search" class="screen">
-
-  <div class="topbar">
-    <div onclick="show('home')">←</div>
-    <div>Find People</div>
-  </div>
-
-  <input id="searchInput" placeholder="Search username..." oninput="searchUsers()">
-  <div id="results"></div>
-
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="screen">
-
   <div class="topbar">
     <div onclick="show('home')">←</div>
     <div>Profile</div>
   </div>
 
-  <div class="profileTop">
-    <div id="profilePic">👤</div>
-    <h2 id="profileName"></h2>
-  </div>
-
+  <h2 id="profileName"></h2>
+  <button onclick="logout()">Logout</button>
 </div>
 
 <script src="firebase.js"></script>
 <script src="app.js"></script>
-
-<script>
-function toggleFab(){
-  fabMenu.classList.toggle("open");
-}
-</script>
 
 </body>
 </html>
