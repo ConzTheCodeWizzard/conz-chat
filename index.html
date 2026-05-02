@@ -9,27 +9,22 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 .screen { display:none; height:100vh; flex-direction:column; }
 .active { display:flex; }
 
-/* HEADER */
 .header {
   background:red;
   color:black;
   padding:12px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
 
-/* BUTTON */
 button {
   background:red;
   border:none;
   color:white;
   padding:12px;
   margin:5px;
-  font-size:16px;
 }
 
-/* INPUT */
 input {
   padding:12px;
   margin:5px;
@@ -38,10 +33,7 @@ input {
   color:white;
 }
 
-/* WELCOME */
 #welcome {
-  display:flex;
-  flex-direction:column;
   justify-content:space-between;
   text-align:center;
   padding:20px;
@@ -50,52 +42,20 @@ input {
 .logo {
   font-size:48px;
   color:red;
-  text-shadow:0 0 20px red;
 }
 
-/* LIST */
-.item {
-  padding:12px;
-  border-bottom:1px solid #222;
-}
-
-/* CHAT */
-#messages { flex:1; overflow:auto; padding:10px; }
-
-.me { text-align:right; }
-.me div { background:red; padding:10px; border-radius:10px; display:inline-block; }
-
-.other { text-align:left; }
-.other div { background:#222; padding:10px; border-radius:10px; display:inline-block; }
-
-.inputBar { display:flex; padding:10px; }
-.inputBar input { flex:1; }
-
-/* PROFILE */
-.avatar {
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:#333;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:30px;
-  margin:20px auto;
-}
 </style>
 </head>
 
 <body>
+
+<div id="errorBox" style="color:red;text-align:center;"></div>
 
 <!-- WELCOME -->
 <div id="welcome" class="screen active">
   <div>
     <h2 style="color:red;">Welcome to</h2>
     <div class="logo">ConzChat</div>
-    <p style="color:#ccc;">
-      Built from the ground up by Conz
-    </p>
   </div>
 
   <div>
@@ -103,7 +63,7 @@ input {
     <button onclick="nav('signup')">Create Account</button>
   </div>
 
-  <div style="font-size:12px;">~ Developed By Conz ~</div>
+  <div>~ Developed By Conz ~</div>
 </div>
 
 <!-- LOGIN -->
@@ -123,7 +83,7 @@ input {
 <div id="signup" class="screen">
   <div class="header">
     <span onclick="nav('welcome')">⬅</span>
-    Create Account
+    Create
     <span></span>
   </div>
 
@@ -135,209 +95,65 @@ input {
 <!-- HOME -->
 <div id="home" class="screen">
   <div class="header">
-    <span onclick="viewProfile(currentUser)">👤</span>
+    <span onclick="nav('welcome')">⬅</span>
     ConzChat
-    <span onclick="nav('search')">＋</span>
-  </div>
-
-  <div id="chatList"></div>
-</div>
-
-<!-- SEARCH -->
-<div id="search" class="screen">
-  <div class="header">
-    <span onclick="nav('home')">⬅</span>
-    Find Users
     <span></span>
-  </div>
-
-  <input id="searchInput" placeholder="Search username">
-  <button onclick="searchUsers()">Search</button>
-
-  <div id="results"></div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="header">
-    <span onclick="nav('home')">⬅</span>
-    Profile
-    <span></span>
-  </div>
-
-  <div style="text-align:center;">
-    <div class="avatar" id="avatar"></div>
-    <h2 id="displayName"></h2>
-    <p id="usernameText"></p>
-  </div>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <div class="header">
-    <span onclick="nav('home')">⬅</span>
-    <span id="chatName"></span>
-    <span onclick="viewProfile(otherUser)">👤</span>
-  </div>
-
-  <div id="messages"></div>
-
-  <div class="inputBar">
-    <input id="msg">
-    <button onclick="send()">Send</button>
   </div>
 </div>
 
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+try {
+
 firebase.initializeApp({
   apiKey:"AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
   projectId:"conzchat"
 });
 
-const db = firebase.firestore();
 const auth = firebase.auth();
 
-let currentUser = "";
-let otherUser = "";
-
 /* NAV */
-function nav(id){
+window.nav = function(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* AUTH */
-async function signup(){
-  let u = su_user.value;
-  let p = su_pass.value;
+/* SIGNUP */
+window.signup = async function(){
+  try {
+    let u = document.getElementById("su_user").value;
+    let p = document.getElementById("su_pass").value;
 
-  let res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
-
-  await db.collection("users").doc(res.user.uid).set({
-    username:u
-  });
-
-  currentUser = res.user.uid;
-  loadChats();
-  nav("home");
+    await auth.createUserWithEmailAndPassword(u+"@app.com", p);
+    nav("home");
+  } catch(e){
+    showError(e.message);
+  }
 }
 
-async function login(){
-  let u = li_user.value;
-  let p = li_pass.value;
+/* LOGIN */
+window.login = async function(){
+  try {
+    let u = document.getElementById("li_user").value;
+    let p = document.getElementById("li_pass").value;
 
-  let res = await auth.signInWithEmailAndPassword(u+"@app.com", p);
-
-  currentUser = res.user.uid;
-  loadChats();
-  nav("home");
+    await auth.signInWithEmailAndPassword(u+"@app.com", p);
+    nav("home");
+  } catch(e){
+    showError(e.message);
+  }
 }
 
-/* PROFILE */
-function viewProfile(uid){
-  db.collection("users").doc(uid).get().then(doc=>{
-    let u = doc.data();
-    displayName.innerText = u.username;
-    usernameText.innerText = "@"+u.username;
-    avatar.innerText = u.username[0].toUpperCase();
-    nav("profile");
-  });
+/* ERROR DISPLAY */
+function showError(msg){
+  document.getElementById("errorBox").innerText = msg;
 }
 
-/* SEARCH */
-function searchUsers(){
-  let input = searchInput.value.toLowerCase();
-
-  db.collection("users").get().then(snap=>{
-    results.innerHTML="";
-
-    snap.forEach(doc=>{
-      let u = doc.data();
-      if(u.username.toLowerCase().includes(input)){
-        results.innerHTML += `
-          <div class="item" onclick="openChat('${doc.id}','${u.username}')">
-            ${u.username}
-          </div>
-        `;
-      }
-    });
-  });
-}
-
-/* CHAT LIST */
-function loadChats(){
-  db.collection("messages").onSnapshot(snap=>{
-    let chats = {};
-    snap.forEach(doc=>{
-      let ids = doc.id.split("_");
-      if(ids.includes(currentUser)){
-        let other = ids[0]===currentUser ? ids[1] : ids[0];
-        chats[other]=true;
-      }
-    });
-
-    chatList.innerHTML="";
-
-    Object.keys(chats).forEach(uid=>{
-      db.collection("users").doc(uid).get().then(doc=>{
-        chatList.innerHTML += `
-          <div class="item" onclick="openChat('${uid}','${doc.data().username}')">
-            ${doc.data().username}
-          </div>
-        `;
-      });
-    });
-  });
-}
-
-/* CHAT */
-function chatId(a,b){ return [a,b].sort().join("_"); }
-
-function openChat(uid,name){
-  otherUser = uid;
-  chatName.innerText = name;
-  nav("chat");
-
-  let id = chatId(currentUser,uid);
-
-  db.collection("messages").doc(id).collection("msgs")
-  .orderBy("time")
-  .onSnapshot(snap=>{
-    messages.innerHTML="";
-
-    snap.forEach(doc=>{
-      let m = doc.data();
-      let cls = m.from===currentUser ? "me":"other";
-
-      messages.innerHTML += `
-        <div class="${cls}">
-          <div>${m.text}</div>
-        </div>
-      `;
-    });
-
-    messages.scrollTop = messages.scrollHeight;
-  });
-}
-
-/* SEND */
-async function send(){
-  if(!msg.value) return;
-
-  let id = chatId(currentUser,otherUser);
-
-  await db.collection("messages").doc(id).collection("msgs").add({
-    from:currentUser,
-    text:msg.value,
-    time:Date.now()
-  });
-
-  msg.value="";
+} catch(e){
+  document.getElementById("errorBox").innerText = "Script crashed: "+e.message;
 }
 </script>
 
