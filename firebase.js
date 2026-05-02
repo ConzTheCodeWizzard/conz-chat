@@ -1,6 +1,3 @@
-// Firebase SDK (must be loaded BEFORE this file in index.html)
-
-// Your config
 const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
   authDomain: "conzchat.firebaseapp.com",
@@ -10,12 +7,7 @@ const firebaseConfig = {
   appId: "1:431124465784:web:055dbf6a8767b2f898458d"
 };
 
-// Init Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Services
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-// Optional (helps debugging)
-console.log("Firebase connected ✅");
