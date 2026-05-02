@@ -7,9 +7,7 @@
   appId: "1:431124465784:web:055dbf6a8767b2f898458d"
 };
 
-// INIT IMMEDIATELY
 firebase.initializeApp(firebaseConfig);
 
-// GLOBAL ACCESS
 const auth = firebase.auth();
 const db = firebase.firestore();
