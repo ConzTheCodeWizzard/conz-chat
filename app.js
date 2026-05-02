@@ -1,74 +1,78 @@
-      });
-    })let currentUser=null;
-let currentChat=null;
-let nav=[];
+let currentUser = null;
+let currentChat = null;
 
+/* NAVIGATION */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-function goBack(){
+function goHome(){
   show("home");
 }
 
+/* AUTH */
 auth.onAuthStateChanged(u=>{
-  currentUser=u;
+  currentUser = u;
+  if(u){
+    loadChats();
+    show("home");
+  } else {
+    show("welcome");
+  }
 });
 
 function logout(){
   auth.signOut();
-  show("welcome");
 }
 
+/* SIGNUP */
 async function signup(){
-  let u=su_user.value;
-  let p=su_pass.value;
+  let u = su_user.value;
+  let p = su_pass.value;
 
-  let res=await auth.createUserWithEmailAndPassword(u+"@app.com",p);
+  let res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
 
   await db.collection("users").doc(res.user.uid).set({
-    username:u,
-    created:Date.now(),
-    bio:"",
-    photo:""
+    username: u,
+    created: Date.now(),
+    bio: "",
+    photo: ""
   });
-
-  currentUser=res.user;
-  loadChats();
-  show("home");
 }
 
+/* LOGIN */
 async function login(){
-  let u=li_user.value;
-  let p=li_pass.value;
+  let u = li_user.value;
+  let p = li_pass.value;
 
-  let res=await auth.signInWithEmailAndPassword(u+"@app.com",p);
-
-  currentUser=res.user;
-  loadChats();
-  show("home");
+  await auth.signInWithEmailAndPassword(u+"@app.com", p);
 }
 
 /* CHAT LIST */
 function loadChats(){
   db.collection("messages").onSnapshot(snap=>{
-    chatList.innerHTML="";
-    let users=new Set();
+    chatList.innerHTML = "";
+
+    let users = new Set();
 
     snap.forEach(doc=>{
-      let m=doc.data();
-      if(m.from===currentUser.uid) users.add(m.to);
-      if(m.to===currentUser.uid) users.add(m.from);
+      let m = doc.data();
+
+      if(m.from === currentUser.uid) users.add(m.to);
+      if(m.to === currentUser.uid) users.add(m.from);
     });
 
     users.forEach(uid=>{
-      db.collection("users").doc(uid).get().then(u=>{
-        let d=u.data();
-        let div=document.createElement("div");
-        div.className="chatItem";
-        div.innerText=d.username;
-        div.onclick=()=>openChat(uid,d.username);
+      db.collection("users").doc(uid).get().then(doc=>{
+        let u = doc.data();
+
+        let div = document.createElement("div");
+        div.className = "chatItem";
+        div.innerText = u.username;
+
+        div.onclick = ()=>openChat(uid, u.username);
+
         chatList.appendChild(div);
       });
     });
@@ -76,20 +80,26 @@ function loadChats(){
 }
 
 /* OPEN CHAT */
-function openChat(uid,name){
-  currentChat=uid;
-  chatName.innerText=name;
+function openChat(uid, name){
+  currentChat = uid;
+  chatName.innerText = name;
+
   show("chat");
 
   db.collection("messages").onSnapshot(snap=>{
-    messages.innerHTML="";
-    snap.forEach(doc=>{
-      let m=doc.data();
+    messages.innerHTML = "";
 
-      if((m.from===currentUser.uid&&m.to===uid)||(m.from===uid&&m.to===currentUser.uid)){
-        let div=document.createElement("div");
-        div.className=m.from===currentUser.uid?"msgMe":"msgOther";
-        div.innerText=m.text;
+    snap.forEach(doc=>{
+      let m = doc.data();
+
+      if(
+        (m.from === currentUser.uid && m.to === uid) ||
+        (m.from === uid && m.to === currentUser.uid)
+      ){
+        let div = document.createElement("div");
+        div.className = m.from === currentUser.uid ? "msgMe" : "msgOther";
+        div.innerText = m.text;
+
         messages.appendChild(div);
       }
     });
@@ -101,13 +111,13 @@ function send(){
   if(!msg.value) return;
 
   db.collection("messages").add({
-    from:currentUser.uid,
-    to:currentChat,
-    text:msg.value,
-    time:Date.now()
+    from: currentUser.uid,
+    to: currentChat,
+    text: msg.value,
+    time: Date.now()
   });
 
-  msg.value="";
+  msg.value = "";
 }
 
 /* SEARCH */
@@ -116,18 +126,21 @@ function openSearch(){
 }
 
 function searchUsers(){
-  let q=searchInput.value.toLowerCase();
+  let q = searchInput.value.toLowerCase();
 
   db.collection("users").onSnapshot(snap=>{
-    results.innerHTML="";
+    results.innerHTML = "";
+
     snap.forEach(doc=>{
-      let u=doc.data();
+      let u = doc.data();
 
       if(u.username.toLowerCase().includes(q)){
-        let div=document.createElement("div");
-        div.className="chatItem";
-        div.innerText=u.username;
-        div.onclick=()=>openChat(doc.id,u.username);
+        let div = document.createElement("div");
+        div.className = "chatItem";
+        div.innerText = u.username;
+
+        div.onclick = ()=>openChat(doc.id, u.username);
+
         results.appendChild(div);
       }
     });
@@ -136,60 +149,93 @@ function searchUsers(){
 
 /* PROFILE */
 function openMyProfile(){
-  db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    let u=doc.data();
+  loadProfile(currentUser.uid, true);
+}
 
-    profileName.innerText=u.username;
-    profileTag.innerText="@"+u.username;
-    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
+function openUserProfile(uid){
+  loadProfile(uid, false);
+}
 
-    bioInput.value=u.bio||"";
+function loadProfile(uid, editable){
+  db.collection("users").doc(uid).get().then(doc=>{
+    let u = doc.data();
+
+    profileName.innerText = u.username;
+    profileTag.innerText = "@"+u.username;
+
+    let days = Math.floor((Date.now()-u.created)/86400000);
+    profileSince.innerText = days + " days on ConzChat";
+
+    bioInput.value = u.bio || "";
+    bioInput.disabled = !editable;
 
     if(u.photo){
-      profilePic.style.backgroundImage=`url(${u.photo})`;
-      profilePic.style.backgroundSize="cover";
-      profilePic.style.backgroundPosition="center";
-      profilePic.innerHTML="";
+      setProfilePic(u.photo);
+    } else {
+      profilePic.innerHTML = "👤";
+      profilePic.style.background = "#222";
     }
 
     show("profile");
   });
 }
 
-function openUserProfile(uid){
-  db.collection("users").doc(uid).get().then(doc=>{
-    let u=doc.data();
-
-    profileName.innerText=u.username;
-    profileTag.innerText="@"+u.username;
-    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
-
-    show("profile");
-  });
-}
-
+/* SAVE BIO */
 function saveProfile(){
   db.collection("users").doc(currentUser.uid).update({
-    bio:bioInput.value
+    bio: bioInput.value
   });
 }
 
-/* PROFILE PIC */
+/* PROFILE PIC CLICK */
+profilePic.onclick = () => {
+
+  let hasPic = profilePic.style.backgroundImage;
+
+  if(!hasPic || hasPic === "none"){
+    uploadPic.click();
+    return;
+  }
+
+  let choice = prompt("1 View\n2 Change");
+
+  if(choice === "1"){
+    let url = profilePic.style.backgroundImage
+      .replace('url("','')
+      .replace('")','');
+
+    window.open(url);
+  }
+
+  if(choice === "2"){
+    uploadPic.click();
+  }
+};
+
+/* UPLOAD IMAGE */
 uploadPic.addEventListener("change", e=>{
-  let file=e.target.files[0];
+  let file = e.target.files[0];
   if(!file) return;
 
-  let reader=new FileReader();
+  let reader = new FileReader();
 
-  reader.onload=()=>{
-    profilePic.style.backgroundImage=`url(${reader.result})`;
-    profilePic.style.backgroundSize="cover";
-    profilePic.style.backgroundPosition="center";
+  reader.onload = ()=>{
+    let img = reader.result;
+
+    setProfilePic(img);
 
     db.collection("users").doc(currentUser.uid).update({
-      photo:reader.result
+      photo: img
     });
   };
 
   reader.readAsDataURL(file);
 });
+
+/* APPLY IMAGE */
+function setProfilePic(img){
+  profilePic.style.backgroundImage = `url(${img})`;
+  profilePic.style.backgroundSize = "cover";
+  profilePic.style.backgroundPosition = "center";
+  profilePic.innerHTML = "";
+}
