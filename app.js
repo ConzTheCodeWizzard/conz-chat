@@ -7,7 +7,6 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 
-  // close fab when switching
   fabMenu.style.display = "none";
   fabOpen = false;
 }
@@ -16,6 +15,7 @@ function show(id){
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
+    loadTheme(); // 🔥 load saved theme
     loadChats();
   } else {
     show("welcome");
@@ -38,7 +38,9 @@ function signup(){
   ).then(res=>{
     return db.collection("users").doc(res.user.uid).set({
       username: signupUsername.value,
-      created: Date.now()
+      created: Date.now(),
+      mainColor:"#000000",
+      secondaryColor:"#ff0000"
     });
   }).catch(e=>alert(e.message));
 }
@@ -60,6 +62,54 @@ function openSearch(){
 
 function openSettings(){
   show("settings");
+  loadTheme();
+}
+
+// 🔥 THEME SYSTEM (ACCOUNT BASED)
+function loadTheme(){
+  db.collection("users").doc(currentUser.uid).get().then(doc=>{
+    let data = doc.data() || {};
+
+    let main = data.mainColor || "#000000";
+    let secondary = data.secondaryColor || "#ff0000";
+
+    applyTheme(main, secondary);
+
+    if(mainColorPicker){
+      mainColorPicker.value = main;
+      secondaryColorPicker.value = secondary;
+    }
+  });
+}
+
+function applyTheme(main, secondary){
+  document.documentElement.style.setProperty('--main', main);
+  document.documentElement.style.setProperty('--secondary', secondary);
+}
+
+function saveTheme(){
+  let main = mainColorPicker.value;
+  let secondary = secondaryColorPicker.value;
+
+  db.collection("users").doc(currentUser.uid).update({
+    mainColor: main,
+    secondaryColor: secondary
+  }).then(()=>{
+    applyTheme(main, secondary);
+  });
+}
+
+function resetTheme(){
+  let main = "#000000";
+  let secondary = "#ff0000";
+
+  db.collection("users").doc(currentUser.uid).update({
+    mainColor: main,
+    secondaryColor: secondary
+  }).then(()=>{
+    applyTheme(main, secondary);
+    loadTheme();
+  });
 }
 
 // SEARCH
