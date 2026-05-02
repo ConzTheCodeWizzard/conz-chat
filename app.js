@@ -1,20 +1,18 @@
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// ===================
-// SCREEN SWITCH
-// ===================
+// NAV
 function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-// ===================
 // LOGIN
-// ===================
 function login(){
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
+
+  if(!email || !password){
+    alert("Enter email and password");
+    return;
+  }
 
   auth.signInWithEmailAndPassword(email, password)
   .then(()=>{
@@ -25,23 +23,25 @@ function login(){
   });
 }
 
-// ===================
-// SIGNUP
-// ===================
+// SIGNUP (FIXED USERNAME)
 function signup(){
+  const username = document.getElementById("signupUsername").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
 
+  if(!username || !email || !password){
+    alert("Fill all fields");
+    return;
+  }
+
   auth.createUserWithEmailAndPassword(email, password)
   .then(userCred=>{
-    const uid = userCred.user.uid;
-
-    // create user profile in firestore
-    db.collection("users").doc(uid).set({
-      username: email.split("@")[0],
+    return db.collection("users").doc(userCred.user.uid).set({
+      username: username,
       created: Date.now()
     });
-
+  })
+  .then(()=>{
     show("home");
   })
   .catch(e=>{
@@ -49,18 +49,13 @@ function signup(){
   });
 }
 
-// ===================
 // LOGOUT
-// ===================
 function logout(){
-  auth.signOut().then(()=>{
-    show("welcome");
-  });
+  auth.signOut();
+  show("welcome");
 }
 
-// ===================
-// SEARCH USERS (FIXED)
-// ===================
+// SEARCH USERS
 function searchUsers(){
   const q = document.getElementById("searchInput").value.toLowerCase();
   const results = document.getElementById("results");
@@ -75,16 +70,13 @@ function searchUsers(){
         const div = document.createElement("div");
         div.style.padding = "10px";
         div.innerText = user.username;
-
         results.appendChild(div);
       }
     });
   });
 }
 
-// ===================
-// PROFILE (TEMP)
-// ===================
+// PROFILE
 function openProfile(){
-  alert("Profile coming next step");
+  alert("Profile next step");
 }
