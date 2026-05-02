@@ -1,157 +1,103 @@
+// FIREBASE INIT (already done in firebase.js)
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 let currentUser;
-let currentChat;
+let currentChatUser;
 
-/* NAV */
-function show(id){
-  document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
-  document.getElementById(id).style.display="block";
-}
-
-/* AUTH */
-auth.onAuthStateChanged(u=>{
-  currentUser = u;
-  if(u){ show("home"); loadChats(); }
-  else show("welcome");
+// LOGIN STATE
+auth.onAuthStateChanged(user => {
+  if(user){
+    currentUser = user;
+    loadChats();
+  } else {
+    show('login');
+  }
 });
 
-function signup(){
-  auth.createUserWithEmailAndPassword(su_user.value+"@app.com", su_pass.value)
-  .then(res=>{
-    db.collection("users").doc(res.user.uid).set({
-      username: su_user.value,
-      bio:"",
-      photo:"",
-      created: Date.now()
+// SCREEN SWITCH
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// =========================
+// 🔥 CHAT LIST (MAIN FEATURE)
+// =========================
+function loadChats(){
+  db.collection("messages")
+  .orderBy("time", "desc")
+  .onSnapshot(snapshot => {
+
+    let chats = {};
+    
+    snapshot.forEach(doc=>{
+      let m = doc.data();
+
+      if(m.from === currentUser.uid || m.to === currentUser.uid){
+        let other = m.from === currentUser.uid ? m.to : m.from;
+
+        if(!chats[other]){
+          chats[other] = m;
+        }
+      }
+    });
+
+    renderChatList(chats);
+  });
+}
+
+// RENDER CHAT LIST
+function renderChatList(chats){
+  chatList.innerHTML = "";
+
+  Object.keys(chats).forEach(uid => {
+
+    db.collection("users").doc(uid).get().then(userDoc=>{
+      let user = userDoc.data();
+      let msg = chats[uid];
+
+      let div = document.createElement("div");
+      div.className = "chatItem";
+
+      div.innerHTML = `
+        <div class="avatar">${user.photo ? `<img src="${user.photo}">` : "👤"}</div>
+        <div class="chatInfo">
+          <div class="name">${user.username}</div>
+          <div class="lastMsg">${msg.text || "📷 Media"}</div>
+        </div>
+      `;
+
+      div.onclick = ()=> openChat(uid, user.username);
+
+      chatList.appendChild(div);
     });
   });
 }
 
-function login(){
-  auth.signInWithEmailAndPassword(li_user.value+"@app.com", li_pass.value);
-}
-
-function logout(){ auth.signOut(); }
-
-/* PROFILE */
-function openMyProfile(){
-  db.collection("users").doc(currentUser.uid).get().then(doc=>{
-    let u = doc.data();
-    profileName.innerText = u.username;
-    bioInput.value = u.bio;
-
-    if(u.photo) setPic(u.photo);
-
-    show("profile");
-  });
-}
-
-profilePic.onclick = ()=>{
-  if(!profilePic.style.backgroundImage){
-    uploadPic.click();
-  } else {
-    menu.style.display="block";
-  }
-};
-
-function closeMenu(){ menu.style.display="none"; }
-
-function changePic(){
-  closeMenu();
-  uploadPic.click();
-}
-
-function viewPic(){
-  closeMenu();
-  let url = profilePic.style.backgroundImage.replace(/url\("|"\)/g,"");
-  window.open(url);
-}
-
-uploadPic.onchange = e=>{
-  let file = e.target.files[0];
-  let ref = storage.ref("pfp/"+currentUser.uid);
-
-  ref.put(file).then(()=>{
-    ref.getDownloadURL().then(url=>{
-      setPic(url);
-      db.collection("users").doc(currentUser.uid).update({photo:url});
-    });
-  });
-};
-
-function setPic(url){
-  profilePic.style.backgroundImage = `url(${url})`;
-  profilePic.style.backgroundSize="cover";
-  profilePic.innerHTML="";
-}
-
-function saveProfile(){
-  db.collection("users").doc(currentUser.uid).update({
-    bio: bioInput.value
-  });
-}
-
-/* SEARCH */
-function openSearch(){
-  show("search");
-  db.collection("users").get().then(snap=>renderUsers(snap.docs));
-}
-
-function searchUsers(){
-  let q = searchInput.value.toLowerCase();
-
-  db.collection("users").get().then(snap=>{
-    let list = snap.docs.filter(d=>{
-      return d.data().username.toLowerCase().includes(q);
-    });
-
-    renderUsers(list);
-  });
-}
-
-function renderUsers(list){
-  results.innerHTML="";
-  list.forEach(doc=>{
-    if(doc.id===currentUser.uid) return;
-
-    let u = doc.data();
-    let div = document.createElement("div");
-    div.innerText = u.username;
-    div.onclick = ()=>openChat(doc.id,u.username);
-    results.appendChild(div);
-  });
-}
-
-/* CHAT */
-function openChat(uid,name){
-  currentChat=uid;
+// =========================
+// 💬 CHAT
+// =========================
+function openChat(uid, name){
+  currentChatUser = uid;
+  chatName.innerText = name;
   show("chat");
 
-  db.collection("messages").onSnapshot(snap=>{
-    messages.innerHTML="";
-    snap.forEach(doc=>{
-      let m=doc.data();
+  db.collection("messages")
+  .orderBy("time")
+  .onSnapshot(snapshot=>{
+    messages.innerHTML = "";
+
+    snapshot.forEach(doc=>{
+      let m = doc.data();
 
       if(
-        (m.from===currentUser.uid && m.to===uid) ||
-        (m.from===uid && m.to===currentUser.uid)
+        (m.from === currentUser.uid && m.to === uid) ||
+        (m.from === uid && m.to === currentUser.uid)
       ){
-        let div=document.createElement("div");
-
-        if(m.text) div.innerText=m.text;
-
-        if(m.image){
-          let img=document.createElement("img");
-          img.src=m.image;
-          img.style.width="150px";
-          div.appendChild(img);
-        }
-
-        if(m.audio){
-          let audio=document.createElement("audio");
-          audio.src=m.audio;
-          audio.controls=true;
-          div.appendChild(audio);
-        }
+        let div = document.createElement("div");
+        div.className = m.from === currentUser.uid ? "me" : "them";
+        div.innerText = m.text;
 
         messages.appendChild(div);
       }
@@ -159,61 +105,60 @@ function openChat(uid,name){
   });
 }
 
-/* TEXT */
+// SEND MESSAGE
 function send(){
+  let text = msg.value;
+  if(!text) return;
+
   db.collection("messages").add({
-    from:currentUser.uid,
-    to:currentChat,
-    text:msg.value,
-    time:Date.now()
+    text,
+    from: currentUser.uid,
+    to: currentChatUser,
+    time: Date.now()
   });
-  msg.value="";
+
+  msg.value = "";
 }
 
-/* IMAGE */
-function sendImage(){
-  let file = sendImg.files[0];
-  let ref = storage.ref("chat/"+Date.now());
+// =========================
+// 🔍 SEARCH USERS (FIXED)
+// =========================
+function openSearch(){
+  show("search");
+}
 
-  ref.put(file).then(()=>{
-    ref.getDownloadURL().then(url=>{
-      db.collection("messages").add({
-        from:currentUser.uid,
-        to:currentChat,
-        image:url
-      });
+function searchUsers(){
+  let q = searchInput.value.toLowerCase();
+  results.innerHTML = "";
+
+  db.collection("users").get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      let user = doc.data();
+
+      if(user.username.toLowerCase().includes(q)){
+        let div = document.createElement("div");
+        div.className = "chatItem";
+        div.innerHTML = `
+          <div class="avatar">👤</div>
+          <div>${user.username}</div>
+        `;
+
+        div.onclick = ()=> openChat(doc.id, user.username);
+
+        results.appendChild(div);
+      }
     });
   });
 }
 
-/* VOICE */
-let recorder, chunks=[];
+// =========================
+// 👤 PROFILE
+// =========================
+function openMyProfile(){
+  show("profile");
 
-function startRecording(){
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    recorder = new MediaRecorder(stream);
-
-    recorder.ondataavailable=e=>chunks.push(e.data);
-
-    recorder.onstop=()=>{
-      let blob = new Blob(chunks);
-      chunks=[];
-
-      let ref = storage.ref("audio/"+Date.now());
-
-      ref.put(blob).then(()=>{
-        ref.getDownloadURL().then(url=>{
-          db.collection("messages").add({
-            from:currentUser.uid,
-            to:currentChat,
-            audio:url
-          });
-        });
-      });
-    };
-
-    recorder.start();
-
-    setTimeout(()=>recorder.stop(),3000);
+  db.collection("users").doc(currentUser.uid).get().then(doc=>{
+    let user = doc.data();
+    profileName.innerText = user.username;
   });
 }
