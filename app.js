@@ -1,55 +1,56 @@
-let currentUser = null;
-let currentChat = null;
-let navStack = [];
+      });
+    })let currentUser=null;
+let currentChat=null;
+let nav=[];
 
 function show(id){
-  const current = document.querySelector(".screen.active");
-  if(current) navStack.push(current.id);
-
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
 function goBack(){
-  let last = navStack.pop();
-  if(last) show(last);
+  show("home");
 }
 
-auth.onAuthStateChanged(user => {
-  currentUser = user;
+auth.onAuthStateChanged(u=>{
+  currentUser=u;
 });
 
 function logout(){
-  auth.signOut().then(()=> show("welcome"));
+  auth.signOut();
+  show("welcome");
 }
 
 async function signup(){
-  const u = su_user.value;
-  const p = su_pass.value;
+  let u=su_user.value;
+  let p=su_pass.value;
 
-  const res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
+  let res=await auth.createUserWithEmailAndPassword(u+"@app.com",p);
 
   await db.collection("users").doc(res.user.uid).set({
     username:u,
-    created:Date.now()
+    created:Date.now(),
+    bio:"",
+    photo:""
   });
 
-  currentUser = res.user;
+  currentUser=res.user;
   loadChats();
   show("home");
 }
 
 async function login(){
-  const u = li_user.value;
-  const p = li_pass.value;
+  let u=li_user.value;
+  let p=li_pass.value;
 
-  const res = await auth.signInWithEmailAndPassword(u+"@app.com", p);
+  let res=await auth.signInWithEmailAndPassword(u+"@app.com",p);
 
-  currentUser = res.user;
+  currentUser=res.user;
   loadChats();
   show("home");
 }
 
+/* CHAT LIST */
 function loadChats(){
   db.collection("messages").onSnapshot(snap=>{
     chatList.innerHTML="";
@@ -74,6 +75,7 @@ function loadChats(){
   });
 }
 
+/* OPEN CHAT */
 function openChat(uid,name){
   currentChat=uid;
   chatName.innerText=name;
@@ -83,6 +85,7 @@ function openChat(uid,name){
     messages.innerHTML="";
     snap.forEach(doc=>{
       let m=doc.data();
+
       if((m.from===currentUser.uid&&m.to===uid)||(m.from===uid&&m.to===currentUser.uid)){
         let div=document.createElement("div");
         div.className=m.from===currentUser.uid?"msgMe":"msgOther";
@@ -93,24 +96,34 @@ function openChat(uid,name){
   });
 }
 
+/* SEND */
 function send(){
+  if(!msg.value) return;
+
   db.collection("messages").add({
     from:currentUser.uid,
     to:currentChat,
     text:msg.value,
     time:Date.now()
   });
+
   msg.value="";
 }
 
-function openSearch(){ show("search"); }
+/* SEARCH */
+function openSearch(){
+  show("search");
+}
 
 function searchUsers(){
-  db.collection("users").get().then(snap=>{
+  let q=searchInput.value.toLowerCase();
+
+  db.collection("users").onSnapshot(snap=>{
     results.innerHTML="";
     snap.forEach(doc=>{
       let u=doc.data();
-      if(u.username.includes(searchInput.value)){
+
+      if(u.username.toLowerCase().includes(q)){
         let div=document.createElement("div");
         div.className="chatItem";
         div.innerText=u.username;
@@ -125,10 +138,20 @@ function searchUsers(){
 function openMyProfile(){
   db.collection("users").doc(currentUser.uid).get().then(doc=>{
     let u=doc.data();
+
     profileName.innerText=u.username;
     profileTag.innerText="@"+u.username;
-    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
+    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
+
     bioInput.value=u.bio||"";
+
+    if(u.photo){
+      profilePic.style.backgroundImage=`url(${u.photo})`;
+      profilePic.style.backgroundSize="cover";
+      profilePic.style.backgroundPosition="center";
+      profilePic.innerHTML="";
+    }
+
     show("profile");
   });
 }
@@ -136,9 +159,11 @@ function openMyProfile(){
 function openUserProfile(uid){
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data();
+
     profileName.innerText=u.username;
     profileTag.innerText="@"+u.username;
-    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
+    profileSince.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
+
     show("profile");
   });
 }
@@ -148,3 +173,23 @@ function saveProfile(){
     bio:bioInput.value
   });
 }
+
+/* PROFILE PIC */
+uploadPic.addEventListener("change", e=>{
+  let file=e.target.files[0];
+  if(!file) return;
+
+  let reader=new FileReader();
+
+  reader.onload=()=>{
+    profilePic.style.backgroundImage=`url(${reader.result})`;
+    profilePic.style.backgroundSize="cover";
+    profilePic.style.backgroundPosition="center";
+
+    db.collection("users").doc(currentUser.uid).update({
+      photo:reader.result
+    });
+  };
+
+  reader.readAsDataURL(file);
+});
