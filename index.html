@@ -16,6 +16,7 @@ body { margin:0; font-family:Arial; background:black; color:white; }
   padding:12px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
 }
 
 /* BUTTON */
@@ -36,6 +37,12 @@ input {
   color:white;
 }
 
+/* LIST */
+.item {
+  padding:12px;
+  border-bottom:1px solid #222;
+}
+
 /* CHAT */
 #messages { flex:1; overflow:auto; padding:10px; }
 
@@ -45,11 +52,8 @@ input {
 .other { text-align:left; }
 .other div { background:#222; padding:10px; border-radius:10px; display:inline-block; }
 
-.inputBar { display:flex; }
+.inputBar { display:flex; padding:10px; }
 .inputBar input { flex:1; }
-
-/* LIST */
-.user { padding:12px; border-bottom:1px solid #222; }
 </style>
 </head>
 
@@ -58,33 +62,72 @@ input {
 <!-- WELCOME -->
 <div id="welcome" class="screen active" style="justify-content:center;align-items:center;">
   <h1 style="color:red;">ConzChat</h1>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
+  <button onclick="nav('login')">Login</button>
+  <button onclick="nav('signup')">Create Account</button>
 </div>
 
 <!-- LOGIN -->
 <div id="login" class="screen">
+  <div class="header">
+    <span onclick="nav('welcome')">⬅</span>
+    Login
+    <span></span>
+  </div>
+
   <input id="li_user" placeholder="Username">
-  <input id="li_pass" type="password">
+  <input id="li_pass" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
 </div>
 
 <!-- SIGNUP -->
 <div id="signup" class="screen">
+  <div class="header">
+    <span onclick="nav('welcome')">⬅</span>
+    Create Account
+    <span></span>
+  </div>
+
   <input id="su_user" placeholder="Username">
-  <input id="su_pass" type="password">
+  <input id="su_pass" type="password" placeholder="Password">
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- APP -->
-<div id="app" class="screen">
+<!-- CHAT LIST -->
+<div id="home" class="screen">
   <div class="header">
     <span onclick="logout()">⬅</span>
-    <span>ConzChat</span>
-    <span onclick="loadUsers()">＋</span>
+    ConzChat
+    <span onclick="nav('users')">＋</span>
   </div>
 
-  <div id="content"></div>
+  <div id="chatList"></div>
+</div>
+
+<!-- USER LIST -->
+<div id="users" class="screen">
+  <div class="header">
+    <span onclick="nav('home')">⬅</span>
+    Find Users
+    <span></span>
+  </div>
+
+  <div id="userList"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="screen">
+  <div class="header">
+    <span onclick="nav('home')">⬅</span>
+    <span id="chatName"></span>
+    <span></span>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="inputBar">
+    <input id="msg">
+    <button onclick="send()">Send</button>
+  </div>
 </div>
 
 <!-- FIREBASE -->
@@ -101,57 +144,80 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-let currentUser="";
-let currentChat="";
+let currentUser = "";
+let currentChat = "";
 
 /* NAV */
-function show(id){
+function nav(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
 /* AUTH */
 async function signup(){
-  let username = su_user.value;
-  let email = username+"@conz.app";
+  let u = su_user.value;
+  let p = su_pass.value;
 
-  let res = await auth.createUserWithEmailAndPassword(email, su_pass.value);
+  let res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
 
-  await db.collection("users").doc(res.user.uid).set({
-    username
-  });
+  await db.collection("users").doc(res.user.uid).set({ username:u });
 
   currentUser = res.user.uid;
-  openChats();
+  loadChats();
+  nav("home");
 }
 
 async function login(){
-  let email = li_user.value+"@conz.app";
+  let u = li_user.value;
+  let p = li_pass.value;
 
-  let res = await auth.signInWithEmailAndPassword(email, li_pass.value);
+  let res = await auth.signInWithEmailAndPassword(u+"@app.com", p);
 
   currentUser = res.user.uid;
-  openChats();
+  loadChats();
+  nav("home");
 }
 
 function logout(){
   auth.signOut();
-  show("welcome");
+  nav("welcome");
 }
 
 /* CHAT LIST */
-function openChats(){
-  show("app");
-
-  db.collection("users").onSnapshot(snap=>{
-    content.innerHTML="";
-
+function loadChats(){
+  db.collection("messages").onSnapshot(snap=>{
+    let chats = {};
     snap.forEach(doc=>{
-      let u = doc.data();
-      if(doc.id !== currentUser){
-        content.innerHTML += `
-          <div class="user" onclick="openChat('${doc.id}','${u.username}')">
-            ${u.username}
+      let id = doc.id.split("_");
+      if(id.includes(currentUser)){
+        let other = id[0]===currentUser ? id[1] : id[0];
+        chats[other] = true;
+      }
+    });
+
+    chatList.innerHTML="";
+
+    Object.keys(chats).forEach(uid=>{
+      db.collection("users").doc(uid).get().then(doc=>{
+        chatList.innerHTML += `
+          <div class="item" onclick="openChat('${uid}','${doc.data().username}')">
+            ${doc.data().username}
+          </div>
+        `;
+      });
+    });
+  });
+}
+
+/* USER LIST */
+function loadUsers(){
+  db.collection("users").get().then(snap=>{
+    userList.innerHTML="";
+    snap.forEach(doc=>{
+      if(doc.id!==currentUser){
+        userList.innerHTML += `
+          <div class="item" onclick="openChat('${doc.id}','${doc.data().username}')">
+            ${doc.data().username}
           </div>
         `;
       }
@@ -159,26 +225,23 @@ function openChats(){
   });
 }
 
+/* OPEN USER LIST */
+document.getElementById("users").addEventListener("click", loadUsers);
+
 /* CHAT */
 function chatId(a,b){ return [a,b].sort().join("_"); }
 
 function openChat(uid,name){
   currentChat = uid;
-
-  content.innerHTML = `
-    <div id="messages"></div>
-    <div class="inputBar">
-      <input id="msg">
-      <button onclick="send()">Send</button>
-    </div>
-  `;
+  chatName.innerText = name;
+  nav("chat");
 
   let id = chatId(currentUser,uid);
 
   db.collection("messages").doc(id).collection("msgs")
-  .orderBy("time").onSnapshot(snap=>{
+  .orderBy("time")
+  .onSnapshot(snap=>{
     messages.innerHTML="";
-
     snap.forEach(doc=>{
       let m = doc.data();
       let cls = m.from===currentUser ? "me":"other";
