@@ -8,8 +8,10 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 
-  fabMenu.style.display = "none";
-  fabOpen = false;
+  if (fabMenu){
+    fabMenu.style.display = "none";
+    fabOpen = false;
+  }
 }
 
 // AUTH
@@ -18,7 +20,7 @@ auth.onAuthStateChanged(user=>{
     currentUser = user;
 
     db.collection("users").doc(user.uid).get().then(doc=>{
-      let data = doc.data();
+      let data = doc.data() || {};
 
       // 🔥 BAN CHECK
       if(data.banned === true){
@@ -27,11 +29,15 @@ auth.onAuthStateChanged(user=>{
         return;
       }
 
-      // 🔥 ADMIN CHECK
+      // 🔥 ADMIN CHECK (FIXED)
       if(data.role === "admin"){
         isAdmin = true;
-        document.getElementById("devBtn").style.display = "block";
-        document.getElementById("appTitle").innerText = "ConzChat DEV";
+
+        let devBtn = document.getElementById("devBtn");
+        let title = document.getElementById("appTitle");
+
+        if(devBtn) devBtn.style.display = "block";
+        if(title) title.innerText = "ConzChat DEV";
       }
 
       loadTheme();
@@ -65,7 +71,7 @@ function signup(){
       banned:false,
       role:"user"
     });
-  });
+  }).catch(e=>alert(e.message));
 }
 
 // LOGOUT
@@ -83,7 +89,7 @@ function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); loadTheme(); }
 function openDev(){ show("dev"); }
 
-// 🔥 LOAD USERS (ADMIN)
+// 🔥 ADMIN PANEL
 function loadAllUsers(){
   allUsers.innerHTML = "";
 
@@ -104,18 +110,12 @@ function loadAllUsers(){
   });
 }
 
-// 🔥 BAN
 function banUser(uid){
-  db.collection("users").doc(uid).update({
-    banned:true
-  });
+  db.collection("users").doc(uid).update({ banned:true });
 }
 
-// 🔥 UNBAN
 function unbanUser(uid){
-  db.collection("users").doc(uid).update({
-    banned:false
-  });
+  db.collection("users").doc(uid).update({ banned:false });
 }
 
 // THEME
@@ -128,7 +128,7 @@ function loadTheme(){
 
     applyTheme(main, secondary);
 
-    if(mainColorPicker){
+    if(window.mainColorPicker){
       mainColorPicker.value = main;
       secondaryColorPicker.value = secondary;
     }
@@ -264,4 +264,18 @@ function loadChats(){
   });
 
   show("home");
+}
+
+// ✅ PROFILE FIX (RESTORED)
+function openProfile(){
+  db.collection("users").doc(currentUser.uid).get().then(doc=>{
+    let u = doc.data();
+
+    profileName.innerText = u.username;
+
+    let days = Math.floor((Date.now()-u.created)/(1000*60*60*24));
+    daysOnApp.innerText = days + " days on ConzChat";
+
+    show("profile");
+  });
 }
