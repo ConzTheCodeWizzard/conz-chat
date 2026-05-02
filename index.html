@@ -7,40 +7,27 @@
 
 <body>
 
-<!-- HOME -->
+<!-- HOME / CHAT LIST -->
 <div id="home" class="screen active">
 
   <div class="topbar">
     <div class="logo">ConzChat</div>
-    <div class="profileBtn" onclick="openMyProfile()">👤</div>
+    <div onclick="openMyProfile()">👤</div>
   </div>
 
-  <div class="homeContent">
-    <h3>Explore Public Groups</h3>
-    <p>Make friends with similar interests</p>
-    <button class="outline">FIND A GROUP</button>
-  </div>
+  <!-- CHAT LIST -->
+  <div id="chatList"></div>
 
-  <!-- FLOAT BUTTON -->
+  <!-- FAB -->
   <div class="fab" onclick="toggleFab()">+</div>
 
-  <!-- FAB MENU -->
   <div id="fabMenu">
     <div onclick="openSearch()">Find People</div>
-    <div onclick="openSearch()">Start Chat</div>
-    <div>Public Groups</div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottomNav">
-    <div class="active">Chat</div>
-    <div>Live</div>
-    <div>Ad-Free</div>
   </div>
 
 </div>
 
-<!-- CHAT -->
+<!-- CHAT SCREEN -->
 <div id="chat" class="screen">
 
   <div class="topbar">
@@ -59,13 +46,15 @@
 
 <!-- SEARCH -->
 <div id="search" class="screen">
+
   <div class="topbar">
     <div onclick="show('home')">←</div>
     <div>Find People</div>
   </div>
 
-  <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
+  <input id="searchInput" placeholder="Search username..." oninput="searchUsers()">
   <div id="results"></div>
+
 </div>
 
 <!-- PROFILE -->
@@ -73,18 +62,13 @@
 
   <div class="topbar">
     <div onclick="show('home')">←</div>
-    <div>Settings</div>
+    <div>Profile</div>
   </div>
 
   <div class="profileTop">
     <div id="profilePic">👤</div>
     <h2 id="profileName"></h2>
-    <p>@username</p>
   </div>
-
-  <textarea id="bioInput"></textarea>
-
-  <button onclick="saveProfile()">Save</button>
 
 </div>
 
