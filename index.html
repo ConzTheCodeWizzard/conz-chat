@@ -8,35 +8,29 @@
 <body>
 
 <div id="welcome" class="screen active">
-  <h2>Welcome to</h2>
   <h1 class="title">ConzChat</h1>
   <button onclick="show('login')">Login</button>
   <button onclick="show('signup')">Create Account</button>
-  <p>~ Developed by Conz ~</p>
 </div>
 
 <div id="login" class="screen">
-  <h2>Login</h2>
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password">
   <button onclick="login()">Login</button>
-  <button onclick="show('welcome')">Back</button>
 </div>
 
 <div id="signup" class="screen">
-  <h2>Create Account</h2>
   <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
   <input id="signupPassword" type="password">
   <button onclick="signup()">Create</button>
-  <button onclick="show('welcome')">Back</button>
 </div>
 
 <div id="home" class="screen">
   <div class="topbar">
     <span onclick="logout()">Logout</span>
-    <span id="appTitle">ConzChat</span>
-    <span onclick="openProfile()">👤</span>
+    <span>ConzChat</span>
+    <span id="profileBtn" onclick="openProfile()">👤</span>
   </div>
 
   <div id="chatList"></div>
@@ -55,11 +49,12 @@
     <span onclick="show('home')">←</span>
     <span>Profile</span>
   </div>
-  <h2 id="profileName"></h2>
+
+  <div id="profileContent"></div>
   <p id="daysOnApp"></p>
 </div>
 
-<!-- 🔥 UPDATE LOG -->
+<!-- 🔥 FULLY UPDATED -->
 <div id="updates" class="screen">
   <div class="topbar">
     <span onclick="show('home')">←</span>
@@ -67,38 +62,44 @@
   </div>
 
   <div style="text-align:left">
-    <p>🔥 Added Update Log system</p>
-    <p>🎨 Renamed Settings → Colour Editor</p>
-    <p>💬 Added message timestamps</p>
-    <p>🔍 Improved search filtering</p>
-    <p>⚡ Added live theme preview</p>
-    <p>👤 Improved profile screen</p>
+
+    <p>🚀 Major Profile System Upgrade</p>
+    <p>👤 Added profile pictures (upload + saved across devices)</p>
+    <p>🖼 Tap profile circle to change picture</p>
+    <p>📛 Added display name system</p>
+    <p>🏷 Usernames now shown as @username in grey</p>
+
+    <p>💬 Chat System Upgrade</p>
+    <p>👥 Avatars added beside messages (left/right)</p>
+    <p>🧠 Messages visually linked to users</p>
+    <p>👆 Clicking username opens profile</p>
+
+    <p>📋 Chat List Upgrade</p>
+    <p>🖼 Profile pictures now shown in chat list</p>
+
+    <p>📱 UI Improvements</p>
+    <p>🎯 All app bar titles centered</p>
+    <p>✨ Cleaner profile layout</p>
+    <p>👤 Profile picture shown in top bar</p>
+
+    <p>🎨 Colour System</p>
+    <p>🎨 Settings renamed to Colour Editor</p>
+
+    <p>🧾 System</p>
+    <p>📝 Update Log tracks all changes</p>
+
   </div>
 </div>
 
 <div id="settings" class="screen">
-  <div class="topbar">
-    <span onclick="show('home')">←</span>
-    <span>Colour Editor</span>
-  </div>
-
-  <h3>Main Colour</h3>
   <input type="color" id="mainColorPicker">
-
-  <h3>Secondary Colour</h3>
   <input type="color" id="secondaryColorPicker">
-
   <button onclick="saveTheme()">Save</button>
   <button onclick="resetTheme()">Reset</button>
 </div>
 
 <div id="search" class="screen">
-  <div class="topbar">
-    <span onclick="show('home')">←</span>
-    <span>Find Users</span>
-  </div>
-
-  <input id="searchInput" oninput="searchUsers()" placeholder="Search users...">
+  <input id="searchInput" oninput="searchUsers()">
   <div id="results"></div>
 </div>
 
@@ -110,13 +111,14 @@
 
   <div id="messages"></div>
 
-  <input id="msgInput" placeholder="Message...">
+  <input id="msgInput">
   <button onclick="sendMessage()">Send</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <script src="firebase.js"></script>
 <script src="app.js"></script>
