@@ -1,6 +1,5 @@
 let currentUser = null;
 let currentChat = null;
-let typingTimeout = null;
 
 /* 🔁 SCREEN SWITCH */
 function show(id){
@@ -10,6 +9,7 @@ function show(id){
 
 /* 🔐 AUTH STATE */
 auth.onAuthStateChanged(async user => {
+
   if(user){
     currentUser = user;
 
@@ -20,47 +20,63 @@ auth.onAuthStateChanged(async user => {
 
     loadChats();
 
-    // 🔥 FIX: don't override login/signup screen
-    const currentScreen = document.querySelector(".screen.active")?.id;
-
-    if(currentScreen !== "login" && currentScreen !== "signup"){
+    // Only go home if currently on welcome
+    if(document.getElementById("welcome").classList.contains("active")){
       show("home");
     }
 
   } else {
     show("welcome");
   }
+
 });
 
 /* 🚪 LOGOUT */
 function logout(){
-  auth.signOut();
+  auth.signOut().then(()=>{
+    currentUser = null;
+    show("welcome");
+  });
 }
 
 /* 🆕 SIGNUP */
 async function signup(){
-  const u = su_user.value;
-  const p = su_pass.value;
+  try {
+    const u = document.getElementById("su_user").value.trim();
+    const p = document.getElementById("su_pass").value.trim();
 
-  if(!u || !p) return alert("Fill everything");
+    if(!u || !p){
+      alert("Fill everything");
+      return;
+    }
 
-  const res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
+    await auth.createUserWithEmailAndPassword(u + "@app.com", p);
 
-  await db.collection("users").doc(res.user.uid).set({
-    username: u,
-    online: true,
-    created: Date.now()
-  });
+    alert("Account created ✅");
+
+  } catch(e){
+    alert(e.message);
+    console.error(e);
+  }
 }
 
 /* 🔑 LOGIN */
 async function login(){
-  const u = li_user.value;
-  const p = li_pass.value;
+  try {
+    const u = document.getElementById("li_user").value.trim();
+    const p = document.getElementById("li_pass").value.trim();
 
-  if(!u || !p) return alert("Fill everything");
+    if(!u || !p){
+      alert("Fill everything");
+      return;
+    }
 
-  await auth.signInWithEmailAndPassword(u+"@app.com", p);
+    await auth.signInWithEmailAndPassword(u + "@app.com", p);
+
+  } catch(e){
+    alert(e.message);
+    console.error(e);
+  }
 }
 
 /* 💬 LOAD CHAT LIST */
@@ -70,7 +86,6 @@ function loadChats(){
     .onSnapshot(snap => {
 
       chatList.innerHTML = "";
-
       let users = new Set();
 
       snap.forEach(doc => {
@@ -86,11 +101,13 @@ function loadChats(){
 
           let div = document.createElement("div");
           div.className = "chatItem";
+
           div.innerHTML = `
-            ${data.username}
-            <span style="float:right;color:${data.online?'lime':'gray'};">●</span>
+            ${data.username || "User"}
+            <span style="float:right;color:${data.online ? 'lime' : 'gray'};">●</span>
           `;
-          div.onclick = () => openChat(uid, data.username);
+
+          div.onclick = () => openChat(uid, data.username || "User");
 
           chatList.appendChild(div);
         });
@@ -133,7 +150,6 @@ function openChat(uid, name){
 
           messages.appendChild(div);
 
-          // mark read
           if(m.to === currentUser.uid && !m.read){
             doc.ref.update({ read:true, delivered:true });
           }
@@ -144,9 +160,10 @@ function openChat(uid, name){
     });
 }
 
-/* 📤 SEND MESSAGE */
+/* 📤 SEND */
 function send(){
-  let text = msg.value;
+  let text = document.getElementById("msg").value;
+
   if(!text || !currentChat) return;
 
   db.collection("messages").add({
@@ -158,7 +175,7 @@ function send(){
     read:false
   });
 
-  msg.value = "";
+  document.getElementById("msg").value = "";
 }
 
 /* 🔍 SEARCH */
@@ -167,12 +184,13 @@ function openSearch(){
 }
 
 function searchUsers(){
-  let q = searchInput.value;
+  let q = document.getElementById("searchInput").value;
 
   db.collection("users")
     .where("username", ">=", q)
     .get()
     .then(snap => {
+
       results.innerHTML = "";
 
       snap.forEach(doc => {
@@ -181,30 +199,11 @@ function searchUsers(){
         let div = document.createElement("div");
         div.className = "chatItem";
         div.innerText = u.username;
+
         div.onclick = () => openChat(doc.id, u.username);
 
         results.appendChild(div);
       });
+
     });
-}
-
-/* 👤 PROFILE */
-function openProfile(){
-  if(!currentUser) return;
-
-  db.collection("users").doc(currentUser.uid).get().then(doc => {
-    let u = doc.data();
-    profileName.innerText = u.username;
-    show("profile");
-  });
-}
-
-function saveProfile(){
-  let pic = profilePic.value;
-
-  db.collection("users").doc(currentUser.uid).update({
-    photo: pic
-  });
-
-  alert("Saved");
 }
