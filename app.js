@@ -2,11 +2,13 @@ let currentUser = null;
 let currentChat = null;
 let typingTimeout = null;
 
+/* 🔁 SCREEN SWITCH */
 function show(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
+/* 🔐 AUTH STATE */
 auth.onAuthStateChanged(async user => {
   if(user){
     currentUser = user;
@@ -17,24 +19,30 @@ auth.onAuthStateChanged(async user => {
     }, { merge:true });
 
     loadChats();
-    show("home");
+
+    // 🔥 FIX: don't override login/signup screen
+    const currentScreen = document.querySelector(".screen.active")?.id;
+
+    if(currentScreen !== "login" && currentScreen !== "signup"){
+      show("home");
+    }
+
   } else {
     show("welcome");
   }
 });
 
-window.addEventListener("beforeunload", () => {
-  if(currentUser){
-    db.collection("users").doc(currentUser.uid).update({
-      online:false,
-      lastSeen:Date.now()
-    });
-  }
-});
+/* 🚪 LOGOUT */
+function logout(){
+  auth.signOut();
+}
 
+/* 🆕 SIGNUP */
 async function signup(){
   const u = su_user.value;
   const p = su_pass.value;
+
+  if(!u || !p) return alert("Fill everything");
 
   const res = await auth.createUserWithEmailAndPassword(u+"@app.com", p);
 
@@ -45,13 +53,17 @@ async function signup(){
   });
 }
 
+/* 🔑 LOGIN */
 async function login(){
   const u = li_user.value;
   const p = li_pass.value;
 
+  if(!u || !p) return alert("Fill everything");
+
   await auth.signInWithEmailAndPassword(u+"@app.com", p);
 }
 
+/* 💬 LOAD CHAT LIST */
 function loadChats(){
   db.collection("messages")
     .orderBy("time")
@@ -70,6 +82,7 @@ function loadChats(){
       users.forEach(uid => {
         db.collection("users").doc(uid).get().then(u => {
           let data = u.data();
+          if(!data) return;
 
           let div = document.createElement("div");
           div.className = "chatItem";
@@ -86,6 +99,7 @@ function loadChats(){
     });
 }
 
+/* 📩 OPEN CHAT */
 function openChat(uid, name){
   currentChat = uid;
   chatName.innerText = name;
@@ -112,9 +126,14 @@ function openChat(uid, name){
             ? (m.read ? "R" : m.delivered ? "D" : "S")
             : "";
 
-          div.innerHTML = `${m.text}<br><small>${status}</small>`;
+          div.innerHTML = `
+            ${m.text}
+            <br><small>${status}</small>
+          `;
+
           messages.appendChild(div);
 
+          // mark read
           if(m.to === currentUser.uid && !m.read){
             doc.ref.update({ read:true, delivered:true });
           }
@@ -125,9 +144,10 @@ function openChat(uid, name){
     });
 }
 
+/* 📤 SEND MESSAGE */
 function send(){
   let text = msg.value;
-  if(!text) return;
+  if(!text || !currentChat) return;
 
   db.collection("messages").add({
     from: currentUser.uid,
@@ -141,21 +161,7 @@ function send(){
   msg.value = "";
 }
 
-msg.addEventListener("input", () => {
-  if(!currentChat) return;
-
-  db.collection("typing").doc(currentUser.uid+"_"+currentChat).set({
-    from: currentUser.uid,
-    to: currentChat,
-    typing:true
-  });
-
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    db.collection("typing").doc(currentUser.uid+"_"+currentChat).delete();
-  }, 1500);
-});
-
+/* 🔍 SEARCH */
 function openSearch(){
   show("search");
 }
@@ -180,4 +186,25 @@ function searchUsers(){
         results.appendChild(div);
       });
     });
+}
+
+/* 👤 PROFILE */
+function openProfile(){
+  if(!currentUser) return;
+
+  db.collection("users").doc(currentUser.uid).get().then(doc => {
+    let u = doc.data();
+    profileName.innerText = u.username;
+    show("profile");
+  });
+}
+
+function saveProfile(){
+  let pic = profilePic.value;
+
+  db.collection("users").doc(currentUser.uid).update({
+    photo: pic
+  });
+
+  alert("Saved");
 }
