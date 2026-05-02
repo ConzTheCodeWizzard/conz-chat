@@ -11,14 +11,8 @@ body{
 }
 
 /* SCREENS */
-.screen{
-  display:none;
-  padding:20px;
-}
-
-.screen.active{
-  display:block;
-}
+.screen{ display:none; padding:20px; }
+.screen.active{ display:block; }
 
 /* TITLE */
 .title{
@@ -52,12 +46,20 @@ input{
   color:#fff;
 }
 
-/* TOP BAR */
+/* TOPBAR */
 .topbar{
   background:var(--secondary);
   padding:15px;
   display:flex;
+  align-items:center;
   justify-content:space-between;
+  position:relative;
+}
+
+.topbar span:nth-child(2){
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
 }
 
 /* CHAT LIST */
@@ -65,6 +67,23 @@ input{
   padding:15px;
   border-bottom:1px solid #222;
   text-align:left;
+  display:flex;
+  align-items:center;
+}
+
+.chatAvatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#222;
+  margin-right:10px;
+  overflow:hidden;
+}
+
+.chatAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 /* MESSAGES */
@@ -73,10 +92,30 @@ input{
   overflow-y:auto;
   display:flex;
   flex-direction:column;
-  padding:10px;
 }
 
-/* MESSAGE BUBBLES */
+.msgWrap{
+  display:flex;
+  align-items:flex-end;
+}
+
+.msgWrap.me{ justify-content:flex-end; }
+.msgWrap.them{ justify-content:flex-start; }
+
+.msgAvatar{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  overflow:hidden;
+  margin:5px;
+}
+
+.msgAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
 .msg{
   max-width:70%;
   padding:10px;
@@ -84,17 +123,29 @@ input{
   border-radius:12px;
 }
 
-.me{
-  background:var(--secondary);
-  align-self:flex-end;
-}
+.me .msg{ background:var(--secondary); }
+.them .msg{ background:#222; }
 
-.them{
+/* PROFILE */
+.avatar{
+  width:100px;
+  height:100px;
+  border-radius:50%;
   background:#222;
-  align-self:flex-start;
+  margin:20px auto;
+  overflow:hidden;
 }
 
-/* FLOAT BUTTON */
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.displayName{ font-size:22px; }
+.username{ color:#888; font-size:14px; }
+
+/* FAB */
 #fab{
   position:fixed;
   bottom:20px;
@@ -110,7 +161,6 @@ input{
   border-radius:50%;
 }
 
-/* FAB MENU */
 #fabMenu{
   position:fixed;
   bottom:90px;
@@ -121,7 +171,6 @@ input{
 
 #fabMenu div{
   background:var(--secondary);
-  color:#fff;
   padding:12px;
   margin-top:10px;
   border-radius:8px;
