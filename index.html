@@ -7,66 +7,62 @@
 
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen" class="screen active">
-  <h1>ConzChat</h1>
+<!-- WELCOME SCREEN -->
+<div id="welcome" class="screen active">
+  <h2>Welcome to</h2>
+  <h1 class="title">ConzChat</h1>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <button onclick="show('login')">Login</button>
+  <button onclick="show('signup')">Create Account</button>
+
+  <p>~ Developed by Conz ~</p>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="screen">
+  <h2>Login</h2>
+
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
-  <button onclick="signup()">Create Account</button>
+  <button onclick="show('welcome')">Back</button>
+</div>
+
+<!-- SIGNUP -->
+<div id="signup" class="screen">
+  <h2>Create Account</h2>
+
+  <input id="signupEmail" placeholder="Email">
+  <input id="signupPassword" type="password" placeholder="Password">
+
+  <button onclick="signup()">Create</button>
+  <button onclick="show('welcome')">Back</button>
 </div>
 
 <!-- HOME -->
 <div id="home" class="screen">
-
   <div class="topbar">
-    <div>ConzChat</div>
-    <div onclick="openProfile()">👤</div>
+    <span onclick="logout()">Logout</span>
+    <span>ConzChat</span>
+    <span onclick="openProfile()">👤</span>
   </div>
 
-  <div id="chatList"></div>
-
-  <div class="fab" onclick="openSearch()">+</div>
-
+  <button onclick="show('search')">Find Users</button>
 </div>
 
 <!-- SEARCH -->
 <div id="search" class="screen">
   <div class="topbar">
-    <div onclick="show('home')">←</div>
-    <div>Find People</div>
+    <span onclick="show('home')">←</span>
+    <span>Find Users</span>
+    <span></span>
   </div>
 
-  <input id="searchInput" placeholder="Search username..." oninput="searchUsers()">
+  <input id="searchInput" placeholder="Search...">
+  <button onclick="searchUsers()">Search</button>
+
   <div id="results"></div>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <div class="topbar">
-    <div onclick="show('home')">←</div>
-    <div id="chatName"></div>
-  </div>
-
-  <div id="messages" class="chatBox"></div>
-
-  <div class="msgInput">
-    <input id="msg" placeholder="Message...">
-    <button onclick="send()">Send</button>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="topbar">
-    <div onclick="show('home')">←</div>
-    <div>Profile</div>
-  </div>
-
-  <h2 id="profileName"></h2>
-  <button onclick="logout()">Logout</button>
 </div>
 
 <script src="firebase.js"></script>
