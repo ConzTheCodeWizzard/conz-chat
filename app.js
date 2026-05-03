@@ -164,46 +164,73 @@ function searchUsers(){
   });
 }
 
-// CHAT
+// 🔥 FIXED CHAT (ONLY CHANGE)
 function openChat(uid,name){
-  currentChatUser=uid;
-  chatName.innerText=name;
+  currentChatUser = uid;
+  chatName.innerText = name;
   show("chat");
 
   if(unsubscribeMessages) unsubscribeMessages();
 
-  unsubscribeMessages=db.collection("messages")
-  .orderBy("time")
-  .onSnapshot(snap=>{
+  // PRELOAD OTHER USER ONCE
+  db.collection("users").doc(uid).get().then(userDoc=>{
+    let otherUser = userDoc.data() || {};
 
-    messages.innerHTML="";
+    unsubscribeMessages = db.collection("messages")
+    .orderBy("time")
+    .onSnapshot(snap=>{
 
-    snap.forEach(doc=>{
-      let m=doc.data();
+      messages.innerHTML = "";
 
-      if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
+      snap.forEach(doc=>{
+        let m = doc.data();
 
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(other!==uid) return;
+        if(!(m.from===currentUser.uid || m.to===currentUser.uid)) return;
 
-      let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(m.from===currentUser.uid?"me":"them");
+        let other = m.from===currentUser.uid ? m.to : m.from;
+        if(other !== uid) return;
 
-      let bubble=document.createElement("div");
-      bubble.className="msg";
+        let isMine = m.from === currentUser.uid;
 
-      bubble.innerHTML=`
-        ${m.text}
-        <div style="font-size:10px;opacity:0.6">
-          ${new Date(m.time).toLocaleTimeString()}
-        </div>
-      `;
+        let wrap=document.createElement("div");
+        wrap.className="msgWrap "+(isMine?"me":"them");
 
-      wrap.appendChild(bubble);
-      messages.appendChild(wrap);
+        let avatar=document.createElement("div");
+        avatar.className="msgAvatar";
+
+        let bubble=document.createElement("div");
+        bubble.className="msg";
+
+        bubble.innerHTML=`
+          ${m.text}
+          <div style="font-size:10px;opacity:0.6">
+            ${new Date(m.time).toLocaleTimeString()}
+          </div>
+        `;
+
+        if(isMine){
+          if(myData.photo){
+            avatar.innerHTML=`<img src="${myData.photo}">`;
+          }
+          avatar.onclick=()=>openProfile(currentUser.uid);
+
+          wrap.appendChild(bubble);
+          wrap.appendChild(avatar);
+        } else {
+          if(otherUser.photo){
+            avatar.innerHTML=`<img src="${otherUser.photo}">`;
+          }
+          avatar.onclick=()=>openProfile(uid);
+
+          wrap.appendChild(avatar);
+          wrap.appendChild(bubble);
+        }
+
+        messages.appendChild(wrap);
+      });
+
+      messages.scrollTop=messages.scrollHeight;
     });
-
-    messages.scrollTop=messages.scrollHeight;
   });
 }
 
@@ -257,4 +284,4 @@ function loadChats(){
   });
 
   show("home");
-}
+                }
