@@ -7,7 +7,6 @@ let unsubscribeMessages = null;
 
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
-let devPanelExists = false;
 
 // ===== NAV =====
 function show(id){
@@ -25,33 +24,17 @@ auth.onAuthStateChanged(user=>{
 
     if(isDev){
       document.querySelector("#home .topbar span:nth-child(2)").innerText = "ConzChat DEV";
-      addDevMenu();
     }
 
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
 
+      // 🚪 BOOT SYSTEM (ONLY DEV FEATURE KEPT)
       if(d.forceLogout){
         alert("😁 Logged out By Conz 😁");
         db.collection("users").doc(user.uid).update({ forceLogout:false });
         auth.signOut();
-      }
-
-      if(d.themeOverride){
-        alert(d.themeOverride.message);
-        document.documentElement.style.setProperty('--secondary', d.themeOverride.color);
-        db.collection("users").doc(user.uid).update({ themeOverride:null });
-      }
-
-      if(d.freezeUntil && Date.now() < d.freezeUntil){
-        alert("You have been frozen for 30 seconds by Conz");
-        document.body.style.pointerEvents = "none";
-
-        setTimeout(()=>{
-          document.body.style.pointerEvents = "auto";
-          db.collection("users").doc(user.uid).update({ freezeUntil:null });
-        }, d.freezeUntil - Date.now());
       }
     });
 
@@ -65,7 +48,7 @@ auth.onAuthStateChanged(user=>{
   } else show("welcome");
 });
 
-// ===== AUTH FUNCTIONS =====
+// ===== AUTH =====
 function login(){
   auth.signInWithEmailAndPassword(loginEmail.value,loginPassword.value)
   .catch(e=>alert(e.message));
@@ -105,21 +88,24 @@ function applyTheme(){
   if(secondaryColorPicker) secondaryColorPicker.value = secondary;
 }
 
-function openSettings(){
-  show("settings");
-}
+function openSettings(){ show("settings"); }
 
 function saveTheme(){
+  myData.mainColor = mainColorPicker.value;
+  myData.secondaryColor = secondaryColorPicker.value;
+
+  applyTheme();
+
   db.collection("users").doc(currentUser.uid).set({
-    mainColor: mainColorPicker.value,
-    secondaryColor: secondaryColorPicker.value
+    mainColor: myData.mainColor,
+    secondaryColor: myData.secondaryColor
   },{merge:true});
 }
 
 function resetTheme(){
-  mainColorPicker.value="#000000";
-  secondaryColorPicker.value="#ff0000";
-  saveTheme();
+  myData.mainColor="#000000";
+  myData.secondaryColor="#ff0000";
+  applyTheme();
 }
 
 // ===== PROFILE =====
@@ -161,10 +147,6 @@ function searchUsers(){
       div.innerHTML=`
         <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
         <div style="flex:1">${u.username}</div>
-        ${isDev ? `
-          <button onclick="event.stopPropagation();devPrincess('${doc.id}')">👑</button>
-          <button onclick="event.stopPropagation();devFreeze('${doc.id}')">❄️</button>
-        ` : ``}
       `;
 
       div.onclick=()=>openChat(doc.id,u.username,u.photo);
@@ -188,16 +170,6 @@ function openChat(uid,name,photo){
 
     snap.forEach(doc=>{
       let m=doc.data();
-
-      if(m.type==="system"){
-        let sys=document.createElement("div");
-        sys.style.textAlign="center";
-        sys.style.color="#aaa";
-        sys.style.margin="10px";
-        sys.innerText=m.text;
-        messages.appendChild(sys);
-        return;
-      }
 
       if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
 
@@ -285,65 +257,3 @@ function loadChats(){
 
   show("home");
 }
-
-// ===== DEV MENU =====
-function addDevMenu(){
-  let dev=document.createElement("div");
-  dev.innerText="Dev Panel";
-
-  dev.onclick=()=>{
-    openSettings();
-
-    if(devPanelExists) return;
-    devPanelExists = true;
-
-    let panel=document.createElement("div");
-
-    panel.innerHTML=`
-      <h3>Dev Broadcast</h3>
-      <button onclick="broadcastProblem()">⚠️ Problem</button>
-      <button onclick="broadcastUpdate()">🚀 Update</button>
-    `;
-
-    settings.appendChild(panel);
-  };
-
-  fabMenu.appendChild(dev);
-}
-
-// ===== DEV ACTIONS =====
-function devPrincess(uid){
-  db.collection("users").doc(uid).update({
-    themeOverride:{color:"#ff69b4",message:"ooo pretty pink 💕"}
-  });
-}
-
-function devFreeze(uid){
-  db.collection("users").doc(uid).update({
-    freezeUntil:Date.now()+30000
-  });
-}
-
-// ===== BROADCAST =====
-function sendSystemToAll(message){
-  db.collection("users").get().then(snap=>{
-    snap.forEach(doc=>{
-      db.collection("messages").add({
-        text:message,
-        type:"system",
-        to:doc.id,
-        time:Date.now()
-      });
-    });
-  });
-}
-
-function broadcastProblem(){
-  sendSystemToAll("Automatic system message from developer...");
-}
-
-function broadcastUpdate(){
-  sendSystemToAll("A new update is coming...");
-}
-
-// ===== PARTICLES + TEXT KEPT =====
