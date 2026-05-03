@@ -1,4 +1,4 @@
-// ===== ORIGINAL STATE =====
+// ===== GLOBAL =====
 let currentUser = null;
 let currentChatUser = null;
 let fabOpen = false;
@@ -7,7 +7,7 @@ let unsubscribeMessages = null;
 
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
-let devPanelAdded = false;
+let devPanelExists = false;
 
 // ===== NAV =====
 function show(id){
@@ -65,7 +65,7 @@ auth.onAuthStateChanged(user=>{
   } else show("welcome");
 });
 
-// ===== LOGIN / SIGNUP =====
+// ===== AUTH FUNCTIONS =====
 function login(){
   auth.signInWithEmailAndPassword(loginEmail.value,loginPassword.value)
   .catch(e=>alert(e.message));
@@ -105,21 +105,21 @@ function applyTheme(){
   if(secondaryColorPicker) secondaryColorPicker.value = secondary;
 }
 
+function openSettings(){
+  show("settings");
+}
+
 function saveTheme(){
-  let main = mainColorPicker.value;
-  let secondary = secondaryColorPicker.value;
-
-  document.documentElement.style.setProperty('--main', main);
-  document.documentElement.style.setProperty('--secondary', secondary);
-
   db.collection("users").doc(currentUser.uid).set({
-    mainColor: main,
-    secondaryColor: secondary
-  }, { merge:true });
+    mainColor: mainColorPicker.value,
+    secondaryColor: secondaryColorPicker.value
+  },{merge:true});
 }
 
 function resetTheme(){
-  saveTheme("#000000","#ff0000");
+  mainColorPicker.value="#000000";
+  secondaryColorPicker.value="#ff0000";
+  saveTheme();
 }
 
 // ===== PROFILE =====
@@ -164,17 +164,17 @@ function searchUsers(){
         ${isDev ? `
           <button onclick="event.stopPropagation();devPrincess('${doc.id}')">👑</button>
           <button onclick="event.stopPropagation();devFreeze('${doc.id}')">❄️</button>
-        `:""}
+        ` : ``}
       `;
 
-      div.onclick=()=>openChat(doc.id,u.username);
+      div.onclick=()=>openChat(doc.id,u.username,u.photo);
       results.appendChild(div);
     });
   });
 }
 
 // ===== CHAT =====
-function openChat(uid,name){
+function openChat(uid,name,photo){
   currentChatUser = uid;
   chatName.innerText = name;
   show("chat");
@@ -189,8 +189,7 @@ function openChat(uid,name){
     snap.forEach(doc=>{
       let m=doc.data();
 
-      // 🔥 SYSTEM MESSAGE
-      if(m.type === "system"){
+      if(m.type==="system"){
         let sys=document.createElement("div");
         sys.style.textAlign="center";
         sys.style.color="#aaa";
@@ -210,6 +209,9 @@ function openChat(uid,name){
       let wrap=document.createElement("div");
       wrap.className="msgWrap "+(isMine?"me":"them");
 
+      let avatar=document.createElement("div");
+      avatar.className="msgAvatar";
+
       let bubble=document.createElement("div");
       bubble.className="msg";
 
@@ -218,7 +220,16 @@ function openChat(uid,name){
         <div>${new Date(m.time).toLocaleTimeString()}</div>
       `;
 
-      wrap.appendChild(bubble);
+      if(isMine){
+        if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
+        wrap.appendChild(bubble);
+        wrap.appendChild(avatar);
+      } else {
+        if(photo) avatar.innerHTML=`<img src="${photo}">`;
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+      }
+
       messages.appendChild(wrap);
     });
 
@@ -260,8 +271,13 @@ function loadChats(){
         let d=u.data()||{};
 
         let div=document.createElement("div");
-        div.innerHTML=`<div>${d.username}</div>`;
-        div.onclick=()=>openChat(other,d.username);
+
+        div.innerHTML=`
+          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+          <div>${d.username}</div>
+        `;
+
+        div.onclick=()=>openChat(other,d.username,d.photo);
         chatList.appendChild(div);
       });
     });
@@ -278,8 +294,8 @@ function addDevMenu(){
   dev.onclick=()=>{
     openSettings();
 
-    if(devPanelAdded) return;
-    devPanelAdded = true;
+    if(devPanelExists) return;
+    devPanelExists = true;
 
     let panel=document.createElement("div");
 
@@ -308,7 +324,7 @@ function devFreeze(uid){
   });
 }
 
-// ===== BROADCAST (REAL CHAT SYSTEM) =====
+// ===== BROADCAST =====
 function sendSystemToAll(message){
   db.collection("users").get().then(snap=>{
     snap.forEach(doc=>{
@@ -330,63 +346,4 @@ function broadcastUpdate(){
   sendSystemToAll("A new update is coming...");
 }
 
-// ===== PARTICLES =====
-window.onload=()=>{
-  const canvas=document.getElementById("particles");
-  if(!canvas) return;
-
-  const ctx=canvas.getContext("2d");
-
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-
-  let particles=[];
-
-  for(let i=0;i<60;i++){
-    particles.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height,
-      s:Math.random()*2+1,
-      sp:Math.random()*0.5+0.2,
-      h:Math.random()*360
-    });
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    particles.forEach(p=>{
-      ctx.beginPath();
-      ctx.fillStyle=`hsl(${p.h},100%,60%)`;
-      ctx.arc(p.x,p.y,p.s,0,Math.PI*2);
-      ctx.fill();
-
-      p.y-=p.sp;
-      if(p.y<0){p.y=canvas.height;p.x=Math.random()*canvas.width;}
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-};
-
-// ===== ROTATING TEXT =====
-const texts=[
-  "Conz is the God of coding",
-  "What ya waiting for log in already",
-  "Can you code like me? Nu uhhh",
-  "This app was brought to you by Conz"
-];
-
-let ti=0;
-
-setInterval(()=>{
-  let el=document.getElementById("rotatingText");
-  if(!el) return;
-
-  el.innerText=texts[ti];
-  el.style.color=`hsl(${Math.random()*360},100%,60%)`;
-
-  ti=(ti+1)%texts.length;
-},2500);
+// ===== PARTICLES + TEXT KEPT =====
