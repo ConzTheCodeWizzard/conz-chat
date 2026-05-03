@@ -107,7 +107,7 @@ function saveDisplayName(){
   }).then(()=>openProfile());
 }
 
-// IMAGE
+// 🔥 IMAGE (FIXED)
 function pickImage(){
   let input=document.createElement("input");
   input.type="file";
@@ -115,13 +115,31 @@ function pickImage(){
 
   input.onchange=e=>{
     let file=e.target.files[0];
-    let reader=new FileReader();
+    if(!file) return;
 
-    reader.onload=ev=>{
-      db.collection("users").doc(currentUser.uid).update({
-        photo:ev.target.result
-      }).then(()=>{
-        myData.photo=ev.target.result;
+    let img = new Image();
+    let reader = new FileReader();
+
+    reader.onload = ev=>{
+      img.src = ev.target.result;
+    };
+
+    img.onload = ()=>{
+      let canvas = document.createElement("canvas");
+      let ctx = canvas.getContext("2d");
+
+      let size = 200;
+      canvas.width = size;
+      canvas.height = size;
+
+      ctx.drawImage(img,0,0,size,size);
+
+      let compressed = canvas.toDataURL("image/jpeg",0.6);
+
+      db.collection("users").doc(currentUser.uid).set({
+        photo: compressed
+      }, { merge:true }).then(()=>{
+        myData.photo = compressed;
         loadAvatar();
         openProfile();
       });
@@ -162,6 +180,19 @@ function searchUsers(){
       results.appendChild(div);
     });
   });
+}
+
+// 🔥 SAFE IMAGE RENDER
+function safeImage(el, src){
+  if(!src) return;
+
+  if(src.length > 150000) return;
+
+  let img=document.createElement("img");
+  img.src=src;
+  img.onerror=()=>img.remove();
+
+  el.appendChild(img);
 }
 
 // CHAT (FIXED)
@@ -208,19 +239,13 @@ function openChat(uid,name){
         `;
 
         if(isMine){
-          if(myData.photo){
-            avatar.innerHTML=`<img src="${myData.photo}">`;
-          }
+          safeImage(avatar, myData.photo);
           avatar.onclick=()=>openProfile(currentUser.uid);
-
           wrap.appendChild(bubble);
           wrap.appendChild(avatar);
         } else {
-          if(otherUser.photo){
-            avatar.innerHTML=`<img src="${otherUser.photo}">`;
-          }
+          safeImage(avatar, otherUser.photo);
           avatar.onclick=()=>openProfile(uid);
-
           wrap.appendChild(avatar);
           wrap.appendChild(bubble);
         }
@@ -228,7 +253,7 @@ function openChat(uid,name){
         fragment.appendChild(wrap);
       });
 
-      messages.innerHTML = "";
+      messages.innerHTML="";
       messages.appendChild(fragment);
       messages.scrollTop = messages.scrollHeight;
     });
