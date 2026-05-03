@@ -29,10 +29,39 @@ auth.onAuthStateChanged(user=>{
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
+
+      // EXISTING
       if(d.forceLogout){
         alert("😁 Logged out By Conz 😁");
         db.collection("users").doc(user.uid).update({ forceLogout:false });
         auth.signOut();
+      }
+
+      // 👑 THEME OVERRIDE
+      if(d.themeOverride){
+        alert(d.themeOverride.message);
+        document.documentElement.style.setProperty('--secondary', d.themeOverride.color);
+        db.collection("users").doc(user.uid).update({ themeOverride:null });
+      }
+
+      // ❄️ FREEZE
+      if(d.freezeUntil && Date.now() < d.freezeUntil){
+        alert("You have been frozen for 30 seconds by Conz");
+
+        document.body.style.pointerEvents = "none";
+
+        let remaining = d.freezeUntil - Date.now();
+
+        setTimeout(()=>{
+          document.body.style.pointerEvents = "auto";
+          db.collection("users").doc(user.uid).update({ freezeUntil:null });
+        }, remaining);
+      }
+
+      // 📢 SYSTEM MESSAGE
+      if(d.systemMessage){
+        alert(d.systemMessage);
+        db.collection("users").doc(user.uid).update({ systemMessage:null });
       }
     });
 
@@ -202,7 +231,12 @@ function searchUsers(){
 
       div.innerHTML=`
         <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
-        <div>${u.username}</div>
+        <div style="flex:1">${u.username}</div>
+        ${isDev ? `
+          <button onclick="event.stopPropagation();devPrincess('${doc.id}')">👑</button>
+          <button onclick="event.stopPropagation();devRed('${doc.id}')">🔴</button>
+          <button onclick="event.stopPropagation();devFreeze('${doc.id}')">❄️</button>
+        ` : ``}
       `;
 
       div.onclick=()=>openChat(doc.id,u.username);
@@ -211,7 +245,7 @@ function searchUsers(){
   });
 }
 
-// CHAT
+// CHAT (UNCHANGED)
 function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
@@ -269,7 +303,7 @@ function openChat(uid,name){
   });
 }
 
-// SEND
+// SEND (UNCHANGED)
 function sendMessage(){
   if(!msgInput.value) return;
 
@@ -283,7 +317,7 @@ function sendMessage(){
   msgInput.value="";
 }
 
-// CHAT LIST
+// CHAT LIST (UNCHANGED)
 function loadChats(){
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
@@ -322,99 +356,53 @@ function loadChats(){
 function addDevMenu(){
   let dev=document.createElement("div");
   dev.innerText="Dev Panel";
-  dev.onclick=()=>openDevPanel();
+  dev.onclick=()=>{
+    openSettings();
+    setTimeout(()=>{
+      let panel=document.createElement("div");
+      panel.innerHTML=`
+        <h3>Dev Broadcast</h3>
+        <button onclick="broadcastProblem()">⚠️ Problem</button>
+        <button onclick="broadcastUpdate()">🚀 Update</button>
+      `;
+      settings.appendChild(panel);
+    },100);
+  };
   fabMenu.appendChild(dev);
 }
 
-function openDevPanel(){
-  let panel=prompt("Enter username to boot:");
-  if(!panel) return;
-
-  db.collection("users").get().then(snap=>{
-    snap.forEach(doc=>{
-      let u=doc.data();
-      if(u.username===panel){
-        db.collection("users").doc(doc.id).update({
-          forceLogout:true
-        });
-      }
-    });
+// DEV ACTIONS
+function devPrincess(uid){
+  db.collection("users").doc(uid).update({
+    themeOverride:{color:"#ff69b4",message:"ooo pretty pink 💕"}
   });
 }
 
-// ===== NEW FEATURES =====
+function devRed(uid){
+  db.collection("users").doc(uid).update({
+    themeOverride:{color:"#ff0000",message:"Welcome to the red zone 🔥"}
+  });
+}
 
-// rotating text
-const texts = [
-  "Conz is the God of coding",
-  "What ya waiting for log in already",
-  "Can you code like me? Nu uhhh",
-  "This app was brought to you by Conz"
-];
+function devFreeze(uid){
+  db.collection("users").doc(uid).update({
+    freezeUntil:Date.now()+30000
+  });
+}
 
-let textIndex = 0;
+// BROADCAST
+function broadcastProblem(){
+  sendSystemToAll("Automatic system message from developer, 1 or more options are currently broken/bugged right now but don't worry it will be fixed soon, sorry for any inconvenience ~Conz~");
+}
 
-setInterval(()=>{
-  let el = document.getElementById("rotatingText");
-  if(!el) return;
+function broadcastUpdate(){
+  sendSystemToAll("A new update is coming at some point today guys, be on the lookout for new cool options and features ~Conz~");
+}
 
-  el.style.opacity=0;
-
-  setTimeout(()=>{
-    el.innerText = texts[textIndex];
-    let color = `hsl(${Math.random()*360},100%,60%)`;
-    el.style.color = color;
-    el.style.textShadow = `0 0 10px ${color}`;
-    el.style.opacity=1;
-
-    textIndex = (textIndex+1)%texts.length;
-  },300);
-
-},2500);
-
-// particles
-const canvas = document.getElementById("particles");
-
-if(canvas){
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  let particles = [];
-
-  for(let i=0;i<60;i++){
-    particles.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height,
-      size:Math.random()*2+1,
-      speed:Math.random()*0.5+0.2,
-      hue:Math.random()*360
+function sendSystemToAll(message){
+  db.collection("users").get().then(snap=>{
+    snap.forEach(doc=>{
+      db.collection("users").doc(doc.id).update({systemMessage:message});
     });
-  }
-
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    particles.forEach(p=>{
-      ctx.beginPath();
-      ctx.fillStyle = `hsla(${p.hue},100%,60%,0.7)`;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(${p.hue},100%,60%)`;
-
-      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fill();
-
-      p.y -= p.speed;
-
-      if(p.y<0){
-        p.y = canvas.height;
-        p.x = Math.random()*canvas.width;
-      }
-    });
-
-    requestAnimationFrame(animate);
-  }
-
-  animate();
-    }
+  });
+}
