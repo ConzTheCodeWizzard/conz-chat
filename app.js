@@ -4,6 +4,9 @@ let fabOpen = false;
 let myData = {};
 let unsubscribeMessages = null;
 
+const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
+let isDev = false;
+
 // NAV
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -16,10 +19,28 @@ function show(id){
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser=user;
+    isDev = user.uid === DEV_UID;
+
+    // 🔥 DEV TITLE
+    if(isDev){
+      document.querySelector("#home .topbar span:nth-child(2)").innerText = "ConzChat DEV";
+      addDevMenu();
+    }
+
+    // 🔥 FORCE LOGOUT LISTENER
+    db.collection("users").doc(user.uid)
+    .onSnapshot(doc=>{
+      let d = doc.data() || {};
+      if(d.forceLogout){
+        alert("😁 Logged out By Conz 😁");
+        db.collection("users").doc(user.uid).update({ forceLogout:false });
+        auth.signOut();
+      }
+    });
 
     db.collection("users").doc(user.uid).get().then(doc=>{
       myData = doc.data() || {};
-      applyTheme();   // 🔥 FIX: apply immediately
+      applyTheme();
       loadChats();
       loadAvatar();
     });
@@ -57,10 +78,7 @@ function toggleFab(){
   fabMenu.style.display=fabOpen?"flex":"none";
 }
 
-// =====================
-// 🎨 THEME (FULL FIX)
-// =====================
-
+// 🎨 THEME
 function applyTheme(){
   let main = myData.mainColor || "#000000";
   let secondary = myData.secondaryColor || "#ff0000";
@@ -68,23 +86,20 @@ function applyTheme(){
   document.documentElement.style.setProperty('--main', main);
   document.documentElement.style.setProperty('--secondary', secondary);
 
-  if(mainColorPicker) mainColorPicker.value = main;
-  if(secondaryColorPicker) secondaryColorPicker.value = secondary;
+  mainColorPicker.value = main;
+  secondaryColorPicker.value = secondary;
 }
 
 function saveTheme(){
-  let main = mainColorPicker.value || "#000000";
-  let secondary = secondaryColorPicker.value || "#ff0000";
+  let main = mainColorPicker.value;
+  let secondary = secondaryColorPicker.value;
 
-  // 🔥 instant apply
   document.documentElement.style.setProperty('--main', main);
   document.documentElement.style.setProperty('--secondary', secondary);
 
-  // 🔥 update local data (THIS WAS YOUR BUG)
   myData.mainColor = main;
   myData.secondaryColor = secondary;
 
-  // 🔥 save to firestore
   db.collection("users").doc(currentUser.uid).set({
     mainColor: main,
     secondaryColor: secondary
@@ -92,28 +107,10 @@ function saveTheme(){
 }
 
 function resetTheme(){
-  let main = "#000000";
-  let secondary = "#ff0000";
-
-  document.documentElement.style.setProperty('--main', main);
-  document.documentElement.style.setProperty('--secondary', secondary);
-
-  myData.mainColor = main;
-  myData.secondaryColor = secondary;
-
-  mainColorPicker.value = main;
-  secondaryColorPicker.value = secondary;
-
-  db.collection("users").doc(currentUser.uid).set({
-    mainColor: main,
-    secondaryColor: secondary
-  }, { merge:true });
+  saveTheme("#000000","#ff0000");
 }
 
-// =====================
 // PROFILE
-// =====================
-
 function openProfile(uid=currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data()||{};
@@ -133,16 +130,7 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-function saveDisplayName(){
-  db.collection("users").doc(currentUser.uid).update({
-    displayName:editName.value
-  }).then(()=>openProfile());
-}
-
-// =====================
 // IMAGE
-// =====================
-
 function pickImage(){
   let input=document.createElement("input");
   input.type="file";
@@ -152,29 +140,26 @@ function pickImage(){
     let file=e.target.files[0];
     if(!file) return;
 
-    let img = new Image();
-    let reader = new FileReader();
+    let img=new Image();
+    let reader=new FileReader();
 
-    reader.onload = ev=>{
-      img.src = ev.target.result;
-    };
+    reader.onload=e=>img.src=e.target.result;
 
-    img.onload = ()=>{
-      let canvas = document.createElement("canvas");
-      let ctx = canvas.getContext("2d");
+    img.onload=()=>{
+      let canvas=document.createElement("canvas");
+      let ctx=canvas.getContext("2d");
 
-      let size = 200;
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width=200;
+      canvas.height=200;
 
-      ctx.drawImage(img,0,0,size,size);
+      ctx.drawImage(img,0,0,200,200);
 
-      let compressed = canvas.toDataURL("image/jpeg",0.6);
+      let compressed=canvas.toDataURL("image/jpeg",0.6);
 
       db.collection("users").doc(currentUser.uid).set({
-        photo: compressed
-      }, { merge:true }).then(()=>{
-        myData.photo = compressed;
+        photo:compressed
+      },{merge:true}).then(()=>{
+        myData.photo=compressed;
         loadAvatar();
         openProfile();
       });
@@ -192,10 +177,7 @@ function loadAvatar(){
     : "👤";
 }
 
-// =====================
 // SEARCH
-// =====================
-
 function openSearch(){ show("search"); }
 function openSettings(){ show("settings"); }
 
@@ -214,32 +196,12 @@ function searchUsers(){
       `;
 
       div.onclick=()=>openChat(doc.id,u.username);
-
       results.appendChild(div);
     });
   });
 }
 
-// =====================
-// SAFE IMAGE
-// =====================
-
-function addImg(el, src){
-  if(!src) return;
-  if(typeof src !== "string") return;
-  if(src.length > 120000) return;
-
-  let img = document.createElement("img");
-  img.src = src;
-  img.onerror = ()=>img.remove();
-
-  el.appendChild(img);
-}
-
-// =====================
-// CHAT (SAFE)
-// =====================
-
+// 💬 CHAT
 function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
@@ -247,70 +209,57 @@ function openChat(uid,name){
 
   if(unsubscribeMessages) unsubscribeMessages();
 
-  messages.innerHTML = "";
-
   db.collection("users").doc(uid).get().then(userDoc=>{
     let otherUser = userDoc.data() || {};
 
     unsubscribeMessages = db.collection("messages")
     .orderBy("time")
     .onSnapshot(snap=>{
+      messages.innerHTML="";
 
-      try{
+      snap.forEach(doc=>{
+        let m=doc.data();
 
-        messages.innerHTML="";
+        if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
 
-        snap.forEach(doc=>{
-          let m = doc.data();
+        let other=m.from===currentUser.uid?m.to:m.from;
+        if(other!==uid) return;
 
-          if(!(m.from===currentUser.uid || m.to===currentUser.uid)) return;
+        let isMine=m.from===currentUser.uid;
 
-          let other = m.from===currentUser.uid ? m.to : m.from;
-          if(other !== uid) return;
+        let wrap=document.createElement("div");
+        wrap.className="msgWrap "+(isMine?"me":"them");
 
-          let isMine = m.from === currentUser.uid;
+        let avatar=document.createElement("div");
+        avatar.className="msgAvatar";
 
-          let wrap=document.createElement("div");
-          wrap.className="msgWrap "+(isMine?"me":"them");
+        let bubble=document.createElement("div");
+        bubble.className="msg";
 
-          let avatar=document.createElement("div");
-          avatar.className="msgAvatar";
+        bubble.innerHTML=`
+          ${m.text}
+          <div>${new Date(m.time).toLocaleTimeString()}</div>
+        `;
 
-          let bubble=document.createElement("div");
-          bubble.className="msg";
+        if(isMine){
+          if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
+          wrap.appendChild(bubble);
+          wrap.appendChild(avatar);
+        } else {
+          if(otherUser.photo) avatar.innerHTML=`<img src="${otherUser.photo}">`;
+          wrap.appendChild(avatar);
+          wrap.appendChild(bubble);
+        }
 
-          bubble.innerHTML=`
-            ${m.text}
-            <div>${new Date(m.time).toLocaleTimeString()}</div>
-          `;
+        messages.appendChild(wrap);
+      });
 
-          if(isMine){
-            addImg(avatar,myData.photo);
-            wrap.appendChild(bubble);
-            wrap.appendChild(avatar);
-          } else {
-            addImg(avatar,otherUser.photo);
-            wrap.appendChild(avatar);
-            wrap.appendChild(bubble);
-          }
-
-          messages.appendChild(wrap);
-        });
-
-        messages.scrollTop = messages.scrollHeight;
-
-      }catch(e){
-        console.log("Prevented crash:",e);
-      }
-
+      messages.scrollTop=messages.scrollHeight;
     });
   });
 }
 
-// =====================
 // SEND
-// =====================
-
 function sendMessage(){
   if(!msgInput.value) return;
 
@@ -324,14 +273,10 @@ function sendMessage(){
   msgInput.value="";
 }
 
-// =====================
 // CHAT LIST
-// =====================
-
 function loadChats(){
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
-
     chatList.innerHTML="";
     let seen={};
 
@@ -355,12 +300,34 @@ function loadChats(){
         `;
 
         div.onclick=()=>openChat(other,d.username);
-
         chatList.appendChild(div);
       });
     });
-
   });
 
   show("home");
-          }
+}
+
+// 🔥 DEV MENU
+function addDevMenu(){
+  let dev=document.createElement("div");
+  dev.innerText="Dev Panel";
+  dev.onclick=()=>openDevPanel();
+  fabMenu.appendChild(dev);
+}
+
+function openDevPanel(){
+  let panel=prompt("Enter username to boot:");
+  if(!panel) return;
+
+  db.collection("users").get().then(snap=>{
+    snap.forEach(doc=>{
+      let u=doc.data();
+      if(u.username===panel){
+        db.collection("users").doc(doc.id).update({
+          forceLogout:true
+        });
+      }
+    });
+  });
+}
