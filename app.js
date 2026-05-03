@@ -4,6 +4,7 @@ let currentChatUser = null;
 let fabOpen = false;
 let myData = {};
 let unsubscribeMessages = null;
+let unsubscribeStatus = null;
 
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
@@ -26,11 +27,25 @@ auth.onAuthStateChanged(user=>{
       document.querySelector("#home .topbar span:nth-child(2)").innerText = "ConzChat DEV";
     }
 
+    // 🟢 SET ONLINE
+    db.collection("users").doc(user.uid).set({
+      online: true,
+      lastSeen: Date.now()
+    }, {merge:true});
+
+    // 🟢 HANDLE LEAVING
+    window.addEventListener("beforeunload", ()=>{
+      db.collection("users").doc(user.uid).set({
+        online: false,
+        lastSeen: Date.now()
+      }, {merge:true});
+    });
+
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
 
-      // 🚪 BOOT SYSTEM (ONLY DEV FEATURE KEPT)
+      // 🚪 BOOT SYSTEM
       if(d.forceLogout){
         alert("😁 Logged out By Conz 😁");
         db.collection("users").doc(user.uid).update({ forceLogout:false });
@@ -63,12 +78,21 @@ function signup(){
       photo:"",
       created:Date.now(),
       mainColor:"#000000",
-      secondaryColor:"#ff0000"
+      secondaryColor:"#ff0000",
+      online: true,
+      lastSeen: Date.now()
     });
   });
 }
 
-function logout(){ auth.signOut(); }
+function logout(){
+  db.collection("users").doc(currentUser.uid).set({
+    online:false,
+    lastSeen:Date.now()
+  },{merge:true});
+
+  auth.signOut();
+}
 
 // ===== FAB =====
 function toggleFab(){
@@ -112,10 +136,26 @@ function resetTheme(){
 function openProfile(uid=currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data()||{};
+    let isDevProfile = uid === DEV_UID;
 
     profileContent.innerHTML=`
       <div class="avatar">${u.photo?`<img src="${u.photo}">`:""}</div>
-      <div class="displayName">${u.displayName||u.username}</div>
+
+      <div class="displayName">
+        ${u.displayName||u.username}
+      </div>
+
+      ${isDevProfile ? `
+        <div style="
+          color: gold;
+          font-weight: bold;
+          margin-top: 6px;
+          text-shadow: 0 0 10px gold;
+        ">
+          👑 ConzChat Dev
+        </div>
+      ` : ""}
+
       <div class="username">@${u.username}</div>
     `;
 
@@ -158,12 +198,32 @@ function searchUsers(){
 // ===== CHAT =====
 function openChat(uid,name,photo){
   currentChatUser = uid;
-  chatName.innerText = name;
   show("chat");
 
   if(unsubscribeMessages) unsubscribeMessages();
+  if(unsubscribeStatus) unsubscribeStatus();
 
-  db.collection("messages")
+  // 🟢 LIVE STATUS
+  unsubscribeStatus = db.collection("users").doc(uid)
+  .onSnapshot(doc=>{
+    let u = doc.data() || {};
+
+    if(u.online){
+      chatName.innerText = name + " 🟢 Online";
+    } else {
+      let seconds = Math.floor((Date.now() - (u.lastSeen || 0)) / 1000);
+
+      let text = seconds < 60
+        ? `${seconds}s ago`
+        : seconds < 3600
+        ? `${Math.floor(seconds/60)}m ago`
+        : `${Math.floor(seconds/3600)}h ago`;
+
+      chatName.innerText = name + " • Last seen " + text;
+    }
+  });
+
+  unsubscribeMessages = db.collection("messages")
   .orderBy("time")
   .onSnapshot(snap=>{
     messages.innerHTML="";
