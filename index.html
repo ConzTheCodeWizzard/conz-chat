@@ -7,33 +7,26 @@
 
 <body>
 
-<!-- WELCOME -->
 <div id="welcome" class="screen active welcomeScreen">
-
   <canvas id="particles"></canvas>
 
   <div class="welcomeContent">
     <h2 class="welcomeText">Welcome to</h2>
     <h1 class="logo">ConzChat</h1>
-
     <div class="version">Version 1.0</div>
-
     <div id="rotatingText" class="rotatingText"></div>
 
     <button onclick="show('login')">Login</button>
     <button onclick="show('signup')">Create Account</button>
   </div>
-
 </div>
 
-<!-- LOGIN -->
 <div id="login" class="screen">
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password">
   <button onclick="login()">Login</button>
 </div>
 
-<!-- SIGNUP -->
 <div id="signup" class="screen">
   <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
@@ -41,7 +34,6 @@
   <button onclick="signup()">Create</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="screen">
   <div class="topbar">
     <button onclick="logout()">Logout</button>
@@ -56,11 +48,11 @@
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="openSettings()">Colour Editor</div>
+    <div onclick="devOpen()">Dev Panel</div>
     <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
@@ -68,14 +60,11 @@
   </div>
 
   <div id="profileContent"></div>
-
   <input id="editName" placeholder="Edit display name">
   <button onclick="saveDisplayName()">Save Name</button>
-
   <p id="daysOnApp"></p>
 </div>
 
-<!-- FIND FRIENDS -->
 <div id="search" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
@@ -86,7 +75,6 @@
   <div id="results"></div>
 </div>
 
-<!-- COLOUR EDITOR -->
 <div id="settings" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
@@ -99,7 +87,6 @@
   <button onclick="resetTheme()">Reset</button>
 </div>
 
-<!-- CHAT -->
 <div id="chat" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
@@ -112,7 +99,6 @@
   <button onclick="sendMessage()">Send</button>
 </div>
 
-<!-- UPDATE LOG -->
 <div id="updates" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
@@ -129,8 +115,11 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <script src="firebase.js"></script>
+<script src="particles.js"></script>
 <script src="app.js"></script>
+<script src="dev.js"></script>
 
 </body>
 </html>
