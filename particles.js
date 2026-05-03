@@ -1,4 +1,4 @@
-window.addEventListener("load", ()=>{
+window.addEventListener("load",()=>{
   const canvas = document.getElementById("particles");
   if(!canvas) return;
 
@@ -11,14 +11,14 @@ window.addEventListener("load", ()=>{
   resize();
   window.addEventListener("resize", resize);
 
-  let particles = [];
+  let particles=[];
 
-  for(let i=0;i<60;i++){
+  for(let i=0;i<80;i++){
     particles.push({
       x:Math.random()*canvas.width,
       y:Math.random()*canvas.height,
       size:Math.random()*2+1,
-      speed:Math.random()*0.5+0.2,
+      speed:Math.random()*0.7+0.3,
       hue:Math.random()*360
     });
   }
@@ -28,16 +28,17 @@ window.addEventListener("load", ()=>{
 
     particles.forEach(p=>{
       ctx.beginPath();
-      ctx.fillStyle = `hsla(${p.hue},100%,60%,0.7)`;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(${p.hue},100%,60%)`;
+      ctx.fillStyle=`hsla(${p.hue},100%,60%,0.7)`;
+      ctx.shadowBlur=20;
+      ctx.shadowColor=`hsl(${p.hue},100%,60%)`;
       ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
       ctx.fill();
 
       p.y -= p.speed;
+
       if(p.y<0){
-        p.y = canvas.height;
-        p.x = Math.random()*canvas.width;
+        p.y=canvas.height;
+        p.x=Math.random()*canvas.width;
       }
     });
 
@@ -45,25 +46,4 @@ window.addEventListener("load", ()=>{
   }
 
   animate();
-
-  const texts = [
-    "Conz is the God of coding",
-    "What ya waiting for log in already",
-    "Can you code like me? Nu uhhh",
-    "This app was brought to you by Conz"
-  ];
-
-  let i = 0;
-
-  setInterval(()=>{
-    let el = document.getElementById("rotatingText");
-    if(!el) return;
-
-    let color = `hsl(${Math.random()*360},100%,60%)`;
-    el.innerText = texts[i];
-    el.style.color = color;
-    el.style.textShadow = `0 0 10px ${color}`;
-
-    i = (i+1)%texts.length;
-  },2500);
 });
