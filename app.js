@@ -21,13 +21,11 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     isDev = user.uid === DEV_UID;
 
-    // 🔥 DEV TITLE
     if(isDev){
       document.querySelector("#home .topbar span:nth-child(2)").innerText = "ConzChat DEV";
       addDevMenu();
     }
 
-    // 🔥 FORCE LOGOUT LISTENER
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
@@ -78,7 +76,7 @@ function toggleFab(){
   fabMenu.style.display=fabOpen?"flex":"none";
 }
 
-// 🎨 THEME
+// THEME
 function applyTheme(){
   let main = myData.mainColor || "#000000";
   let secondary = myData.secondaryColor || "#ff0000";
@@ -86,8 +84,8 @@ function applyTheme(){
   document.documentElement.style.setProperty('--main', main);
   document.documentElement.style.setProperty('--secondary', secondary);
 
-  mainColorPicker.value = main;
-  secondaryColorPicker.value = secondary;
+  if(mainColorPicker) mainColorPicker.value = main;
+  if(secondaryColorPicker) secondaryColorPicker.value = secondary;
 }
 
 function saveTheme(){
@@ -107,7 +105,19 @@ function saveTheme(){
 }
 
 function resetTheme(){
-  saveTheme("#000000","#ff0000");
+  let main = "#000000";
+  let secondary = "#ff0000";
+
+  document.documentElement.style.setProperty('--main', main);
+  document.documentElement.style.setProperty('--secondary', secondary);
+
+  myData.mainColor = main;
+  myData.secondaryColor = secondary;
+
+  db.collection("users").doc(currentUser.uid).set({
+    mainColor: main,
+    secondaryColor: secondary
+  }, { merge:true });
 }
 
 // PROFILE
@@ -201,7 +211,7 @@ function searchUsers(){
   });
 }
 
-// 💬 CHAT
+// CHAT
 function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
@@ -308,7 +318,7 @@ function loadChats(){
   show("home");
 }
 
-// 🔥 DEV MENU
+// DEV MENU
 function addDevMenu(){
   let dev=document.createElement("div");
   dev.innerText="Dev Panel";
@@ -331,3 +341,80 @@ function openDevPanel(){
     });
   });
 }
+
+// ===== NEW FEATURES =====
+
+// rotating text
+const texts = [
+  "Conz is the God of coding",
+  "What ya waiting for log in already",
+  "Can you code like me? Nu uhhh",
+  "This app was brought to you by Conz"
+];
+
+let textIndex = 0;
+
+setInterval(()=>{
+  let el = document.getElementById("rotatingText");
+  if(!el) return;
+
+  el.style.opacity=0;
+
+  setTimeout(()=>{
+    el.innerText = texts[textIndex];
+    let color = `hsl(${Math.random()*360},100%,60%)`;
+    el.style.color = color;
+    el.style.textShadow = `0 0 10px ${color}`;
+    el.style.opacity=1;
+
+    textIndex = (textIndex+1)%texts.length;
+  },300);
+
+},2500);
+
+// particles
+const canvas = document.getElementById("particles");
+
+if(canvas){
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let particles = [];
+
+  for(let i=0;i<60;i++){
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height,
+      size:Math.random()*2+1,
+      speed:Math.random()*0.5+0.2,
+      hue:Math.random()*360
+    });
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${p.hue},100%,60%,0.7)`;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(${p.hue},100%,60%)`;
+
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+
+      p.y -= p.speed;
+
+      if(p.y<0){
+        p.y = canvas.height;
+        p.x = Math.random()*canvas.width;
+      }
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+    }
