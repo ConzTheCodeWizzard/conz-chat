@@ -7,18 +7,33 @@
 
 <body>
 
-<div id="welcome" class="screen active">
-  <h1 class="title">ConzChat</h1>
-  <button onclick="show('login')">Login</button>
-  <button onclick="show('signup')">Create Account</button>
+<!-- WELCOME -->
+<div id="welcome" class="screen active welcomeScreen">
+
+  <canvas id="particles"></canvas>
+
+  <div class="welcomeContent">
+    <h2 class="welcomeText">Welcome to</h2>
+    <h1 class="logo">ConzChat</h1>
+
+    <div class="version">Version 1.0</div>
+
+    <div id="rotatingText" class="rotatingText"></div>
+
+    <button onclick="show('login')">Login</button>
+    <button onclick="show('signup')">Create Account</button>
+  </div>
+
 </div>
 
+<!-- LOGIN -->
 <div id="login" class="screen">
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password">
   <button onclick="login()">Login</button>
 </div>
 
+<!-- SIGNUP -->
 <div id="signup" class="screen">
   <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
@@ -105,12 +120,9 @@
   </div>
 
   <div style="text-align:left">
-    <p>✅ Full UI rewrite</p>
-    <p>✅ Fixed Find Friends</p>
-    <p>✅ Fixed Colour Editor</p>
-    <p>🆕 Added timestamps</p>
-    <p>🆕 Click profile from chat</p>
-    <p>🆕 Editable display name</p>
+    <p>🔥 New animated welcome screen</p>
+    <p>🌈 Multi neon particles added</p>
+    <p>💬 Rotating intro text</p>
   </div>
 </div>
 
