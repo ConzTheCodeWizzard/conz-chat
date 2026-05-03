@@ -107,7 +107,7 @@ function saveDisplayName(){
   }).then(()=>openProfile());
 }
 
-// 🔥 IMAGE (FIXED)
+// IMAGE (compressed save)
 function pickImage(){
   let input=document.createElement("input");
   input.type="file";
@@ -182,26 +182,27 @@ function searchUsers(){
   });
 }
 
-// 🔥 SAFE IMAGE RENDER
-function safeImage(el, src){
+// SAFE IMAGE
+function addImg(el, src){
   if(!src) return;
-
   if(src.length > 150000) return;
 
-  let img=document.createElement("img");
-  img.src=src;
-  img.onerror=()=>img.remove();
+  let img = document.createElement("img");
+  img.src = src;
+  img.onerror = ()=>img.remove();
 
   el.appendChild(img);
 }
 
-// CHAT (FIXED)
+// CHAT (FIXED PROPERLY)
 function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
   show("chat");
 
   if(unsubscribeMessages) unsubscribeMessages();
+
+  messages.innerHTML = "";
 
   db.collection("users").doc(uid).get().then(userDoc=>{
     let otherUser = userDoc.data() || {};
@@ -210,10 +211,10 @@ function openChat(uid,name){
     .orderBy("time")
     .onSnapshot(snap=>{
 
-      let fragment = document.createDocumentFragment();
+      snap.docChanges().forEach(change=>{
+        if(change.type !== "added") return;
 
-      snap.forEach(doc=>{
-        let m = doc.data();
+        let m = change.doc.data();
 
         if(!(m.from===currentUser.uid || m.to===currentUser.uid)) return;
 
@@ -239,23 +240,21 @@ function openChat(uid,name){
         `;
 
         if(isMine){
-          safeImage(avatar, myData.photo);
+          addImg(avatar, myData.photo);
           avatar.onclick=()=>openProfile(currentUser.uid);
           wrap.appendChild(bubble);
           wrap.appendChild(avatar);
         } else {
-          safeImage(avatar, otherUser.photo);
+          addImg(avatar, otherUser.photo);
           avatar.onclick=()=>openProfile(uid);
           wrap.appendChild(avatar);
           wrap.appendChild(bubble);
         }
 
-        fragment.appendChild(wrap);
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
       });
 
-      messages.innerHTML="";
-      messages.appendChild(fragment);
-      messages.scrollTop = messages.scrollHeight;
     });
   });
 }
