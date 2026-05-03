@@ -23,17 +23,23 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     isDev = user.uid === DEV_UID;
 
+    // DEV LABEL
     if(isDev){
       document.querySelector("#home .topbar span:nth-child(2)").innerText = "ConzChat DEV";
     }
 
-    // 🟢 SET ONLINE
+    // 🔒 DEV BUTTON VISIBILITY FIX
+    const devBtn = document.getElementById("devBtn");
+    if(devBtn){
+      devBtn.style.display = isDev ? "block" : "none";
+    }
+
+    // 🟢 ONLINE STATUS
     db.collection("users").doc(user.uid).set({
       online: true,
       lastSeen: Date.now()
     }, {merge:true});
 
-    // 🟢 HANDLE LEAVING
     window.addEventListener("beforeunload", ()=>{
       db.collection("users").doc(user.uid).set({
         online: false,
@@ -41,6 +47,7 @@ auth.onAuthStateChanged(user=>{
       }, {merge:true});
     });
 
+    // LISTENER
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
@@ -60,7 +67,9 @@ auth.onAuthStateChanged(user=>{
       loadAvatar();
     });
 
-  } else show("welcome");
+  } else {
+    show("welcome");
+  }
 });
 
 // ===== AUTH =====
@@ -79,8 +88,8 @@ function signup(){
       created:Date.now(),
       mainColor:"#000000",
       secondaryColor:"#ff0000",
-      online: true,
-      lastSeen: Date.now()
+      online:true,
+      lastSeen:Date.now()
     });
   });
 }
@@ -126,10 +135,17 @@ function saveTheme(){
   },{merge:true});
 }
 
+// 🔥 FIXED RESET (PERSISTS)
 function resetTheme(){
-  myData.mainColor="#000000";
-  myData.secondaryColor="#ff0000";
+  myData.mainColor = "#000000";
+  myData.secondaryColor = "#ff0000";
+
   applyTheme();
+
+  db.collection("users").doc(currentUser.uid).set({
+    mainColor:"#000000",
+    secondaryColor:"#ff0000"
+  },{merge:true});
 }
 
 // ===== PROFILE =====
@@ -146,23 +162,34 @@ function openProfile(uid=currentUser.uid){
       </div>
 
       ${isDevProfile ? `
-        <div style="
-          color: gold;
-          font-weight: bold;
-          margin-top: 6px;
-          text-shadow: 0 0 10px gold;
-        ">
+        <div style="color:gold;font-weight:bold;margin-top:6px;text-shadow:0 0 10px gold;">
           👑 ConzChat Dev
         </div>
       ` : ""}
 
       <div class="username">@${u.username}</div>
+
+      <input id="pfpUrl" placeholder="Paste image URL">
+      <button onclick="changeProfilePic(document.getElementById('pfpUrl').value)">Save Picture</button>
     `;
 
     daysOnApp.innerText=
       Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
 
     show("profile");
+  });
+}
+
+// 🔥 PROFILE PIC FIX
+function changeProfilePic(url){
+  if(!url) return;
+
+  db.collection("users").doc(currentUser.uid).set({
+    photo:url
+  },{merge:true}).then(()=>{
+    myData.photo = url;
+    loadAvatar();
+    openProfile();
   });
 }
 
@@ -203,7 +230,7 @@ function openChat(uid,name,photo){
   if(unsubscribeMessages) unsubscribeMessages();
   if(unsubscribeStatus) unsubscribeStatus();
 
-  // 🟢 LIVE STATUS
+  // STATUS
   unsubscribeStatus = db.collection("users").doc(uid)
   .onSnapshot(doc=>{
     let u = doc.data() || {};
