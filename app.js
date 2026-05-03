@@ -164,7 +164,7 @@ function searchUsers(){
   });
 }
 
-// 🔥 FIXED CHAT (ONLY CHANGE)
+// CHAT (FIXED)
 function openChat(uid,name){
   currentChatUser = uid;
   chatName.innerText = name;
@@ -172,7 +172,6 @@ function openChat(uid,name){
 
   if(unsubscribeMessages) unsubscribeMessages();
 
-  // PRELOAD OTHER USER ONCE
   db.collection("users").doc(uid).get().then(userDoc=>{
     let otherUser = userDoc.data() || {};
 
@@ -180,7 +179,7 @@ function openChat(uid,name){
     .orderBy("time")
     .onSnapshot(snap=>{
 
-      messages.innerHTML = "";
+      let fragment = document.createDocumentFragment();
 
       snap.forEach(doc=>{
         let m = doc.data();
@@ -226,10 +225,12 @@ function openChat(uid,name){
           wrap.appendChild(bubble);
         }
 
-        messages.appendChild(wrap);
+        fragment.appendChild(wrap);
       });
 
-      messages.scrollTop=messages.scrollHeight;
+      messages.innerHTML = "";
+      messages.appendChild(fragment);
+      messages.scrollTop = messages.scrollHeight;
     });
   });
 }
@@ -284,4 +285,4 @@ function loadChats(){
   });
 
   show("home");
-                }
+}
