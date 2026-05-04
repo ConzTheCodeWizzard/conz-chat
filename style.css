@@ -11,7 +11,7 @@ color:#fff;
 overflow:hidden;
 }
 
-/* SCREENS */
+/* ===== SCREENS ===== */
 .screen{
 display:none;
 height:100vh;
@@ -28,12 +28,11 @@ flex-direction:column;
 .welcomeScreen{
 display:flex;
 flex-direction:column;
-justify-content:flex-start;
+justify-content:center; /* 🔥 FIX: true vertical centering */
 align-items:center;
 text-align:center;
 position:relative;
 height:100vh;
-padding-top:80px;
 }
 
 /* PARTICLES */
@@ -54,7 +53,7 @@ align-items:center;
 
 /* LOGO */
 .logo{
-font-size:55px;
+font-size:60px; /* slightly bigger = fills screen better */
 text-shadow:0 0 20px var(--secondary);
 animation:pulse 2s infinite;
 }
@@ -67,25 +66,33 @@ animation:pulse 2s infinite;
 
 /* ROTATING TEXT */
 .rotatingText{
-margin-top:10px;
-font-size:16px;
+margin-top:12px;
+font-size:18px;
 transition:0.5s;
-min-height:20px;
+min-height:22px;
 }
 
 /* VERSION */
 .version{
-margin-top:5px;
+margin-top:6px;
 font-size:16px;
 opacity:0.8;
 }
 
+/* BUTTON GROUP */
+.welcomeButtons{
+margin-top:10px;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
 /* BUTTONS */
 button{
-padding:10px;
+padding:12px 18px;
 margin:6px;
 border:none;
-border-radius:8px;
+border-radius:10px;
 background:linear-gradient(135deg,#ff0033,#ff0066);
 color:#fff;
 font-weight:bold;
@@ -99,15 +106,17 @@ transform:scale(1.05);
 box-shadow:0 0 25px rgba(255,0,100,0.8);
 }
 
-/* FOOTER */
+/* FOOTER (FORCED VISIBLE) */
 .welcomeFooter{
 position:absolute;
-bottom:20px;
+bottom:10px;
+left:0;
 width:100%;
 text-align:center;
 font-size:12px;
 color:#777;
-z-index:5;
+z-index:10; /* 🔥 ensures above canvas */
+pointer-events:none;
 }
 
 /* ===== TOPBAR ===== */
