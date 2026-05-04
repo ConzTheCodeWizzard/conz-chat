@@ -7,29 +7,34 @@
 
 <body>
 
+<!-- WELCOME -->
 <div id="welcome" class="screen active welcomeScreen">
   <canvas id="particles"></canvas>
 
   <div class="welcomeContent">
-    <h2>Welcome to</h2>
+    <h2 class="welcomeText">Welcome to</h2>
     <h1 class="logo">ConzChat</h1>
 
-    <div id="rotatingText"></div>
+    <!-- FIX: rotating text ABOVE version -->
+    <div id="rotatingText" class="rotatingText"></div>
     <div class="version">Version 1.0</div>
 
     <button onclick="show('login')">Login</button>
     <button onclick="show('signup')">Create Account</button>
   </div>
 
-  <div class="footerText">Developed By Conz</div>
+  <!-- FIX: bottom text added -->
+  <div class="welcomeFooter">Developed By Conz</div>
 </div>
 
+<!-- LOGIN -->
 <div id="login" class="screen">
   <input id="loginEmail" placeholder="Email">
   <input id="loginPassword" type="password">
   <button onclick="login()">Login</button>
 </div>
 
+<!-- SIGNUP -->
 <div id="signup" class="screen">
   <input id="signupUsername" placeholder="Username">
   <input id="signupEmail" placeholder="Email">
@@ -37,10 +42,11 @@
   <button onclick="signup()">Create</button>
 </div>
 
+<!-- HOME -->
 <div id="home" class="screen">
   <div class="topbar center">
     <button class="plainBtn" onclick="logout()">Logout</button>
-    <span>ConzChat</span>
+    <span id="topTitle">ConzChat</span>
     <span id="profileBtn" onclick="openProfile()">👤</span>
   </div>
 
@@ -51,10 +57,15 @@
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="openSettings()">Colour Editor</div>
+
+    <!-- FIX: DEV BUTTON ID (important for control) -->
     <div id="devBtn" onclick="devOpen()">Dev Panel</div>
+
+    <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
 
+<!-- PROFILE -->
 <div id="profile" class="screen">
   <div class="topbar center">
     <button class="plainBtn" onclick="show('home')">Back</button>
@@ -62,8 +73,15 @@
   </div>
 
   <div id="profileContent"></div>
+
+  <!-- kept but can remove later if unused -->
+  <input id="editName" placeholder="Edit display name">
+  <button onclick="saveDisplayName()">Save Name</button>
+
+  <p id="daysOnApp"></p>
 </div>
 
+<!-- SEARCH -->
 <div id="search" class="screen">
   <div class="topbar center">
     <button class="plainBtn" onclick="show('home')">Back</button>
@@ -74,23 +92,29 @@
   <div id="results"></div>
 </div>
 
+<!-- SETTINGS -->
 <div id="settings" class="screen">
   <div class="topbar center">
     <button class="plainBtn" onclick="show('home')">Back</button>
     <span>Colour Editor</span>
   </div>
 
-  <button onclick="pickMain()">Edit Primary Colour</button>
-  <button onclick="pickSecondary()">Edit Secondary Colour</button>
+  <!-- FIX: labels clearer -->
+  <label>Primary Colour</label>
+  <input type="color" id="mainColorPicker">
+
+  <label>Secondary Colour</label>
+  <input type="color" id="secondaryColorPicker">
 
   <button onclick="saveTheme()">Save</button>
   <button onclick="resetTheme()">Reset</button>
 </div>
 
+<!-- CHAT -->
 <div id="chat" class="screen">
   <div class="topbar center">
     <button class="plainBtn" onclick="show('home')">Back</button>
-    <span id="chatName"></span>
+    <span id="chatName" onclick="openProfile(currentChatUser)"></span>
   </div>
 
   <div id="messages"></div>
@@ -99,6 +123,21 @@
   <button onclick="sendMessage()">Send</button>
 </div>
 
+<!-- UPDATE LOG -->
+<div id="updates" class="screen">
+  <div class="topbar center">
+    <button class="plainBtn" onclick="show('home')">Back</button>
+    <span>Update Log</span>
+  </div>
+
+  <div style="text-align:left">
+    <p>🔥 New animated welcome screen</p>
+    <p>🌈 Multi neon particles added</p>
+    <p>💬 Rotating intro text</p>
+  </div>
+</div>
+
+<!-- FILE PICKER (needed for profile image upgrade later) -->
 <input type="file" id="filePicker" accept="image/*" style="display:none">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -111,4 +150,4 @@
 <script src="dev.js"></script>
 
 </body>
-</html>
+  </html>
