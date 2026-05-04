@@ -1,3 +1,5 @@
+// ===== FIREBASE SETUP =====
+
 const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",
   authDomain: "conzchat.firebaseapp.com",
@@ -7,8 +9,9 @@ const firebaseConfig = {
   appId: "1:431124465784:web:055dbf6a8767b2f898458d"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+// Services
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
