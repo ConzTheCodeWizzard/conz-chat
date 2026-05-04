@@ -29,18 +29,15 @@ auth.onAuthStateChanged(user=>{
 
     const topTitle = document.getElementById("topTitle");
 
-    // ✅ FIX: force correct title BOTH ways
     if(topTitle){
       topTitle.innerText = isDev ? "ConzChat DEV" : "ConzChat";
     }
 
-    // ✅ FIX: dev button visibility
     const devBtn = document.getElementById("devBtn");
     if(devBtn){
       devBtn.style.display = isDev ? "block" : "none";
     }
 
-    // ONLINE STATUS
     db.collection("users").doc(user.uid).set({
       online:true,
       lastSeen:Date.now()
@@ -53,7 +50,6 @@ auth.onAuthStateChanged(user=>{
       },{merge:true});
     });
 
-    // LISTENER (BOOT)
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
@@ -65,13 +61,9 @@ auth.onAuthStateChanged(user=>{
       }
     });
 
-    // LOAD USER DATA
     db.collection("users").doc(user.uid).get().then(doc=>{
       myData = doc.data() || {};
-
-      // ✅ FIX: always apply theme AFTER loading DB
       applyTheme();
-
       loadChats();
       loadAvatar();
     });
@@ -145,7 +137,7 @@ function saveTheme(){
     mainColor: myData.mainColor,
     secondaryColor: myData.secondaryColor
   },{merge:true}).then(()=>{
-    applyTheme(); // ✅ ensure applied AFTER save
+    applyTheme();
   });
 }
 
@@ -174,9 +166,7 @@ function openProfile(uid=currentUser.uid){
 
       <div class="displayName">${u.displayName||u.username}</div>
 
-      ${isDevProfile ? `
-        <div class="devBadge">👑 ConzChat Dev</div>
-      ` : ""}
+      ${isDevProfile ? `<div class="devBadge">👑 ConzChat Dev</div>` : ""}
 
       <div class="username">@${u.username}</div>
 
@@ -371,3 +361,35 @@ function loadChats(){
 
   show("home");
 }
+
+// ===== ROTATING TEXT (ADDED) =====
+const rotatingTexts = [
+  "Built by Conz",
+  "Next-gen chat",
+  "Fast. Clean. Powerful.",
+  "Welcome to the future",
+  "Real-time messaging"
+];
+
+let rotateIndex = 0;
+
+function startRotatingText(){
+  const el = document.getElementById("rotatingText");
+  if(!el) return;
+
+  function update(){
+    el.style.opacity = 0;
+
+    setTimeout(()=>{
+      el.innerText = rotatingTexts[rotateIndex];
+      el.style.opacity = 1;
+
+      rotateIndex = (rotateIndex + 1) % rotatingTexts.length;
+    }, 300);
+  }
+
+  update();
+  setInterval(update, 2500);
+}
+
+window.addEventListener("load", startRotatingText);
