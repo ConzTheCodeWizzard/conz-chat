@@ -1,20 +1,21 @@
 window.onerror = function(msg, url, line){
   alert("JS ERROR:\n" + msg + "\nLine: " + line);
 };
+
 // ===== WAIT FOR FIREBASE SAFELY =====
 window.addEventListener("load", () => {
 
-  if (typeof firebase === "undefined") {
-    console.error("Firebase not loaded");
-    return;
+  function waitForFirebase(){
+    if (typeof firebase === "undefined" || typeof auth === "undefined" || typeof db === "undefined") {
+      console.warn("Firebase not ready, retrying...");
+      setTimeout(waitForFirebase, 300);
+      return;
+    }
+
+    startApp();
   }
 
-  if (typeof auth === "undefined" || typeof db === "undefined") {
-    console.error("Firebase services not ready");
-    return;
-  }
-
-  startApp();
+  waitForFirebase();
 });
 
 function startApp(){
