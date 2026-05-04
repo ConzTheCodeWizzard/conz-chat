@@ -9,8 +9,8 @@ let unsubscribeStatus = null;
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
 
-// ===== NAV =====
-function show(id){
+// ===== NAV (GLOBAL FIX) =====
+window.show = function(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 
   const el = document.getElementById(id);
@@ -22,7 +22,7 @@ function show(id){
   }
 
   fabOpen=false;
-}
+};
 
 // ===== AUTH =====
 auth.onAuthStateChanged(user=>{
@@ -193,7 +193,7 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-// ===== IMAGE PICKER (FIXED - NO CRASH) =====
+// ===== IMAGE PICKER SAFE =====
 function pickImage(){
   const filePicker = document.getElementById("filePicker");
   if(filePicker) filePicker.click();
