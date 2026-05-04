@@ -119,8 +119,9 @@ window.login = function(){
 
   auth.signInWithEmailAndPassword(email, password)
   .then(()=>{
-    alert("LOGIN SUCCESS");
-  })
+  alert("LOGIN SUCCESS");
+  show("home");
+})
   .catch(e=>{
     alert("ERROR: " + e.message);
   });
