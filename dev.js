@@ -6,6 +6,9 @@ function devOpen(){
   // prevent duplicates
   if(document.getElementById("devPanel")) return;
 
+  // 🔥 FIX: hide all other screens first
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+
   let panel = document.createElement("div");
   panel.id = "devPanel";
   panel.className = "screen active";
