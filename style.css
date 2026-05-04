@@ -1,78 +1,254 @@
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#000;
-  color:#fff;
+:root{
+--main:#000;
+--secondary:#ff0033;
 }
 
+body{
+margin:0;
+font-family:sans-serif;
+background:#000;
+color:#fff;
+overflow:hidden;
+}
+
+/* SCREENS */
 .screen{
-  display:none;
-  height:100vh;
+display:none;
+height:100vh;
+width:100vw;
+overflow:hidden;
 }
 
 .screen.active{
-  display:flex;
-  flex-direction:column;
+display:flex;
+flex-direction:column;
 }
 
-/* CENTERED TOPBAR */
+/* WELCOME */
+.welcomeScreen{
+justify-content:center;
+align-items:center;
+text-align:center;
+position:relative;
+}
+
+canvas{
+position:absolute;
+top:0;
+left:0;
+z-index:0;
+}
+
+.welcomeContent{
+z-index:2;
+}
+
+.logo{
+font-size:50px;
+text-shadow:0 0 20px var(--secondary);
+animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+0%{text-shadow:0 0 10px var(--secondary);}
+50%{text-shadow:0 0 30px var(--secondary);}
+100%{text-shadow:0 0 10px var(--secondary);}
+}
+
+.rotatingText{
+margin-top:10px;
+font-size:14px;
+transition:0.5s;
+color:#00bfff;
+}
+
+/* NEW: welcome footer */
+.welcomeFooter{
+position:absolute;
+bottom:10px;
+width:100%;
+text-align:center;
+font-size:12px;
+color:#777;
+}
+
+/* TOPBAR (FIXED CENTERING) */
 .topbar{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  padding:10px;
-  background:#ff0000;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:10px;
+background:var(--secondary);
+position:relative;
+font-weight:bold;
 }
 
+/* left button */
 .topbar button{
-  position:absolute;
-  left:10px;
+position:absolute;
+left:10px;
 }
 
+/* right profile */
+#profileBtn{
+position:absolute;
+right:10px;
+}
+
+/* remove bubble look */
 .plainBtn{
-  background:none;
-  border:none;
-  color:#fff;
-  font-weight:bold;
+background:none !important;
+box-shadow:none !important;
+padding:0 !important;
 }
 
-/* PROFILE */
-.avatar img{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  display:block;
-  margin:20px auto;
+/* CHAT LIST */
+#chatList div{
+display:flex;
+align-items:center;
+gap:10px;
+padding:12px;
+border-bottom:1px solid rgba(255,255,255,0.05);
+transition:0.3s;
 }
 
-.displayName,
-.username,
-.devBadge,
-.days{
-  text-align:center;
-  margin-top:10px;
+#chatList div:hover{
+background:rgba(255,0,100,0.1);
+transform:scale(1.02);
 }
 
-.devBadge{
-  color:gold;
+/* AVATAR */
+.chatAvatar img,
+.msgAvatar img{
+width:40px;
+height:40px;
+border-radius:50%;
+box-shadow:0 0 10px var(--secondary);
+}
+
+/* CHAT */
+#messages{
+flex:1;
+overflow-y:auto;
+padding:10px;
+}
+
+.msgWrap{
+display:flex;
+margin:10px 0;
+}
+
+.msgWrap.me{
+justify-content:flex-end;
+}
+
+.msg{
+padding:10px 14px;
+border-radius:12px;
+max-width:60%;
+background:linear-gradient(135deg,#111,#222);
+box-shadow:0 0 10px rgba(255,0,100,0.4);
+position:relative;
+}
+
+/* INPUT */
+input{
+padding:10px;
+margin:5px;
+border:none;
+outline:none;
+border-radius:8px;
+background:#111;
+color:#fff;
+box-shadow:0 0 10px rgba(255,0,100,0.2);
 }
 
 /* BUTTONS */
 button{
-  padding:12px;
-  margin:6px;
-  background:#ff0000;
-  border:none;
-  color:#fff;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:8px;
+background:linear-gradient(135deg,#ff0033,#ff0066);
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 0 15px rgba(255,0,100,0.5);
 }
 
-/* FOOTER */
-.footerText{
-  position:absolute;
-  bottom:10px;
-  width:100%;
-  text-align:center;
-  font-size:12px;
-  color:#888;
+button:hover{
+transform:scale(1.05);
+box-shadow:0 0 25px rgba(255,0,100,0.8);
+}
+
+/* FAB */
+#fab{
+position:absolute;
+bottom:20px;
+right:20px;
+width:50px;
+height:50px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:30px;
+background:linear-gradient(135deg,#ff0033,#ff00ff);
+box-shadow:0 0 20px #ff00ff;
+}
+
+/* FAB MENU */
+#fabMenu{
+position:absolute;
+bottom:80px;
+right:20px;
+display:none;
+flex-direction:column;
+}
+
+#fabMenu div{
+padding:10px;
+margin:5px;
+background:#111;
+border-radius:8px;
+box-shadow:0 0 10px rgba(255,0,100,0.5);
+transition:0.3s;
+}
+
+#fabMenu div:hover{
+transform:scale(1.05);
+}
+
+/* PROFILE FIXES */
+.avatar img{
+width:120px;
+height:120px;
+border-radius:50%;
+display:block;
+margin:20px auto;
+box-shadow:0 0 15px var(--secondary);
+}
+
+.displayName,
+.username,
+.days,
+.devBadge{
+text-align:center;
+margin-top:8px;
+}
+
+.devBadge{
+color:gold;
+font-weight:bold;
+text-shadow:0 0 10px gold;
+}
+
+/* DEV PANEL (CLEAN LOOK) */
+#devResults div{
+padding:10px;
+border-bottom:1px solid rgba(255,255,255,0.05);
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
