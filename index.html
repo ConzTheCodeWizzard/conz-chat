@@ -11,14 +11,17 @@
   <canvas id="particles"></canvas>
 
   <div class="welcomeContent">
-    <h2 class="welcomeText">Welcome to</h2>
+    <h2>Welcome to</h2>
     <h1 class="logo">ConzChat</h1>
+
+    <div id="rotatingText"></div>
     <div class="version">Version 1.0</div>
-    <div id="rotatingText" class="rotatingText"></div>
 
     <button onclick="show('login')">Login</button>
     <button onclick="show('signup')">Create Account</button>
   </div>
+
+  <div class="footerText">Developed By Conz</div>
 </div>
 
 <div id="login" class="screen">
@@ -35,8 +38,8 @@
 </div>
 
 <div id="home" class="screen">
-  <div class="topbar">
-    <button onclick="logout()">Logout</button>
+  <div class="topbar center">
+    <button class="plainBtn" onclick="logout()">Logout</button>
     <span>ConzChat</span>
     <span id="profileBtn" onclick="openProfile()">👤</span>
   </div>
@@ -48,26 +51,22 @@
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="openSettings()">Colour Editor</div>
-    <div onclick="devOpen()">Dev Panel</div>
-    <div onclick="show('updates')">Update Log</div>
+    <div id="devBtn" onclick="devOpen()">Dev Panel</div>
   </div>
 </div>
 
 <div id="profile" class="screen">
-  <div class="topbar">
-    <button onclick="show('home')">Back</button>
+  <div class="topbar center">
+    <button class="plainBtn" onclick="show('home')">Back</button>
     <span>Profile</span>
   </div>
 
   <div id="profileContent"></div>
-  <input id="editName" placeholder="Edit display name">
-  <button onclick="saveDisplayName()">Save Name</button>
-  <p id="daysOnApp"></p>
 </div>
 
 <div id="search" class="screen">
-  <div class="topbar">
-    <button onclick="show('home')">Back</button>
+  <div class="topbar center">
+    <button class="plainBtn" onclick="show('home')">Back</button>
     <span>Find Friends</span>
   </div>
 
@@ -76,21 +75,22 @@
 </div>
 
 <div id="settings" class="screen">
-  <div class="topbar">
-    <button onclick="show('home')">Back</button>
+  <div class="topbar center">
+    <button class="plainBtn" onclick="show('home')">Back</button>
     <span>Colour Editor</span>
   </div>
 
-  <input type="color" id="mainColorPicker">
-  <input type="color" id="secondaryColorPicker">
+  <button onclick="pickMain()">Edit Primary Colour</button>
+  <button onclick="pickSecondary()">Edit Secondary Colour</button>
+
   <button onclick="saveTheme()">Save</button>
   <button onclick="resetTheme()">Reset</button>
 </div>
 
 <div id="chat" class="screen">
-  <div class="topbar">
-    <button onclick="show('home')">Back</button>
-    <span id="chatName" onclick="openProfile(currentChatUser)"></span>
+  <div class="topbar center">
+    <button class="plainBtn" onclick="show('home')">Back</button>
+    <span id="chatName"></span>
   </div>
 
   <div id="messages"></div>
@@ -99,18 +99,7 @@
   <button onclick="sendMessage()">Send</button>
 </div>
 
-<div id="updates" class="screen">
-  <div class="topbar">
-    <button onclick="show('home')">Back</button>
-    <span>Update Log</span>
-  </div>
-
-  <div style="text-align:left">
-    <p>🔥 New animated welcome screen</p>
-    <p>🌈 Multi neon particles added</p>
-    <p>💬 Rotating intro text</p>
-  </div>
-</div>
+<input type="file" id="filePicker" accept="image/*" style="display:none">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
