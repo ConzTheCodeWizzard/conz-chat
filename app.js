@@ -13,9 +13,11 @@ let isDev = false;
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
   if(typeof fabMenu !== "undefined"){
     fabMenu.style.display="none";
   }
+
   fabOpen=false;
 }
 
@@ -25,12 +27,14 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     isDev = user.uid === DEV_UID;
 
-    // DEV LABEL
-    if(isDev){
-      document.getElementById("topTitle").innerText = "ConzChat DEV";
+    const topTitle = document.getElementById("topTitle");
+
+    // ✅ FIX: force correct title BOTH ways
+    if(topTitle){
+      topTitle.innerText = isDev ? "ConzChat DEV" : "ConzChat";
     }
 
-    // DEV BUTTON CONTROL
+    // ✅ FIX: dev button visibility
     const devBtn = document.getElementById("devBtn");
     if(devBtn){
       devBtn.style.display = isDev ? "block" : "none";
@@ -49,7 +53,7 @@ auth.onAuthStateChanged(user=>{
       },{merge:true});
     });
 
-    // LISTENER
+    // LISTENER (BOOT)
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
@@ -61,9 +65,13 @@ auth.onAuthStateChanged(user=>{
       }
     });
 
+    // LOAD USER DATA
     db.collection("users").doc(user.uid).get().then(doc=>{
       myData = doc.data() || {};
+
+      // ✅ FIX: always apply theme AFTER loading DB
       applyTheme();
+
       loadChats();
       loadAvatar();
     });
@@ -118,8 +126,13 @@ function applyTheme(){
   document.documentElement.style.setProperty('--main', main);
   document.documentElement.style.setProperty('--secondary', secondary);
 
-  if(mainColorPicker) mainColorPicker.value = main;
-  if(secondaryColorPicker) secondaryColorPicker.value = secondary;
+  if(typeof mainColorPicker !== "undefined" && mainColorPicker){
+    mainColorPicker.value = main;
+  }
+
+  if(typeof secondaryColorPicker !== "undefined" && secondaryColorPicker){
+    secondaryColorPicker.value = secondary;
+  }
 }
 
 function openSettings(){ show("settings"); }
@@ -128,24 +141,24 @@ function saveTheme(){
   myData.mainColor = mainColorPicker.value;
   myData.secondaryColor = secondaryColorPicker.value;
 
-  applyTheme();
-
   db.collection("users").doc(currentUser.uid).set({
     mainColor: myData.mainColor,
     secondaryColor: myData.secondaryColor
-  },{merge:true});
+  },{merge:true}).then(()=>{
+    applyTheme(); // ✅ ensure applied AFTER save
+  });
 }
 
 function resetTheme(){
   myData.mainColor = "#000000";
   myData.secondaryColor = "#ff0000";
 
-  applyTheme();
-
   db.collection("users").doc(currentUser.uid).set({
     mainColor:"#000000",
     secondaryColor:"#ff0000"
-  },{merge:true});
+  },{merge:true}).then(()=>{
+    applyTheme();
+  });
 }
 
 // ===== PROFILE =====
