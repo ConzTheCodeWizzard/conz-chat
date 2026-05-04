@@ -30,7 +30,7 @@ let unsubscribeStatus = null;
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
 
-// ===== NAV (FIXED HARD SWITCH) =====
+// ===== NAV =====
 window.show = function(id){
 
   const screens = document.querySelectorAll(".screen");
@@ -105,16 +105,16 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// ===== AUTH FUNCTIONS =====
-function login(){
+// ===== AUTH FUNCTIONS (FIXED GLOBAL) =====
+window.login = function(){
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
 
   auth.signInWithEmailAndPassword(email, password)
   .catch(e=>alert(e.message));
-}
+};
 
-function signup(){
+window.signup = function(){
   const username = document.getElementById("signupUsername").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
@@ -132,25 +132,25 @@ function signup(){
       lastSeen:Date.now()
     });
   });
-}
+};
 
-function logout(){
+window.logout = function(){
   db.collection("users").doc(currentUser.uid).set({
     online:false,
     lastSeen:Date.now()
   },{merge:true});
 
   auth.signOut();
-}
+};
 
 // ===== FAB =====
-function toggleFab(){
+window.toggleFab = function(){
   fabOpen=!fabOpen;
   const fabMenu = document.getElementById("fabMenu");
   if(fabMenu){
     fabMenu.style.display=fabOpen?"flex":"none";
   }
-}
+};
 
 // ===== THEME =====
 function applyTheme(){
@@ -167,9 +167,9 @@ function applyTheme(){
   if(secPicker) secPicker.value = secondary;
 }
 
-function openSettings(){ show("settings"); }
+window.openSettings = function(){ show("settings"); };
 
-function saveTheme(){
+window.saveTheme = function(){
   const main = document.getElementById("mainColorPicker").value;
   const secondary = document.getElementById("secondaryColorPicker").value;
 
@@ -180,9 +180,9 @@ function saveTheme(){
     mainColor: main,
     secondaryColor: secondary
   },{merge:true}).then(applyTheme);
-}
+};
 
-function resetTheme(){
+window.resetTheme = function(){
   myData.mainColor = "#000000";
   myData.secondaryColor = "#ff0000";
 
@@ -190,7 +190,7 @@ function resetTheme(){
     mainColor:"#000000",
     secondaryColor:"#ff0000"
   },{merge:true}).then(applyTheme);
-}
+};
 
 // ===== ROTATING TEXT =====
 const rotatingTexts = [
