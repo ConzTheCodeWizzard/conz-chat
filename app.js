@@ -193,27 +193,34 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-// ===== IMAGE PICKER =====
+// ===== IMAGE PICKER (FIXED - NO CRASH) =====
 function pickImage(){
-  document.getElementById("filePicker").click();
+  const filePicker = document.getElementById("filePicker");
+  if(filePicker) filePicker.click();
 }
 
-document.getElementById("filePicker").onchange = e=>{
-  let file = e.target.files[0];
-  if(!file) return;
+window.addEventListener("load", ()=>{
+  const filePicker = document.getElementById("filePicker");
 
-  let reader = new FileReader();
-  reader.onload = ()=>{
-    db.collection("users").doc(currentUser.uid).update({
-      photo:reader.result
-    }).then(()=>{
-      myData.photo = reader.result;
-      loadAvatar();
-      openProfile();
-    });
-  };
-  reader.readAsDataURL(file);
-};
+  if(filePicker){
+    filePicker.onchange = e=>{
+      let file = e.target.files[0];
+      if(!file) return;
+
+      let reader = new FileReader();
+      reader.onload = ()=>{
+        db.collection("users").doc(currentUser.uid).update({
+          photo:reader.result
+        }).then(()=>{
+          myData.photo = reader.result;
+          loadAvatar();
+          openProfile();
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+});
 
 function loadAvatar(){
   const profileBtn = document.getElementById("profileBtn");
