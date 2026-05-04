@@ -1,3 +1,6 @@
+window.onerror = function(msg, url, line){
+  alert("JS ERROR:\n" + msg + "\nLine: " + line);
+};
 // ===== WAIT FOR FIREBASE SAFELY =====
 window.addEventListener("load", () => {
 
