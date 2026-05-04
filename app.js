@@ -1,3 +1,21 @@
+// ===== WAIT FOR FIREBASE SAFELY =====
+window.addEventListener("load", () => {
+
+  if (typeof firebase === "undefined") {
+    console.error("Firebase not loaded");
+    return;
+  }
+
+  if (typeof auth === "undefined" || typeof db === "undefined") {
+    console.error("Firebase services not ready");
+    return;
+  }
+
+  startApp();
+});
+
+function startApp(){
+
 // ===== GLOBAL =====
 let currentUser = null;
 let currentChatUser = null;
@@ -9,7 +27,7 @@ let unsubscribeStatus = null;
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
 
-// ===== NAV (GLOBAL FIX) =====
+// ===== NAV =====
 window.show = function(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 
@@ -193,34 +211,31 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-// ===== IMAGE PICKER SAFE =====
+// ===== IMAGE PICKER =====
 function pickImage(){
   const filePicker = document.getElementById("filePicker");
   if(filePicker) filePicker.click();
 }
 
-window.addEventListener("load", ()=>{
-  const filePicker = document.getElementById("filePicker");
+const filePickerEl = document.getElementById("filePicker");
+if(filePickerEl){
+  filePickerEl.onchange = e=>{
+    let file = e.target.files[0];
+    if(!file) return;
 
-  if(filePicker){
-    filePicker.onchange = e=>{
-      let file = e.target.files[0];
-      if(!file) return;
-
-      let reader = new FileReader();
-      reader.onload = ()=>{
-        db.collection("users").doc(currentUser.uid).update({
-          photo:reader.result
-        }).then(()=>{
-          myData.photo = reader.result;
-          loadAvatar();
-          openProfile();
-        });
-      };
-      reader.readAsDataURL(file);
+    let reader = new FileReader();
+    reader.onload = ()=>{
+      db.collection("users").doc(currentUser.uid).update({
+        photo:reader.result
+      }).then(()=>{
+        myData.photo = reader.result;
+        loadAvatar();
+        openProfile();
+      });
     };
-  }
-});
+    reader.readAsDataURL(file);
+  };
+}
 
 function loadAvatar(){
   const profileBtn = document.getElementById("profileBtn");
@@ -429,4 +444,6 @@ function startRotatingText(){
   setInterval(update, 2500);
 }
 
-window.addEventListener("load", startRotatingText);
+startRotatingText();
+
+}
