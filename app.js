@@ -12,7 +12,9 @@ let isDev = false;
 // ===== NAV =====
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+
+  const el = document.getElementById(id);
+  if(el) el.classList.add("active");
 
   const fabMenu = document.getElementById("fabMenu");
   if(fabMenu){
@@ -74,16 +76,23 @@ auth.onAuthStateChanged(user=>{
 
 // ===== AUTH FUNCTIONS =====
 function login(){
-  auth.signInWithEmailAndPassword(loginEmail.value,loginPassword.value)
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  auth.signInWithEmailAndPassword(email, password)
   .catch(e=>alert(e.message));
 }
 
 function signup(){
-  auth.createUserWithEmailAndPassword(signupEmail.value,signupPassword.value)
+  const username = document.getElementById("signupUsername").value;
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
   .then(res=>{
     return db.collection("users").doc(res.user.uid).set({
-      username:signupUsername.value,
-      displayName:signupUsername.value,
+      username:username,
+      displayName:username,
       photo:"",
       created:Date.now(),
       mainColor:"#000000",
@@ -120,27 +129,26 @@ function applyTheme(){
   document.documentElement.style.setProperty('--main', main);
   document.documentElement.style.setProperty('--secondary', secondary);
 
-  if(typeof mainColorPicker !== "undefined" && mainColorPicker){
-    mainColorPicker.value = main;
-  }
+  const mainPicker = document.getElementById("mainColorPicker");
+  const secPicker = document.getElementById("secondaryColorPicker");
 
-  if(typeof secondaryColorPicker !== "undefined" && secondaryColorPicker){
-    secondaryColorPicker.value = secondary;
-  }
+  if(mainPicker) mainPicker.value = main;
+  if(secPicker) secPicker.value = secondary;
 }
 
 function openSettings(){ show("settings"); }
 
 function saveTheme(){
-  myData.mainColor = mainColorPicker.value;
-  myData.secondaryColor = secondaryColorPicker.value;
+  const main = document.getElementById("mainColorPicker").value;
+  const secondary = document.getElementById("secondaryColorPicker").value;
+
+  myData.mainColor = main;
+  myData.secondaryColor = secondary;
 
   db.collection("users").doc(currentUser.uid).set({
-    mainColor: myData.mainColor,
-    secondaryColor: myData.secondaryColor
-  },{merge:true}).then(()=>{
-    applyTheme();
-  });
+    mainColor: main,
+    secondaryColor: secondary
+  },{merge:true}).then(applyTheme);
 }
 
 function resetTheme(){
@@ -150,13 +158,14 @@ function resetTheme(){
   db.collection("users").doc(currentUser.uid).set({
     mainColor:"#000000",
     secondaryColor:"#ff0000"
-  },{merge:true}).then(()=>{
-    applyTheme();
-  });
+  },{merge:true}).then(applyTheme);
 }
 
 // ===== PROFILE =====
 function openProfile(uid=currentUser.uid){
+  const profileContent = document.getElementById("profileContent");
+  const daysOnApp = document.getElementById("daysOnApp");
+
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data()||{};
     let isDevProfile = uid === DEV_UID;
@@ -186,10 +195,10 @@ function openProfile(uid=currentUser.uid){
 
 // ===== IMAGE PICKER =====
 function pickImage(){
-  filePicker.click();
+  document.getElementById("filePicker").click();
 }
 
-filePicker.onchange = e=>{
+document.getElementById("filePicker").onchange = e=>{
   let file = e.target.files[0];
   if(!file) return;
 
@@ -207,6 +216,9 @@ filePicker.onchange = e=>{
 };
 
 function loadAvatar(){
+  const profileBtn = document.getElementById("profileBtn");
+  if(!profileBtn) return;
+
   profileBtn.innerHTML = myData.photo
     ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`
     : "👤";
@@ -223,6 +235,7 @@ function bootUser(uid){
 function openSearch(){ show("search"); }
 
 function searchUsers(){
+  const results = document.getElementById("results");
   results.innerHTML="";
 
   db.collection("users").get().then(snap=>{
@@ -246,6 +259,9 @@ function searchUsers(){
 function openChat(uid,name,photo){
   currentChatUser = uid;
   show("chat");
+
+  const chatName = document.getElementById("chatName");
+  const messages = document.getElementById("messages");
 
   if(unsubscribeMessages) unsubscribeMessages();
   if(unsubscribeStatus) unsubscribeStatus();
@@ -317,6 +333,7 @@ function openChat(uid,name,photo){
 
 // ===== SEND =====
 function sendMessage(){
+  const msgInput = document.getElementById("msgInput");
   if(!msgInput.value) return;
 
   db.collection("messages").add({
@@ -331,6 +348,8 @@ function sendMessage(){
 
 // ===== CHAT LIST =====
 function loadChats(){
+  const chatList = document.getElementById("chatList");
+
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
     chatList.innerHTML="";
