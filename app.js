@@ -105,13 +105,25 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// ===== AUTH FUNCTIONS (FIXED GLOBAL) =====
+// ===== AUTH FUNCTIONS (DEBUG VERSION) =====
 window.login = function(){
+  alert("LOGIN CLICKED");
+
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
 
+  if(!email || !password){
+    alert("Missing email or password");
+    return;
+  }
+
   auth.signInWithEmailAndPassword(email, password)
-  .catch(e=>alert(e.message));
+  .then(()=>{
+    alert("LOGIN SUCCESS");
+  })
+  .catch(e=>{
+    alert("ERROR: " + e.message);
+  });
 };
 
 window.signup = function(){
