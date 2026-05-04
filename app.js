@@ -7,7 +7,6 @@ window.addEventListener("load", () => {
 
   function waitForFirebase(){
     if (typeof firebase === "undefined" || typeof auth === "undefined" || typeof db === "undefined") {
-      console.warn("Firebase not ready, retrying...");
       setTimeout(waitForFirebase, 300);
       return;
     }
@@ -31,12 +30,22 @@ let unsubscribeStatus = null;
 const DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
 let isDev = false;
 
-// ===== NAV =====
+// ===== NAV (FIXED HARD SWITCH) =====
 window.show = function(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 
-  const el = document.getElementById(id);
-  if(el) el.classList.add("active");
+  const screens = document.querySelectorAll(".screen");
+
+  for(let i = 0; i < screens.length; i++){
+    screens[i].style.display = "none";
+    screens[i].classList.remove("active");
+  }
+
+  const target = document.getElementById(id);
+
+  if(target){
+    target.style.display = "flex";
+    target.classList.add("active");
+  }
 
   const fabMenu = document.getElementById("fabMenu");
   if(fabMenu){
@@ -181,232 +190,6 @@ function resetTheme(){
     mainColor:"#000000",
     secondaryColor:"#ff0000"
   },{merge:true}).then(applyTheme);
-}
-
-// ===== PROFILE =====
-function openProfile(uid=currentUser.uid){
-  const profileContent = document.getElementById("profileContent");
-  const daysOnApp = document.getElementById("daysOnApp");
-
-  db.collection("users").doc(uid).get().then(doc=>{
-    let u=doc.data()||{};
-    let isDevProfile = uid === DEV_UID;
-
-    profileContent.innerHTML = `
-      <div class="avatar" ${uid===currentUser.uid ? 'onclick="pickImage()"' : ''}>
-        ${u.photo?`<img src="${u.photo}">`:""}
-      </div>
-
-      <div class="displayName">${u.displayName||u.username}</div>
-
-      ${isDevProfile ? `<div class="devBadge">👑 ConzChat Dev</div>` : ""}
-
-      <div class="username">@${u.username}</div>
-
-      ${isDev && uid!==currentUser.uid ? `
-        <button onclick="bootUser('${uid}')">Boot User</button>
-      ` : ""}
-    `;
-
-    daysOnApp.innerText =
-      Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
-
-    show("profile");
-  });
-}
-
-// ===== IMAGE PICKER =====
-function pickImage(){
-  const filePicker = document.getElementById("filePicker");
-  if(filePicker) filePicker.click();
-}
-
-const filePickerEl = document.getElementById("filePicker");
-if(filePickerEl){
-  filePickerEl.onchange = e=>{
-    let file = e.target.files[0];
-    if(!file) return;
-
-    let reader = new FileReader();
-    reader.onload = ()=>{
-      db.collection("users").doc(currentUser.uid).update({
-        photo:reader.result
-      }).then(()=>{
-        myData.photo = reader.result;
-        loadAvatar();
-        openProfile();
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-}
-
-function loadAvatar(){
-  const profileBtn = document.getElementById("profileBtn");
-  if(!profileBtn) return;
-
-  profileBtn.innerHTML = myData.photo
-    ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`
-    : "👤";
-}
-
-// ===== DEV =====
-function bootUser(uid){
-  db.collection("users").doc(uid).update({
-    forceLogout:true
-  });
-}
-
-// ===== SEARCH =====
-function openSearch(){ show("search"); }
-
-function searchUsers(){
-  const results = document.getElementById("results");
-  results.innerHTML="";
-
-  db.collection("users").get().then(snap=>{
-    snap.forEach(doc=>{
-      let u=doc.data();
-
-      let div=document.createElement("div");
-
-      div.innerHTML=`
-        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
-        <div style="flex:1">${u.username}</div>
-      `;
-
-      div.onclick=()=>openChat(doc.id,u.username,u.photo);
-      results.appendChild(div);
-    });
-  });
-}
-
-// ===== CHAT =====
-function openChat(uid,name,photo){
-  currentChatUser = uid;
-  show("chat");
-
-  const chatName = document.getElementById("chatName");
-  const messages = document.getElementById("messages");
-
-  if(unsubscribeMessages) unsubscribeMessages();
-  if(unsubscribeStatus) unsubscribeStatus();
-
-  unsubscribeStatus = db.collection("users").doc(uid)
-  .onSnapshot(doc=>{
-    let u = doc.data() || {};
-
-    if(u.online){
-      chatName.innerText = name + " 🟢 Online";
-    } else {
-      let seconds = Math.floor((Date.now() - (u.lastSeen || 0)) / 1000);
-
-      let text = seconds < 60
-        ? `${seconds}s ago`
-        : seconds < 3600
-        ? `${Math.floor(seconds/60)}m ago`
-        : `${Math.floor(seconds/3600)}h ago`;
-
-      chatName.innerText = name + " • Last seen " + text;
-    }
-  });
-
-  unsubscribeMessages = db.collection("messages")
-  .orderBy("time")
-  .onSnapshot(snap=>{
-    messages.innerHTML="";
-
-    snap.forEach(doc=>{
-      let m=doc.data();
-
-      if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
-
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(other!==uid) return;
-
-      let isMine=m.from===currentUser.uid;
-
-      let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(isMine?"me":"them");
-
-      let avatar=document.createElement("div");
-      avatar.className="msgAvatar";
-
-      let bubble=document.createElement("div");
-      bubble.className="msg";
-
-      bubble.innerHTML=`
-        ${m.text}
-        <div>${new Date(m.time).toLocaleTimeString()}</div>
-      `;
-
-      if(isMine){
-        if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
-        wrap.appendChild(bubble);
-        wrap.appendChild(avatar);
-      } else {
-        if(photo) avatar.innerHTML=`<img src="${photo}">`;
-        wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
-      }
-
-      messages.appendChild(wrap);
-    });
-
-    messages.scrollTop=messages.scrollHeight;
-  });
-}
-
-// ===== SEND =====
-function sendMessage(){
-  const msgInput = document.getElementById("msgInput");
-  if(!msgInput.value) return;
-
-  db.collection("messages").add({
-    text:msgInput.value,
-    from:currentUser.uid,
-    to:currentChatUser,
-    time:Date.now()
-  });
-
-  msgInput.value="";
-}
-
-// ===== CHAT LIST =====
-function loadChats(){
-  const chatList = document.getElementById("chatList");
-
-  db.collection("messages").orderBy("time","desc")
-  .onSnapshot(snap=>{
-    chatList.innerHTML="";
-    let seen={};
-
-    snap.forEach(doc=>{
-      let m=doc.data();
-
-      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
-
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(seen[other]) return;
-      seen[other]=true;
-
-      db.collection("users").doc(other).get().then(u=>{
-        let d=u.data()||{};
-
-        let div=document.createElement("div");
-
-        div.innerHTML=`
-          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
-          <div>${d.username}</div>
-        `;
-
-        div.onclick=()=>openChat(other,d.username,d.photo);
-        chatList.appendChild(div);
-      });
-    });
-  });
-
-  show("home");
 }
 
 // ===== ROTATING TEXT =====
