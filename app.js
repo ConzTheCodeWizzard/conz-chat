@@ -14,7 +14,8 @@ function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 
-  if(typeof fabMenu !== "undefined"){
+  const fabMenu = document.getElementById("fabMenu");
+  if(fabMenu){
     fabMenu.style.display="none";
   }
 
@@ -28,7 +29,6 @@ auth.onAuthStateChanged(user=>{
     isDev = user.uid === DEV_UID;
 
     const topTitle = document.getElementById("topTitle");
-
     if(topTitle){
       topTitle.innerText = isDev ? "ConzChat DEV" : "ConzChat";
     }
@@ -53,9 +53,8 @@ auth.onAuthStateChanged(user=>{
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
-
       if(d.forceLogout){
-        alert("😁YOU GOT BOOTED BY CONZ BRUH😁 ~Conz~");
+        alert("😁YOU GOT BOOTED BY CONZ😁");
         db.collection("users").doc(user.uid).update({ forceLogout:false });
         auth.signOut();
       }
@@ -73,7 +72,7 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// ===== AUTH =====
+// ===== AUTH FUNCTIONS =====
 function login(){
   auth.signInWithEmailAndPassword(loginEmail.value,loginPassword.value)
   .catch(e=>alert(e.message));
@@ -107,7 +106,10 @@ function logout(){
 // ===== FAB =====
 function toggleFab(){
   fabOpen=!fabOpen;
-  fabMenu.style.display=fabOpen?"flex":"none";
+  const fabMenu = document.getElementById("fabMenu");
+  if(fabMenu){
+    fabMenu.style.display=fabOpen?"flex":"none";
+  }
 }
 
 // ===== THEME =====
@@ -182,7 +184,7 @@ function openProfile(uid=currentUser.uid){
   });
 }
 
-// ===== PROFILE IMAGE PICKER =====
+// ===== IMAGE PICKER =====
 function pickImage(){
   filePicker.click();
 }
@@ -210,7 +212,7 @@ function loadAvatar(){
     : "👤";
 }
 
-// ===== DEV BOOT =====
+// ===== DEV =====
 function bootUser(uid){
   db.collection("users").doc(uid).update({
     forceLogout:true
@@ -362,13 +364,21 @@ function loadChats(){
   show("home");
 }
 
-// ===== ROTATING TEXT (ADDED) =====
+// ===== ROTATING TEXT =====
 const rotatingTexts = [
   "Built by Conz",
   "Next-gen chat",
   "Fast. Clean. Powerful.",
   "Welcome to the future",
   "Real-time messaging"
+];
+
+const rotatingColors = [
+  "#00bfff",
+  "#ff00ff",
+  "#00ff99",
+  "#ff0033",
+  "#ffff00"
 ];
 
 let rotateIndex = 0;
@@ -382,6 +392,7 @@ function startRotatingText(){
 
     setTimeout(()=>{
       el.innerText = rotatingTexts[rotateIndex];
+      el.style.color = rotatingColors[rotateIndex];
       el.style.opacity = 1;
 
       rotateIndex = (rotateIndex + 1) % rotatingTexts.length;
