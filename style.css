@@ -62,7 +62,7 @@ transition:0.5s;
 color:#00bfff;
 }
 
-/* NEW: welcome footer */
+/* footer */
 .welcomeFooter{
 position:absolute;
 bottom:10px;
@@ -72,7 +72,7 @@ font-size:12px;
 color:#777;
 }
 
-/* TOPBAR (FIXED CENTERING) */
+/* TOPBAR */
 .topbar{
 display:flex;
 justify-content:center;
@@ -83,19 +83,16 @@ position:relative;
 font-weight:bold;
 }
 
-/* left button */
 .topbar button{
 position:absolute;
 left:10px;
 }
 
-/* right profile */
 #profileBtn{
 position:absolute;
 right:10px;
 }
 
-/* remove bubble look */
 .plainBtn{
 background:none !important;
 box-shadow:none !important;
@@ -220,7 +217,7 @@ transition:0.3s;
 transform:scale(1.05);
 }
 
-/* PROFILE FIXES */
+/* PROFILE */
 .avatar img{
 width:120px;
 height:120px;
@@ -232,10 +229,15 @@ box-shadow:0 0 15px var(--secondary);
 
 .displayName,
 .username,
-.days,
 .devBadge{
 text-align:center;
 margin-top:8px;
+}
+
+/* 🔥 FIX: center days text */
+#daysOnApp{
+text-align:center;
+margin-top:10px;
 }
 
 .devBadge{
@@ -244,7 +246,28 @@ font-weight:bold;
 text-shadow:0 0 10px gold;
 }
 
-/* DEV PANEL (CLEAN LOOK) */
+/* 🔥 COLOUR EDITOR FIX */
+#settings{
+align-items:center;
+text-align:center;
+}
+
+#settings label{
+margin-top:10px;
+display:block;
+}
+
+/* make color inputs look like buttons */
+#settings input[type="color"]{
+width:200px;
+height:45px;
+border-radius:10px;
+cursor:pointer;
+margin:auto;
+display:block;
+}
+
+/* DEV PANEL */
 #devResults div{
 padding:10px;
 border-bottom:1px solid rgba(255,255,255,0.05);
