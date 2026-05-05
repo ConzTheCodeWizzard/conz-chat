@@ -12,18 +12,16 @@
   <canvas id="particles"></canvas>
 
   <div class="welcomeContent">
-    <h2 class="welcomeText">Welcome to</h2>
+    <h2>Welcome to</h2>
     <h1 class="logo">ConzChat</h1>
 
-    <div id="rotatingText" class="rotatingText"></div>
+    <div id="rotatingText"></div>
     <button onclick="alert(typeof show)">TEST JS</button>
-    <div class="version">Version 1.3</div>
+    <div>Version 1.3</div>
 
     <button onclick="show('login')">Login</button>
     <button onclick="show('signup')">Create Account</button>
   </div>
-
-  <div class="welcomeFooter">Developed By Conz</div>
 </div>
 
 <!-- LOGIN -->
@@ -43,9 +41,9 @@
 
 <!-- HOME -->
 <div id="home" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="logout()">Logout</button>
-    <span id="topTitle">ConzChat</span>
+  <div class="topbar">
+    <button onclick="logout()">Logout</button>
+    <span>ConzChat</span>
     <span id="profileBtn" onclick="openProfile()">👤</span>
   </div>
 
@@ -53,66 +51,63 @@
 
   <div id="fab" onclick="toggleFab()">+</div>
 
-  <!-- ✅ CLEAN FAB MENU -->
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
 
-<!-- PROFILE -->
-<div id="profile" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="show('home')">Back</button>
-    <span>Profile</span>
-  </div>
-
-  <div id="profileContent"></div>
-  <p id="daysOnApp"></p>
-</div>
-
 <!-- SEARCH -->
 <div id="search" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="show('home')">Back</button>
-    <span>Find Friends</span>
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Search</span>
   </div>
 
-  <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
+  <input oninput="searchUsers()" placeholder="Search...">
   <div id="results"></div>
 </div>
 
 <!-- CHAT -->
 <div id="chat" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="show('home')">Back</button>
+
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
     <span id="chatName"></span>
   </div>
 
   <div id="messages"></div>
 
-  <input id="msgInput">
-  <button onclick="sendMessage()">Send</button>
+  <!-- ✅ FIXED INPUT BAR -->
+  <div class="chatInputBar">
+    <input id="msgInput" placeholder="Type a message...">
+    <div id="sendBtn" onclick="sendMessage()">Send</div>
+  </div>
+
 </div>
 
-<!-- UPDATE LOG -->
+<!-- PROFILE -->
+<div id="profile" class="screen">
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Profile</span>
+  </div>
+
+  <div id="profileContent"></div>
+</div>
+
+<!-- UPDATES -->
 <div id="updates" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="show('home')">Back</button>
-    <span>Update Log</span>
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Updates</span>
   </div>
 
-  <div style="text-align:left">
-    <p>version 1.3 log</p>
-    <p>❗️ Color Editor currently broken</p>
-    <p>✅ Navigation fixes</p>
-    <p>➕ Layout upgrade</p>
-  </div>
+  <p>UI upgraded</p>
 </div>
 
-<input type="file" id="filePicker" accept="image/*" style="display:none">
+<input type="file" id="filePicker" style="display:none">
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
