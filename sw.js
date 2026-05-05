@@ -1,4 +1,4 @@
-const CACHE_NAME = "conzchat-v11";
+const CACHE_NAME = "conzchat-v12";
 
 self.addEventListener("install", e => self.skipWaiting());
 
