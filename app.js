@@ -52,7 +52,6 @@ auth.onAuthStateChanged(user=>{
     currentUser=user;
     window.isDev = user.uid===DEV_UID;
 
-    // FORCE LOGOUT LISTENER
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
       let d = doc.data() || {};
@@ -292,43 +291,3 @@ window.sendMessage=function(){
   db.collection("messages").add({
     text:msgInput.value,
     from:currentUser.uid,
-    to:currentChatUser,
-    time:Date.now()
-  });
-
-  msgInput.value="";
-};
-
-// ===== CHAT LIST =====
-function loadChats(){
-  db.collection("messages").orderBy("time","desc")
-  .onSnapshot(snap=>{
-    chatList.innerHTML="";
-    let seen={};
-
-    snap.forEach(doc=>{
-      let m=doc.data();
-
-      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
-
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(seen[other]) return;
-      seen[other]=true;
-
-      db.collection("users").doc(other).get().then(u=>{
-        let d=u.data()||{};
-
-        let div=document.createElement("div");
-        div.innerHTML=`
-          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
-          <div>${d.username}</div>
-        `;
-
-        div.onclick=()=>openChat(other,d.username,d.photo);
-        chatList.appendChild(div);
-      });
-    });
-  });
-}
-
-}
