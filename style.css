@@ -28,14 +28,13 @@ flex-direction:column;
 .welcomeScreen{
 display:flex;
 flex-direction:column;
-justify-content:center; /* 🔥 FIX: true vertical centering */
+justify-content:center;
 align-items:center;
 text-align:center;
 position:relative;
 height:100vh;
 }
 
-/* PARTICLES */
 canvas{
 position:absolute;
 top:0;
@@ -43,7 +42,6 @@ left:0;
 z-index:0;
 }
 
-/* CONTENT */
 .welcomeContent{
 z-index:2;
 display:flex;
@@ -51,9 +49,8 @@ flex-direction:column;
 align-items:center;
 }
 
-/* LOGO */
 .logo{
-font-size:60px; /* slightly bigger = fills screen better */
+font-size:60px;
 text-shadow:0 0 20px var(--secondary);
 animation:pulse 2s infinite;
 }
@@ -64,7 +61,6 @@ animation:pulse 2s infinite;
 100%{text-shadow:0 0 10px var(--secondary);}
 }
 
-/* ROTATING TEXT */
 .rotatingText{
 margin-top:12px;
 font-size:18px;
@@ -72,14 +68,12 @@ transition:0.5s;
 min-height:22px;
 }
 
-/* VERSION */
 .version{
 margin-top:6px;
 font-size:16px;
 opacity:0.8;
 }
 
-/* BUTTON GROUP */
 .welcomeButtons{
 margin-top:10px;
 display:flex;
@@ -87,7 +81,6 @@ flex-direction:column;
 align-items:center;
 }
 
-/* BUTTONS */
 button{
 padding:12px 18px;
 margin:6px;
@@ -106,7 +99,6 @@ transform:scale(1.05);
 box-shadow:0 0 25px rgba(255,0,100,0.8);
 }
 
-/* FOOTER (FORCED VISIBLE) */
 .welcomeFooter{
 position:absolute;
 bottom:10px;
@@ -115,7 +107,7 @@ width:100%;
 text-align:center;
 font-size:12px;
 color:#777;
-z-index:10; /* 🔥 ensures above canvas */
+z-index:10;
 pointer-events:none;
 }
 
@@ -175,8 +167,34 @@ box-shadow:0 0 10px var(--secondary);
 flex:1;
 overflow-y:auto;
 padding:10px;
+padding-bottom:80px; /* 🔥 space for input bar */
 }
 
+/* 🔥 NEW: INPUT BAR FIX */
+#chat input,
+#chat button{
+margin:0;
+}
+
+#chat{
+position:relative;
+}
+
+#chat input{
+position:absolute;
+bottom:10px;
+left:10px;
+width:calc(100% - 90px);
+}
+
+#chat button{
+position:absolute;
+bottom:10px;
+right:10px;
+width:70px;
+}
+
+/* ===== MESSAGES ===== */
 .msgWrap{
 display:flex;
 margin:10px 0;
@@ -222,7 +240,6 @@ background:linear-gradient(135deg,#ff0033,#ff00ff);
 box-shadow:0 0 20px #ff00ff;
 }
 
-/* ===== FAB MENU ===== */
 #fabMenu{
 position:absolute;
 bottom:80px;
@@ -270,33 +287,4 @@ margin-top:10px;
 color:gold;
 font-weight:bold;
 text-shadow:0 0 10px gold;
-}
-
-/* ===== SETTINGS ===== */
-#settings{
-align-items:center;
-text-align:center;
-}
-
-#settings label{
-margin-top:10px;
-display:block;
-}
-
-#settings input[type="color"]{
-width:200px;
-height:45px;
-border-radius:10px;
-cursor:pointer;
-margin:auto;
-display:block;
-}
-
-/* ===== DEV PANEL ===== */
-#devResults div{
-padding:10px;
-border-bottom:1px solid rgba(255,255,255,0.05);
-display:flex;
-justify-content:space-between;
-align-items:center;
 }
