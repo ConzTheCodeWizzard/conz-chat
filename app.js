@@ -2,8 +2,8 @@ window.onerror = function(msg, url, line){
   alert("JS ERROR:\n" + msg + "\nLine: " + line);
 };
 
-// ===== WAIT FOR FIREBASE =====
 window.addEventListener("load", () => {
+
   function wait(){
     if(typeof firebase==="undefined" || typeof auth==="undefined" || typeof db==="undefined"){
       setTimeout(wait,200);
@@ -11,6 +11,7 @@ window.addEventListener("load", () => {
     }
     startApp();
   }
+
   wait();
 });
 
@@ -25,7 +26,7 @@ let unsubscribeMessages=null;
 let unsubscribeStatus=null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
-let isDev=false;
+window.isDev=false;
 
 // ===== NAV =====
 window.show=function(id){
@@ -50,7 +51,7 @@ window.show=function(id){
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser=user;
-    isDev = user.uid===DEV_UID;
+    window.isDev = user.uid===DEV_UID;
 
     db.collection("users").doc(user.uid).set({
       online:true,
@@ -129,6 +130,29 @@ function applyTheme(){
   document.documentElement.style.setProperty('--secondary',myData.secondaryColor||"#ff0033");
 }
 
+window.saveTheme=function(){
+  let main=mainColorPicker.value;
+  let secondary=secondaryColorPicker.value;
+
+  myData.mainColor=main;
+  myData.secondaryColor=secondary;
+
+  db.collection("users").doc(currentUser.uid).set({
+    mainColor:main,
+    secondaryColor:secondary
+  },{merge:true}).then(applyTheme);
+};
+
+window.resetTheme=function(){
+  myData.mainColor="#000";
+  myData.secondaryColor="#ff0033";
+
+  db.collection("users").doc(currentUser.uid).set({
+    mainColor:"#000",
+    secondaryColor:"#ff0033"
+  },{merge:true}).then(applyTheme);
+};
+
 // ===== PROFILE =====
 window.openProfile=function(uid=currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
@@ -138,8 +162,14 @@ window.openProfile=function(uid=currentUser.uid){
       <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"':''}>
         ${u.photo?`<img src="${u.photo}">`:""}
       </div>
+
       <div class="displayName">${u.displayName||u.username}</div>
-      <div>@${u.username}</div>
+
+      ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
+
+      <div class="username">@${u.username}</div>
+
+      ${isDev && uid!==currentUser.uid ? `<button onclick="devBoot('${uid}')">Boot User</button>`:""}
     `;
 
     daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
@@ -203,9 +233,20 @@ function openChat(uid,name,photo){
   unsubscribeStatus=db.collection("users").doc(uid)
   .onSnapshot(doc=>{
     let u=doc.data()||{};
-    chatName.innerText=u.online
-    ? name+" 🟢"
-    : name+" • last seen";
+
+    if(u.online){
+      chatName.innerText=name+" 🟢 Online";
+    }else{
+      let seconds=Math.floor((Date.now()-(u.lastSeen||0))/1000);
+
+      let text=seconds<60
+        ? `${seconds}s ago`
+        : seconds<3600
+        ? `${Math.floor(seconds/60)}m ago`
+        : `${Math.floor(seconds/3600)}h ago`;
+
+      chatName.innerText=name+" • Last seen "+text;
+    }
   });
 
   unsubscribeMessages=db.collection("messages")
@@ -225,6 +266,9 @@ function openChat(uid,name,photo){
       let wrap=document.createElement("div");
       wrap.className="msgWrap "+(isMine?"me":"them");
 
+      let avatar=document.createElement("div");
+      avatar.className="msgAvatar";
+
       let bubble=document.createElement("div");
       bubble.className="msg";
       bubble.innerHTML=`
@@ -232,7 +276,16 @@ function openChat(uid,name,photo){
         <div>${new Date(m.time).toLocaleTimeString()}</div>
       `;
 
-      wrap.appendChild(bubble);
+      if(isMine){
+        if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
+        wrap.appendChild(bubble);
+        wrap.appendChild(avatar);
+      }else{
+        if(photo) avatar.innerHTML=`<img src="${photo}">`;
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+      }
+
       messages.appendChild(wrap);
     });
 
@@ -286,10 +339,4 @@ function loadChats(){
   });
 }
 
-// ===== DEV =====
-window.devOpen=function(){
-  if(!isDev) return;
-  alert("Dev panel coming back");
-};
-
-           }
+}
