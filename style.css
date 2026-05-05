@@ -138,66 +138,55 @@ height:40px;
 border-radius:50%;
 }
 
-/* ===== CHAT FIX ===== */
+/* ===== CHAT ===== */
 #chat{
 display:flex;
 flex-direction:column;
 height:100vh;
 }
 
-/* messages take available space */
 #messages{
 flex:1;
 overflow-y:auto;
 padding:10px;
 }
 
-/* 🔥 REAL INPUT BAR */
-#chat input{
+/* 🔥 NEW INPUT BAR (ONLY CHANGE) */
+.chatInputBar{
+display:flex;
+align-items:center;
+padding:8px;
+background:#000;
+border-top:1px solid rgba(255,255,255,0.05);
+}
+
+.chatInputBar input{
 flex:1;
-margin:0;
+height:36px;
+border-radius:18px;
+padding:0 12px;
+background:#111;
+border:none;
+outline:none;
+color:#fff;
+font-size:14px;
 }
 
-#chat button{
-margin:0;
-width:80px;
+.sendText{
+margin-left:10px;
+font-weight:bold;
+color:#ff0033;
+opacity:0.3;
+cursor:pointer;
+transition:0.2s;
 }
 
-/* 🔥 INPUT BAR CONTAINER (auto created layout) */
-#chat input,
-#chat button{
-height:45px;
+.sendText.active{
+opacity:1;
 }
 
-/* wrap input + button */
-#chat input,
-#chat button{
-display:inline-block;
-}
-
-#chat input{
-border-radius:10px 0 0 10px;
-}
-
-#chat button{
-border-radius:0 10px 10px 0;
-}
-
-/* 👇 THIS IS THE KEY FIX */
-#chat input,
-#chat button{
-position:relative;
-}
-
-#chat{
-padding-bottom:0;
-}
-
-/* create bottom bar */
-#chat::after{
-content:"";
-display:block;
-height:10px;
+.sendText:active{
+transform:scale(0.9);
 }
 
 /* ===== MESSAGE ===== */
