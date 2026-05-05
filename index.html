@@ -19,7 +19,6 @@
     <button onclick="alert(typeof show)">TEST JS</button>
     <div class="version">Version 1.3</div>
 
-    <!-- ✅ FIXED BUTTONS -->
     <button onclick="show('login')">Login</button>
     <button onclick="show('signup')">Create Account</button>
   </div>
@@ -54,10 +53,9 @@
 
   <div id="fab" onclick="toggleFab()">+</div>
 
+  <!-- ✅ CLEAN FAB MENU -->
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
-    <div onclick="openSettings()">Colour Editor</div>
-    <div id="devBtn" onclick="devOpen()">Dev Panel</div>
     <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
@@ -82,23 +80,6 @@
 
   <input id="searchInput" placeholder="Search..." oninput="searchUsers()">
   <div id="results"></div>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" class="screen">
-  <div class="topbar center">
-    <button class="plainBtn" onclick="show('home')">Back</button>
-    <span>Colour Editor</span>
-  </div>
-
-  <label>Primary Colour</label>
-  <input type="color" id="mainColorPicker">
-
-  <label>Secondary Colour</label>
-  <input type="color" id="secondaryColorPicker">
-
-  <button onclick="saveTheme()">Save</button>
-  <button onclick="resetTheme()">Reset</button>
 </div>
 
 <!-- CHAT -->
@@ -139,7 +120,6 @@
 <script src="firebase.js"></script>
 <script src="particles.js"></script>
 <script src="app.js"></script>
-<script src="dev.js"></script>
 
 </body>
 </html>
