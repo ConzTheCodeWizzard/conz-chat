@@ -2,7 +2,7 @@ window.onerror = function(msg, url, line){
   alert("JS ERROR:\n" + msg + "\nLine: " + line);
 };
 
-// ===== GLOBAL NAV (FIXED: NOW ALWAYS AVAILABLE) =====
+// ===== GLOBAL NAV (ALWAYS AVAILABLE) =====
 window.show = function(id){
   document.querySelectorAll(".screen").forEach(s=>{
     s.style.display="none";
@@ -286,8 +286,74 @@ function openChat(uid,name,photo){
 
 // ===== SEND =====
 window.sendMessage=function(){
-  if(!msgInput.value) return;
+  if(!msgInput || !msgInput.value) return;
 
   db.collection("messages").add({
     text:msgInput.value,
     from:currentUser.uid,
+    to:currentChatUser,
+    time:Date.now()
+  });
+
+  msgInput.value="";
+
+  if(window.sendBtn){
+    sendBtn.classList.remove("active");
+  }
+};
+
+// ===== CHAT LIST =====
+function loadChats(){
+  db.collection("messages").orderBy("time","desc")
+  .onSnapshot(snap=>{
+    chatList.innerHTML="";
+    let seen={};
+
+    snap.forEach(doc=>{
+      let m=doc.data();
+
+      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
+
+      let other=m.from===currentUser.uid?m.to:m.from;
+      if(seen[other]) return;
+      seen[other]=true;
+
+      db.collection("users").doc(other).get().then(u=>{
+        let d=u.data()||{};
+
+        let div=document.createElement("div");
+        div.innerHTML=`
+          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+          <div>${d.username}</div>
+        `;
+
+        div.onclick=()=>openChat(other,d.username,d.photo);
+        chatList.appendChild(div);
+      });
+    });
+  });
+}
+
+// ===== SEND BAR UPGRADE (SAFE) =====
+setTimeout(()=>{
+  if(window.msgInput && window.sendBtn){
+
+    msgInput.addEventListener("input", ()=>{
+      if(msgInput.value.trim()){
+        sendBtn.classList.add("active");
+      }else{
+        sendBtn.classList.remove("active");
+      }
+    });
+
+    msgInput.addEventListener("keydown", function(e){
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+  }
+},500);
+
+    }
