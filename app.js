@@ -1,18 +1,18 @@
 window.onerror = function(msg, url, line){
-  alert("JS ERROR:\n" + msg + "\nLine: " + line);
+alert("JS ERROR:\n" + msg + "\nLine: " + line);
 };
 
 window.addEventListener("load", () => {
 
-  function wait(){
-    if(typeof firebase==="undefined" || typeof auth==="undefined" || typeof db==="undefined"){
-      setTimeout(wait,200);
-      return;
-    }
-    startApp();
-  }
+function wait(){
+if(typeof firebase==="undefined" || typeof auth==="undefined" || typeof db==="undefined"){
+setTimeout(wait,200);
+return;
+}
+startApp();
+}
 
-  wait();
+wait();
 });
 
 function startApp(){
@@ -30,313 +30,303 @@ window.isDev=false;
 
 // ===== NAV =====
 window.show=function(id){
-  document.querySelectorAll(".screen").forEach(s=>{
-    s.style.display="none";
-    s.classList.remove("active");
-  });
+document.querySelectorAll(".screen").forEach(s=>{
+s.style.display="none";
+s.classList.remove("active");
+});
 
-  let el=document.getElementById(id);
-  if(el){
-    el.style.display="flex";
-    el.classList.add("active");
-  }
+let el=document.getElementById(id);
+if(el){
+el.style.display="flex";
+el.classList.add("active");
+}
 
-  let fab=document.getElementById("fabMenu");
-  if(fab) fab.style.display="none";
+let fab=document.getElementById("fabMenu");
+if(fab) fab.style.display="none";
 
-  fabOpen=false;
+fabOpen=false;
 };
 
 // ===== AUTH =====
 auth.onAuthStateChanged(user=>{
-  if(user){
-    currentUser=user;
-    window.isDev = user.uid===DEV_UID;
+if(user){
+currentUser=user;
+window.isDev = user.uid===DEV_UID;
 
-    db.collection("users").doc(user.uid).set({
-      online:true,
-      lastSeen:Date.now()
-    },{merge:true});
+// 🔥 FORCE LOGOUT LISTENER
+db.collection("users").doc(user.uid)
+.onSnapshot(doc=>{
+  let d = doc.data() || {};
 
-    db.collection("users").doc(user.uid).get().then(doc=>{
-      myData=doc.data()||{};
-      applyTheme();
-      loadChats();
-      loadAvatar();
-    });
-
-    document.getElementById("devBtn").style.display=isDev?"block":"none";
-
-    show("home");
-
-  }else{
-    show("welcome");
+  if(d.forceLogout){
+    alert("😁Logged out By Conz ~Six Sevennn🙌~");
+    db.collection("users").doc(user.uid).update({ forceLogout:false });
+    auth.signOut();
   }
+});
+
+db.collection("users").doc(user.uid).set({
+  online:true,
+  lastSeen:Date.now()
+},{merge:true});
+
+db.collection("users").doc(user.uid).get().then(doc=>{
+  myData=doc.data()||{};
+  loadChats();
+  loadAvatar();
+});
+
+show("home");
+
+}else{
+show("welcome");
+}
 });
 
 // ===== LOGIN =====
 window.login=function(){
-  let email=loginEmail.value;
-  let pass=loginPassword.value;
+let email=loginEmail.value;
+let pass=loginPassword.value;
 
-  if(!email||!pass){
-    alert("Missing details");
-    return;
-  }
+if(!email||!pass){
+alert("Missing details");
+return;
+}
 
-  auth.signInWithEmailAndPassword(email,pass)
-  .catch(e=>alert(e.message));
+auth.signInWithEmailAndPassword(email,pass)
+.catch(e=>alert(e.message));
 };
 
 // ===== SIGNUP =====
 window.signup=function(){
-  let username=signupUsername.value;
-  let email=signupEmail.value;
-  let pass=signupPassword.value;
+let username=signupUsername.value;
+let email=signupEmail.value;
+let pass=signupPassword.value;
 
-  auth.createUserWithEmailAndPassword(email,pass)
-  .then(res=>{
-    return db.collection("users").doc(res.user.uid).set({
-      username,
-      displayName:username,
-      photo:"",
-      created:Date.now(),
-      mainColor:"#000",
-      secondaryColor:"#ff0033",
-      online:true,
-      lastSeen:Date.now()
-    });
-  });
+auth.createUserWithEmailAndPassword(email,pass)
+.then(res=>{
+return db.collection("users").doc(res.user.uid).set({
+username,
+displayName:username,
+photo:"",
+created:Date.now(),
+online:true,
+lastSeen:Date.now()
+});
+});
 };
 
 window.logout=function(){
-  db.collection("users").doc(currentUser.uid).set({
-    online:false,
-    lastSeen:Date.now()
-  },{merge:true});
+db.collection("users").doc(currentUser.uid).set({
+online:false,
+lastSeen:Date.now()
+},{merge:true});
 
-  auth.signOut();
+auth.signOut();
 };
 
 // ===== FAB =====
 window.toggleFab=function(){
-  fabOpen=!fabOpen;
-  fabMenu.style.display=fabOpen?"flex":"none";
-};
-
-// ===== THEME =====
-function applyTheme(){
-  document.documentElement.style.setProperty('--main',myData.mainColor||"#000");
-  document.documentElement.style.setProperty('--secondary',myData.secondaryColor||"#ff0033");
-}
-
-window.saveTheme=function(){
-  let main=mainColorPicker.value;
-  let secondary=secondaryColorPicker.value;
-
-  myData.mainColor=main;
-  myData.secondaryColor=secondary;
-
-  db.collection("users").doc(currentUser.uid).set({
-    mainColor:main,
-    secondaryColor:secondary
-  },{merge:true}).then(applyTheme);
-};
-
-window.resetTheme=function(){
-  myData.mainColor="#000";
-  myData.secondaryColor="#ff0033";
-
-  db.collection("users").doc(currentUser.uid).set({
-    mainColor:"#000",
-    secondaryColor:"#ff0033"
-  },{merge:true}).then(applyTheme);
+fabOpen=!fabOpen;
+fabMenu.style.display=fabOpen?"flex":"none";
 };
 
 // ===== PROFILE =====
 window.openProfile=function(uid=currentUser.uid){
-  db.collection("users").doc(uid).get().then(doc=>{
-    let u=doc.data()||{};
+db.collection("users").doc(uid).get().then(doc=>{
+let u=doc.data()||{};
 
-    profileContent.innerHTML=`
-      <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"':''}>
-        ${u.photo?`<img src="${u.photo}">`:""}
-      </div>
+profileContent.innerHTML=`
+  <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"' : ''}>
+    ${u.photo?`<img src="${u.photo}">`:""}
+  </div>
 
-      <div class="displayName">${u.displayName||u.username}</div>
+  <div class="displayName">${u.displayName||u.username}</div>
 
-      ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
+  ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
 
-      <div class="username">@${u.username}</div>
+  <div class="username">@${u.username}</div>
 
-      ${isDev && uid!==currentUser.uid ? `<button onclick="devBoot('${uid}')">Boot User</button>`:""}
-    `;
+  ${isDev && uid!==currentUser.uid ? `<button onclick="devBoot('${uid}')">BOOT THIS BITCH</button>`:""}
+`;
 
-    daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
+daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
 
-    show("profile");
-  });
+show("profile");
+
+});
 };
 
 window.pickImage=function(){
-  filePicker.click();
+filePicker.click();
 };
 
 filePicker.onchange=e=>{
-  let f=e.target.files[0];
-  if(!f) return;
+let f=e.target.files[0];
+if(!f) return;
 
-  let r=new FileReader();
-  r.onload=()=>{
-    db.collection("users").doc(currentUser.uid).update({photo:r.result});
-    myData.photo=r.result;
-    loadAvatar();
-  };
-  r.readAsDataURL(f);
+let r=new FileReader();
+r.onload=()=>{
+db.collection("users").doc(currentUser.uid).update({photo:r.result});
+myData.photo=r.result;
+loadAvatar();
+};
+r.readAsDataURL(f);
 };
 
 function loadAvatar(){
-  profileBtn.innerHTML=myData.photo
-  ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`
-  : "👤";
+profileBtn.innerHTML=myData.photo
+? "<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">"
+: "👤";
+}
+
+// ===== DEV BOOT =====
+function devBoot(uid){
+db.collection("users").doc(uid).update({
+forceLogout:true
+});
 }
 
 // ===== SEARCH =====
 window.openSearch=()=>show("search");
 
 window.searchUsers=function(){
-  results.innerHTML="";
-  db.collection("users").get().then(snap=>{
-    snap.forEach(doc=>{
-      let u=doc.data();
+results.innerHTML="";
+db.collection("users").get().then(snap=>{
+snap.forEach(doc=>{
+let u=doc.data();
 
-      let div=document.createElement("div");
-      div.innerHTML=`
-        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
-        <div>${u.username}</div>
-      `;
+  let div=document.createElement("div");
+  div.innerHTML=`
+    <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
+    <div>${u.username}</div>
+  `;
 
-      div.onclick=()=>openChat(doc.id,u.username,u.photo);
-      results.appendChild(div);
-    });
-  });
+  div.onclick=()=>openChat(doc.id,u.username,u.photo);
+  results.appendChild(div);
+});
+
+});
 };
 
 // ===== CHAT =====
 function openChat(uid,name,photo){
-  currentChatUser=uid;
-  show("chat");
+currentChatUser=uid;
+show("chat");
 
-  if(unsubscribeMessages) unsubscribeMessages();
-  if(unsubscribeStatus) unsubscribeStatus();
+if(unsubscribeMessages) unsubscribeMessages();
+if(unsubscribeStatus) unsubscribeStatus();
 
-  unsubscribeStatus=db.collection("users").doc(uid)
-  .onSnapshot(doc=>{
-    let u=doc.data()||{};
+unsubscribeStatus=db.collection("users").doc(uid)
+.onSnapshot(doc=>{
+let u=doc.data()||{};
 
-    if(u.online){
-      chatName.innerText=name+" 🟢 Online";
-    }else{
-      let seconds=Math.floor((Date.now()-(u.lastSeen||0))/1000);
+if(u.online){
+  chatName.innerText=name+" 🟢 Online";
+}else{
+  let seconds=Math.floor((Date.now()-(u.lastSeen||0))/1000);
 
-      let text=seconds<60
-        ? `${seconds}s ago`
-        : seconds<3600
-        ? `${Math.floor(seconds/60)}m ago`
-        : `${Math.floor(seconds/3600)}h ago`;
+  let text=seconds<60
+    ? `${seconds}s ago`
+    : seconds<3600
+    ? `${Math.floor(seconds/60)}m ago`
+    : `${Math.floor(seconds/3600)}h ago`;
 
-      chatName.innerText=name+" • Last seen "+text;
-    }
-  });
+  chatName.innerText=name+" • Last seen "+text;
+}
 
-  unsubscribeMessages=db.collection("messages")
-  .orderBy("time")
-  .onSnapshot(snap=>{
-    messages.innerHTML="";
+});
 
-    snap.forEach(doc=>{
-      let m=doc.data();
+unsubscribeMessages=db.collection("messages")
+.orderBy("time")
+.onSnapshot(snap=>{
+messages.innerHTML="";
 
-      if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(other!==uid) return;
+snap.forEach(doc=>{
+  let m=doc.data();
 
-      let isMine=m.from===currentUser.uid;
+  if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
+  let other=m.from===currentUser.uid?m.to:m.from;
+  if(other!==uid) return;
 
-      let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(isMine?"me":"them");
+  let isMine=m.from===currentUser.uid;
 
-      let avatar=document.createElement("div");
-      avatar.className="msgAvatar";
+  let wrap=document.createElement("div");
+  wrap.className="msgWrap "+(isMine?"me":"them");
 
-      let bubble=document.createElement("div");
-      bubble.className="msg";
-      bubble.innerHTML=`
-        ${m.text}
-        <div>${new Date(m.time).toLocaleTimeString()}</div>
-      `;
+  let avatar=document.createElement("div");
+  avatar.className="msgAvatar";
 
-      if(isMine){
-        if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
-        wrap.appendChild(bubble);
-        wrap.appendChild(avatar);
-      }else{
-        if(photo) avatar.innerHTML=`<img src="${photo}">`;
-        wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
-      }
+  let bubble=document.createElement("div");
+  bubble.className="msg";
+  bubble.innerHTML=`
+    ${m.text}
+    <div>${new Date(m.time).toLocaleTimeString()}</div>
+  `;
 
-      messages.appendChild(wrap);
-    });
+  if(isMine){
+    if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
+    wrap.appendChild(bubble);
+    wrap.appendChild(avatar);
+  }else{
+    if(photo) avatar.innerHTML=`<img src="${photo}">`;
+    wrap.appendChild(avatar);
+    wrap.appendChild(bubble);
+  }
 
-    messages.scrollTop=messages.scrollHeight;
-  });
+  messages.appendChild(wrap);
+});
+
+messages.scrollTop=messages.scrollHeight;
+
+});
 }
 
 // ===== SEND =====
 window.sendMessage=function(){
-  if(!msgInput.value) return;
+if(!msgInput.value) return;
 
-  db.collection("messages").add({
-    text:msgInput.value,
-    from:currentUser.uid,
-    to:currentChatUser,
-    time:Date.now()
-  });
+db.collection("messages").add({
+text:msgInput.value,
+from:currentUser.uid,
+to:currentChatUser,
+time:Date.now()
+});
 
-  msgInput.value="";
+msgInput.value="";
 };
 
 // ===== CHAT LIST =====
 function loadChats(){
-  db.collection("messages").orderBy("time","desc")
-  .onSnapshot(snap=>{
-    chatList.innerHTML="";
-    let seen={};
+db.collection("messages").orderBy("time","desc")
+.onSnapshot(snap=>{
+chatList.innerHTML="";
+let seen={};
 
-    snap.forEach(doc=>{
-      let m=doc.data();
+snap.forEach(doc=>{
+  let m=doc.data();
 
-      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
+  if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
 
-      let other=m.from===currentUser.uid?m.to:m.from;
-      if(seen[other]) return;
-      seen[other]=true;
+  let other=m.from===currentUser.uid?m.to:m.from;
+  if(seen[other]) return;
+  seen[other]=true;
 
-      db.collection("users").doc(other).get().then(u=>{
-        let d=u.data()||{};
+  db.collection("users").doc(other).get().then(u=>{
+    let d=u.data()||{};
 
-        let div=document.createElement("div");
-        div.innerHTML=`
-          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
-          <div>${d.username}</div>
-        `;
+    let div=document.createElement("div");
+    div.innerHTML=`
+      <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+      <div>${d.username}</div>
+    `;
 
-        div.onclick=()=>openChat(other,d.username,d.photo);
-        chatList.appendChild(div);
-      });
-    });
+    div.onclick=()=>openChat(other,d.username,d.photo);
+    chatList.appendChild(div);
   });
+});
+
+});
 }
 
 }
