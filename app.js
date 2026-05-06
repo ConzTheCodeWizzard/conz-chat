@@ -35,18 +35,16 @@ window.addEventListener("load", () => {
 
 function startApp(){
 
-/* 🔥 GLOBAL USER FIX */
 window.currentUser=null;
-
 window.currentChatUser=null;
-
-/* 🔥 GROUP SAFETY */
 window.currentGroup=null;
 
 let fabOpen=false;
 let myData={};
 let unsubscribeMessages=null;
 let unsubscribeStatus=null;
+
+window.unsubscribeMessages = null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
@@ -55,7 +53,6 @@ auth.onAuthStateChanged(user=>{
 
   if(user){
 
-    /* 🔥 GLOBAL USER FIX */
     window.currentUser=user;
 
     window.isDev = user.uid===DEV_UID;
@@ -94,6 +91,10 @@ auth.onAuthStateChanged(user=>{
         window.chatsLoaded=true;
 
         loadChats();
+
+        if(window.loadGroups){
+          loadGroups();
+        }
       }
 
     });
@@ -305,12 +306,16 @@ window.searchUsers=function(){
 
 function openChat(uid,name,photo){
 
-  /* 🔥 RESET GROUP STATE */
   window.currentGroup=null;
 
   window.currentChatUser=uid;
 
   show("chat");
+
+  /* 🔥 RESTORE DM PROFILE CLICK */
+  chatName.onclick=()=>{
+    openProfile(uid);
+  };
 
   if(unsubscribeMessages) unsubscribeMessages();
 
@@ -480,7 +485,6 @@ setTimeout(()=>{
 
         e.preventDefault();
 
-        /* 🔥 GROUP SAFE SEND */
         handleSend();
       }
     });
