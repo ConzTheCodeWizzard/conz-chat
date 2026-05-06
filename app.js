@@ -47,10 +47,8 @@ let unsubscribeStatus=null;
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
-/* 🔥 FIXED DUPLICATE CHAT LIST */
-loadChats();
-
 auth.onAuthStateChanged(user=>{
+
   if(user){
 
     currentUser=user;
@@ -63,6 +61,7 @@ auth.onAuthStateChanged(user=>{
       let d = doc.data() || {};
 
       if(d.forceLogout){
+
         alert("😁Logged out By Conz ~Six Sevennn🙌~");
 
         db.collection("users").doc(user.uid).update({
@@ -78,7 +77,6 @@ auth.onAuthStateChanged(user=>{
       lastSeen:Date.now()
     },{merge:true});
 
-    /* 🔥 FIXED */
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
 
@@ -86,11 +84,22 @@ auth.onAuthStateChanged(user=>{
 
       loadAvatar();
 
+      /* 🔥 FIXED */
+      if(!window.chatsLoaded){
+
+        window.chatsLoaded=true;
+
+        loadChats();
+      }
+
     });
 
     show("home");
 
   }else{
+
+    window.chatsLoaded=false;
+
     show("welcome");
   }
 });
@@ -233,14 +242,12 @@ filePicker.onchange=e=>{
 
   r.onload=()=>{
 
+    /* 🔥 FIXED */
     db.collection("users").doc(currentUser.uid).update({
-
-      /* 🔥 FIXED PERMANENT PHOTO */
-      photo:r.result + "?v=" + Date.now()
-
+      photo:r.result
     });
 
-    myData.photo=r.result + "?v=" + Date.now();
+    myData.photo=r.result;
 
     loadAvatar();
 
