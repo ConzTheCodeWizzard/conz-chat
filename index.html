@@ -73,12 +73,13 @@
 
   <div class="topbar">
     <button onclick="show('home')">Back</button>
-    <span id="chatName"></span>
+
+    <!-- 🔥 FRIEND PROFILE CLICK -->
+    <span id="chatName" onclick="openProfile(currentChatUser)"></span>
   </div>
 
   <div id="messages"></div>
 
-  <!-- 🔥 THIS IS WHAT YOU WERE MISSING -->
   <div class="chatInputBar">
     <input id="msgInput" placeholder="Type a message...">
     <div id="sendBtn" class="sendText" onclick="sendMessage()">Send</div>
@@ -94,6 +95,9 @@
   </div>
 
   <div id="profileContent"></div>
+
+  <!-- 🔥 FIXED MISSING ELEMENT -->
+  <p id="daysOnApp"></p>
 </div>
 
 <!-- UPDATES -->
