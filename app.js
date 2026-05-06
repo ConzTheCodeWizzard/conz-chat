@@ -39,6 +39,9 @@ let currentUser=null;
 
 window.currentChatUser=null;
 
+/* 🔥 GROUP SAFETY */
+window.currentGroup=null;
+
 let fabOpen=false;
 let myData={};
 let unsubscribeMessages=null;
@@ -84,7 +87,6 @@ auth.onAuthStateChanged(user=>{
 
       loadAvatar();
 
-      /* 🔥 FIXED */
       if(!window.chatsLoaded){
 
         window.chatsLoaded=true;
@@ -242,7 +244,6 @@ filePicker.onchange=e=>{
 
   r.onload=()=>{
 
-    /* 🔥 FIXED */
     db.collection("users").doc(currentUser.uid).update({
       photo:r.result
     });
@@ -301,6 +302,9 @@ window.searchUsers=function(){
 };
 
 function openChat(uid,name,photo){
+
+  /* 🔥 RESET GROUP STATE */
+  window.currentGroup=null;
 
   window.currentChatUser=uid;
 
@@ -474,7 +478,8 @@ setTimeout(()=>{
 
         e.preventDefault();
 
-        sendMessage();
+        /* 🔥 GROUP SAFE SEND */
+        handleSend();
       }
     });
   }
