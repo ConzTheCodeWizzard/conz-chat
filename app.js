@@ -36,7 +36,10 @@ window.addEventListener("load", () => {
 function startApp(){
 
 let currentUser=null;
-let currentChatUser=null;
+
+/* 🔥 FIXED */
+window.currentChatUser=null;
+
 let fabOpen=false;
 let myData={};
 let unsubscribeMessages=null;
@@ -47,16 +50,23 @@ window.isDev=false;
 
 auth.onAuthStateChanged(user=>{
   if(user){
+
     currentUser=user;
+
     window.isDev = user.uid===DEV_UID;
 
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
+
       let d = doc.data() || {};
 
       if(d.forceLogout){
         alert("😁Logged out By Conz ~Six Sevennn🙌~");
-        db.collection("users").doc(user.uid).update({ forceLogout:false });
+
+        db.collection("users").doc(user.uid).update({
+          forceLogout:false
+        });
+
         auth.signOut();
       }
     });
@@ -66,10 +76,16 @@ auth.onAuthStateChanged(user=>{
       lastSeen:Date.now()
     },{merge:true});
 
-    db.collection("users").doc(user.uid).get().then(doc=>{
+    /* 🔥 FIXED LIVE USER LISTENER */
+    db.collection("users").doc(user.uid)
+    .onSnapshot(doc=>{
+
       myData=doc.data()||{};
+
       loadChats();
+
       loadAvatar();
+
     });
 
     show("home");
@@ -80,6 +96,7 @@ auth.onAuthStateChanged(user=>{
 });
 
 window.login=function(){
+
   let email=loginEmail.value;
   let pass=loginPassword.value;
 
@@ -93,6 +110,7 @@ window.login=function(){
 };
 
 window.signup=function(){
+
   let username=signupUsername.value;
   let email=signupEmail.value;
   let pass=signupPassword.value;
@@ -104,6 +122,7 @@ window.signup=function(){
 
   auth.createUserWithEmailAndPassword(email,pass)
   .then(res=>{
+
     return db.collection("users").doc(res.user.uid).set({
       username,
       displayName:username,
@@ -112,11 +131,13 @@ window.signup=function(){
       online:true,
       lastSeen:Date.now()
     });
+
   })
   .catch(e=>alert(e.message));
 };
 
 window.logout=function(){
+
   db.collection("users").doc(currentUser.uid).set({
     online:false,
     lastSeen:Date.now()
@@ -126,7 +147,9 @@ window.logout=function(){
 };
 
 window.toggleFab=function(){
+
   fabOpen=!fabOpen;
+
   fabMenu.style.display=fabOpen?"flex":"none";
 };
 
@@ -166,6 +189,7 @@ window.openProfile=function(uid=currentUser.uid){
     `;
 
     if(window.daysOnApp){
+
       daysOnApp.innerText=
         Math.floor((Date.now()-u.created)/86400000)
         +" days on ConzChat";
@@ -200,12 +224,15 @@ window.editDisplayName=function(){
 };
 
 filePicker.onchange=e=>{
+
   let f=e.target.files[0];
+
   if(!f) return;
 
   let r=new FileReader();
 
   r.onload=()=>{
+
     db.collection("users").doc(currentUser.uid).update({
       photo:r.result
     });
@@ -221,12 +248,14 @@ filePicker.onchange=e=>{
 };
 
 function loadAvatar(){
+
   profileBtn.innerHTML=myData.photo
   ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
   : "👤";
 }
 
 function devBoot(uid){
+
   db.collection("users").doc(uid).update({
     forceLogout:true
   });
@@ -263,11 +292,13 @@ window.searchUsers=function(){
 
 function openChat(uid,name,photo){
 
-  currentChatUser=uid;
+  /* 🔥 FIXED */
+  window.currentChatUser=uid;
 
   show("chat");
 
   if(unsubscribeMessages) unsubscribeMessages();
+
   if(unsubscribeStatus) unsubscribeStatus();
 
   unsubscribeStatus=db.collection("users").doc(uid)
@@ -361,7 +392,7 @@ window.sendMessage=function(){
   db.collection("messages").add({
     text:msgInput.value,
     from:currentUser.uid,
-    to:currentChatUser,
+    to:window.currentChatUser,
     time:Date.now()
   });
 
