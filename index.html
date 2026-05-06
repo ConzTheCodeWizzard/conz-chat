@@ -53,6 +53,10 @@
 
   <div id="fabMenu">
     <div onclick="openSearch()">Find Friends</div>
+
+    <!-- 🔥 GROUP OPTION -->
+    <div onclick="createGroup()">Start Group</div>
+
     <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
@@ -82,7 +86,9 @@
 
   <div class="chatInputBar">
     <input id="msgInput" placeholder="Type a message...">
-    <div id="sendBtn" class="sendText" onclick="sendMessage()">Send</div>
+
+    <!-- 🔥 SAFE GROUP/DM SEND -->
+    <div id="sendBtn" class="sendText" onclick="handleSend()">Send</div>
   </div>
 
 </div>
@@ -135,6 +141,9 @@
 <script src="firebase.js"></script>
 <script src="particles.js"></script>
 <script src="app.js"></script>
+
+<!-- 🔥 GROUP SYSTEM -->
+<script src="group.js"></script>
 
 </body>
 </html>
