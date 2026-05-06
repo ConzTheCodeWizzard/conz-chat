@@ -35,7 +35,6 @@ window.addEventListener("load", () => {
 
 function startApp(){
 
-// ===== GLOBAL =====
 let currentUser=null;
 let currentChatUser=null;
 let fabOpen=false;
@@ -46,7 +45,6 @@ let unsubscribeStatus=null;
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
-// ===== AUTH =====
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser=user;
@@ -81,7 +79,6 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// ===== LOGIN =====
 window.login=function(){
   let email=loginEmail.value;
   let pass=loginPassword.value;
@@ -95,7 +92,6 @@ window.login=function(){
   .catch(e=>alert(e.message));
 };
 
-// ===== SIGNUP =====
 window.signup=function(){
   let username=signupUsername.value;
   let email=signupEmail.value;
@@ -120,7 +116,6 @@ window.signup=function(){
   .catch(e=>alert(e.message));
 };
 
-// ===== LOGOUT =====
 window.logout=function(){
   db.collection("users").doc(currentUser.uid).set({
     online:false,
@@ -130,32 +125,51 @@ window.logout=function(){
   auth.signOut();
 };
 
-// ===== FAB =====
 window.toggleFab=function(){
   fabOpen=!fabOpen;
   fabMenu.style.display=fabOpen?"flex":"none";
 };
 
-// ===== PROFILE =====
+/* ===== PROFILE ===== */
+
 window.openProfile=function(uid=currentUser.uid){
+
   db.collection("users").doc(uid).get().then(doc=>{
+
     let u=doc.data()||{};
 
     profileContent.innerHTML=`
       <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"' : ''}>
-        ${u.photo?`<img src="${u.photo}">`:""}
+        ${
+          u.photo
+          ? `<img src="${u.photo}">`
+          : `<div style="font-size:40px;">👤</div>`
+        }
       </div>
 
-      <div class="displayName">${u.displayName||u.username}</div>
+      <div class="displayName"
+        ${uid===currentUser.uid?'onclick="editDisplayName()"' : ''}>
+        ${u.displayName||u.username}
+      </div>
 
-      ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
+      ${uid===DEV_UID
+        ? `<div class="devBadge">👑 ConzChat Dev</div>`
+        : ""
+      }
 
       <div class="username">@${u.username}</div>
 
-      ${isDev && uid!==currentUser.uid ? `<button onclick="devBoot('${uid}')">BOOT THIS BITCH</button>`:""}
+      ${isDev && uid!==currentUser.uid
+        ? `<button onclick="devBoot('${uid}')">BOOT THIS BITCH</button>`
+        : ""
+      }
     `;
 
-    daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days";
+    if(window.daysOnApp){
+      daysOnApp.innerText=
+        Math.floor((Date.now()-u.created)/86400000)
+        +" days on ConzChat";
+    }
 
     show("profile");
   });
@@ -165,58 +179,92 @@ window.pickImage=function(){
   filePicker.click();
 };
 
+window.editDisplayName=function(){
+
+  let newName=prompt(
+    "Enter new display name",
+    myData.displayName || myData.username
+  );
+
+  if(!newName || !newName.trim()) return;
+
+  db.collection("users")
+  .doc(currentUser.uid)
+  .update({
+    displayName:newName
+  });
+
+  myData.displayName=newName;
+
+  openProfile(currentUser.uid);
+};
+
 filePicker.onchange=e=>{
   let f=e.target.files[0];
   if(!f) return;
 
   let r=new FileReader();
+
   r.onload=()=>{
-    db.collection("users").doc(currentUser.uid).update({photo:r.result});
+    db.collection("users").doc(currentUser.uid).update({
+      photo:r.result
+    });
+
     myData.photo=r.result;
+
     loadAvatar();
+
+    openProfile(currentUser.uid);
   };
+
   r.readAsDataURL(f);
 };
 
-// ===== FIXED PROFILE BUTTON =====
 function loadAvatar(){
   profileBtn.innerHTML=myData.photo
   ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
   : "👤";
 }
 
-// ===== DEV BOOT =====
 function devBoot(uid){
   db.collection("users").doc(uid).update({
     forceLogout:true
   });
 }
 
-// ===== SEARCH =====
 window.openSearch=()=>show("search");
 
 window.searchUsers=function(){
+
   results.innerHTML="";
 
   db.collection("users").get().then(snap=>{
+
     snap.forEach(doc=>{
+
       let u=doc.data();
 
       let div=document.createElement("div");
+
       div.innerHTML=`
-        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
+        <div class="chatAvatar">
+          ${u.photo?`<img src="${u.photo}">`:""}
+        </div>
+
         <div>${u.username}</div>
       `;
 
       div.onclick=()=>openChat(doc.id,u.username,u.photo);
+
       results.appendChild(div);
     });
   });
 };
 
-// ===== CHAT =====
 function openChat(uid,name,photo){
+
   currentChatUser=uid;
+
   show("chat");
 
   if(unsubscribeMessages) unsubscribeMessages();
@@ -224,11 +272,15 @@ function openChat(uid,name,photo){
 
   unsubscribeStatus=db.collection("users").doc(uid)
   .onSnapshot(doc=>{
+
     let u=doc.data()||{};
 
     if(u.online){
+
       chatName.innerText=name+" 🟢 Online";
+
     }else{
+
       let seconds=Math.floor((Date.now()-(u.lastSeen||0))/1000);
 
       let text=seconds<60
@@ -244,36 +296,53 @@ function openChat(uid,name,photo){
   unsubscribeMessages=db.collection("messages")
   .orderBy("time")
   .onSnapshot(snap=>{
+
     messages.innerHTML="";
 
     snap.forEach(doc=>{
+
       let m=doc.data();
 
       if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
+
       let other=m.from===currentUser.uid?m.to:m.from;
+
       if(other!==uid) return;
 
       let isMine=m.from===currentUser.uid;
 
       let wrap=document.createElement("div");
+
       wrap.className="msgWrap "+(isMine?"me":"them");
 
       let avatar=document.createElement("div");
+
       avatar.className="msgAvatar";
 
       let bubble=document.createElement("div");
+
       bubble.className="msg";
+
       bubble.innerHTML=`
         ${m.text}
         <div>${new Date(m.time).toLocaleTimeString()}</div>
       `;
 
       if(isMine){
-        if(myData.photo) avatar.innerHTML=`<img src="${myData.photo}">`;
+
+        if(myData.photo){
+          avatar.innerHTML=`<img src="${myData.photo}">`;
+        }
+
         wrap.appendChild(bubble);
         wrap.appendChild(avatar);
+
       }else{
-        if(photo) avatar.innerHTML=`<img src="${photo}">`;
+
+        if(photo){
+          avatar.innerHTML=`<img src="${photo}">`;
+        }
+
         wrap.appendChild(avatar);
         wrap.appendChild(bubble);
       }
@@ -285,8 +354,8 @@ function openChat(uid,name,photo){
   });
 }
 
-// ===== SEND =====
 window.sendMessage=function(){
+
   if(!msgInput || !msgInput.value) return;
 
   db.collection("messages").add({
@@ -303,43 +372,55 @@ window.sendMessage=function(){
   }
 };
 
-// ===== CHAT LIST =====
 function loadChats(){
+
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
+
     chatList.innerHTML="";
+
     let seen={};
 
     snap.forEach(doc=>{
+
       let m=doc.data();
 
       if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
 
       let other=m.from===currentUser.uid?m.to:m.from;
+
       if(seen[other]) return;
+
       seen[other]=true;
 
       db.collection("users").doc(other).get().then(u=>{
+
         let d=u.data()||{};
 
         let div=document.createElement("div");
+
         div.innerHTML=`
-          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+          <div class="chatAvatar">
+            ${d.photo?`<img src="${d.photo}">`:""}
+          </div>
+
           <div>${d.username}</div>
         `;
 
         div.onclick=()=>openChat(other,d.username,d.photo);
+
         chatList.appendChild(div);
       });
     });
   });
 }
 
-// ===== SEND BAR UPGRADE (SAFE) =====
 setTimeout(()=>{
+
   if(window.msgInput && window.sendBtn){
 
     msgInput.addEventListener("input", ()=>{
+
       if(msgInput.value.trim()){
         sendBtn.classList.add("active");
       }else{
@@ -348,13 +429,16 @@ setTimeout(()=>{
     });
 
     msgInput.addEventListener("keydown", function(e){
+
       if(e.key === "Enter" && !e.shiftKey){
+
         e.preventDefault();
+
         sendMessage();
       }
     });
-
   }
+
 },500);
 
 }
