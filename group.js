@@ -5,6 +5,7 @@
 
 window.currentGroup = null;
 window.unsubscribeGroupMessages = null;
+window.groupListenerLoaded = false;
 
 /* ===== CREATE GROUP ===== */
 
@@ -35,8 +36,6 @@ window.createGroup = async function(){
 
     alert("Group created!");
 
-    loadGroups();
-
     openGroup(ref.id);
 
   }catch(err){
@@ -51,18 +50,31 @@ window.loadGroups = function(){
 
   if(!window.currentUser) return;
 
+  if(window.groupListenerLoaded) return;
+
+  window.groupListenerLoaded = true;
+
   db.collection("groups")
   .where("members","array-contains",window.currentUser.uid)
-  .orderBy("lastTime","desc")
   .onSnapshot(snap=>{
 
     let oldGroups = document.querySelectorAll(".groupItem");
 
     oldGroups.forEach(el=>el.remove());
 
+    let groups = [];
+
     snap.forEach(doc=>{
 
-      let g = doc.data();
+      groups.push({
+        id:doc.id,
+        ...doc.data()
+      });
+    });
+
+    groups.sort((a,b)=>(b.lastTime||0)-(a.lastTime||0));
+
+    groups.forEach(g=>{
 
       let div = document.createElement("div");
 
@@ -92,11 +104,15 @@ window.loadGroups = function(){
 
       div.onclick = ()=>{
 
-        openGroup(doc.id);
+        openGroup(g.id);
       };
 
       chatList.prepend(div);
     });
+  },
+  err=>{
+
+    alert(err.message);
   });
 };
 
@@ -111,6 +127,9 @@ window.openGroup = function(groupId){
   window.currentChatUser = null;
 
   show("chat");
+
+  /* 🔥 FIX GROUP HEADER CLICK */
+  chatName.onclick = null;
 
   if(window.unsubscribeGroupMessages){
     window.unsubscribeGroupMessages();
@@ -134,14 +153,20 @@ window.openGroup = function(groupId){
 
   window.unsubscribeGroupMessages = db.collection("groupMessages")
   .where("groupId","==",groupId)
-  .orderBy("time")
   .onSnapshot(async snap=>{
 
     messages.innerHTML = "";
 
-    for(const doc of snap.docs){
+    let groupMessages = [];
 
-      let m = doc.data();
+    snap.forEach(doc=>{
+
+      groupMessages.push(doc.data());
+    });
+
+    groupMessages.sort((a,b)=>(a.time||0)-(b.time||0));
+
+    for(const m of groupMessages){
 
       let userDoc = await db.collection("users")
       .doc(m.from)
@@ -212,6 +237,10 @@ window.openGroup = function(groupId){
     }
 
     messages.scrollTop = messages.scrollHeight;
+  },
+  err=>{
+
+    alert(err.message);
   });
 };
 
