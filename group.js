@@ -20,9 +20,9 @@ window.createGroup = async function(){
 
       name:name,
 
-      owner:currentUser.uid,
+      owner:window.currentUser.uid,
 
-      members:[currentUser.uid],
+      members:[window.currentUser.uid],
 
       created:Date.now(),
 
@@ -49,10 +49,10 @@ window.createGroup = async function(){
 
 window.loadGroups = function(){
 
-  if(!currentUser) return;
+  if(!window.currentUser) return;
 
   db.collection("groups")
-  .where("members","array-contains",currentUser.uid)
+  .where("members","array-contains",window.currentUser.uid)
   .orderBy("lastTime","desc")
   .onSnapshot(snap=>{
 
@@ -104,7 +104,7 @@ window.loadGroups = function(){
 
 window.openGroup = function(groupId){
 
-  if(!currentUser) return;
+  if(!window.currentUser) return;
 
   window.currentGroup = groupId;
 
@@ -149,7 +149,7 @@ window.openGroup = function(groupId){
 
       let u = userDoc.data() || {};
 
-      let isMine = m.from===currentUser.uid;
+      let isMine = m.from===window.currentUser.uid;
 
       let wrap = document.createElement("div");
 
@@ -237,7 +237,7 @@ window.sendGroupMessage = async function(){
 
       groupId:window.currentGroup,
 
-      from:currentUser.uid,
+      from:window.currentUser.uid,
 
       text:text,
 
@@ -312,7 +312,7 @@ window.addToGroup = async function(groupId,uid){
 
 setTimeout(()=>{
 
-  if(typeof currentUser !== "undefined"){
+  if(window.currentUser){
 
     loadGroups();
   }
