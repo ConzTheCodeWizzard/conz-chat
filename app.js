@@ -178,9 +178,10 @@ filePicker.onchange=e=>{
   r.readAsDataURL(f);
 };
 
+// ===== FIXED PROFILE BUTTON =====
 function loadAvatar(){
   profileBtn.innerHTML=myData.photo
-  ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%">`
+  ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
   : "👤";
 }
 
@@ -356,4 +357,4 @@ setTimeout(()=>{
   }
 },500);
 
-    }
+}
