@@ -123,6 +123,17 @@ padding:0 !important;
 }
 
 /* ===== CHAT LIST ===== */
+
+#home{
+overflow-y:auto;
+}
+
+#chatList{
+flex:1;
+overflow-y:auto;
+padding-bottom:100px;
+}
+
 #chatList div{
 display:flex;
 align-items:center;
