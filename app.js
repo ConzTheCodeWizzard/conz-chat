@@ -35,7 +35,8 @@ window.addEventListener("load", () => {
 
 function startApp(){
 
-let currentUser=null;
+/* 🔥 GLOBAL USER FIX */
+window.currentUser=null;
 
 window.currentChatUser=null;
 
@@ -54,7 +55,8 @@ auth.onAuthStateChanged(user=>{
 
   if(user){
 
-    currentUser=user;
+    /* 🔥 GLOBAL USER FIX */
+    window.currentUser=user;
 
     window.isDev = user.uid===DEV_UID;
 
@@ -149,7 +151,7 @@ window.signup=function(){
 
 window.logout=function(){
 
-  db.collection("users").doc(currentUser.uid).set({
+  db.collection("users").doc(window.currentUser.uid).set({
     online:false,
     lastSeen:Date.now()
   },{merge:true});
@@ -166,14 +168,14 @@ window.toggleFab=function(){
 
 /* ===== PROFILE ===== */
 
-window.openProfile=function(uid=currentUser.uid){
+window.openProfile=function(uid=window.currentUser.uid){
 
   db.collection("users").doc(uid).get().then(doc=>{
 
     let u=doc.data()||{};
 
     profileContent.innerHTML=`
-      <div class="avatar" ${uid===currentUser.uid?'onclick="pickImage()"' : ''}>
+      <div class="avatar" ${uid===window.currentUser.uid?'onclick="pickImage()"' : ''}>
         ${
           u.photo
           ? `<img src="${u.photo}">`
@@ -182,7 +184,7 @@ window.openProfile=function(uid=currentUser.uid){
       </div>
 
       <div class="displayName"
-        ${uid===currentUser.uid?'onclick="editDisplayName()"' : ''}>
+        ${uid===window.currentUser.uid?'onclick="editDisplayName()"' : ''}>
         ${u.displayName||u.username}
       </div>
 
@@ -193,7 +195,7 @@ window.openProfile=function(uid=currentUser.uid){
 
       <div class="username">@${u.username}</div>
 
-      ${isDev && uid!==currentUser.uid
+      ${isDev && uid!==window.currentUser.uid
         ? `<button onclick="devBoot('${uid}')">BOOT THIS BITCH</button>`
         : ""
       }
@@ -224,14 +226,14 @@ window.editDisplayName=function(){
   if(!newName || !newName.trim()) return;
 
   db.collection("users")
-  .doc(currentUser.uid)
+  .doc(window.currentUser.uid)
   .update({
     displayName:newName
   });
 
   myData.displayName=newName;
 
-  openProfile(currentUser.uid);
+  openProfile(window.currentUser.uid);
 };
 
 filePicker.onchange=e=>{
@@ -244,7 +246,7 @@ filePicker.onchange=e=>{
 
   r.onload=()=>{
 
-    db.collection("users").doc(currentUser.uid).update({
+    db.collection("users").doc(window.currentUser.uid).update({
       photo:r.result
     });
 
@@ -252,7 +254,7 @@ filePicker.onchange=e=>{
 
     loadAvatar();
 
-    openProfile(currentUser.uid);
+    openProfile(window.currentUser.uid);
   };
 
   r.readAsDataURL(f);
@@ -347,13 +349,13 @@ function openChat(uid,name,photo){
 
       let m=doc.data();
 
-      if(!(m.from===currentUser.uid||m.to===currentUser.uid)) return;
+      if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
 
-      let other=m.from===currentUser.uid?m.to:m.from;
+      let other=m.from===window.currentUser.uid?m.to:m.from;
 
       if(other!==uid) return;
 
-      let isMine=m.from===currentUser.uid;
+      let isMine=m.from===window.currentUser.uid;
 
       let wrap=document.createElement("div");
 
@@ -404,7 +406,7 @@ window.sendMessage=function(){
 
   db.collection("messages").add({
     text:msgInput.value,
-    from:currentUser.uid,
+    from:window.currentUser.uid,
     to:window.currentChatUser,
     time:Date.now()
   });
@@ -429,9 +431,9 @@ function loadChats(){
 
       let m=doc.data();
 
-      if(m.from!==currentUser.uid&&m.to!==currentUser.uid) return;
+      if(m.from!==window.currentUser.uid&&m.to!==window.currentUser.uid) return;
 
-      let other=m.from===currentUser.uid?m.to:m.from;
+      let other=m.from===window.currentUser.uid?m.to:m.from;
 
       if(seen[other]) return;
 
