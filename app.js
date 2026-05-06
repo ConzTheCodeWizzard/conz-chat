@@ -37,7 +37,6 @@ function startApp(){
 
 let currentUser=null;
 
-/* 🔥 FIXED */
 window.currentChatUser=null;
 
 let fabOpen=false;
@@ -47,6 +46,9 @@ let unsubscribeStatus=null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
+
+/* 🔥 FIXED DUPLICATE CHAT LIST */
+loadChats();
 
 auth.onAuthStateChanged(user=>{
   if(user){
@@ -76,13 +78,11 @@ auth.onAuthStateChanged(user=>{
       lastSeen:Date.now()
     },{merge:true});
 
-    /* 🔥 FIXED LIVE USER LISTENER */
+    /* 🔥 FIXED */
     db.collection("users").doc(user.uid)
     .onSnapshot(doc=>{
 
       myData=doc.data()||{};
-
-      loadChats();
 
       loadAvatar();
 
@@ -234,10 +234,13 @@ filePicker.onchange=e=>{
   r.onload=()=>{
 
     db.collection("users").doc(currentUser.uid).update({
-      photo:r.result
+
+      /* 🔥 FIXED PERMANENT PHOTO */
+      photo:r.result + "?v=" + Date.now()
+
     });
 
-    myData.photo=r.result;
+    myData.photo=r.result + "?v=" + Date.now();
 
     loadAvatar();
 
@@ -292,7 +295,6 @@ window.searchUsers=function(){
 
 function openChat(uid,name,photo){
 
-  /* 🔥 FIXED */
   window.currentChatUser=uid;
 
   show("chat");
