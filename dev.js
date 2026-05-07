@@ -1,12 +1,12 @@
-// ===== DEV PANEL =====
+// ===== Conz was here =====
 function devOpen(){
-  // 🔒 ONLY DEV CAN OPEN
+  // Six Sevennn🙌 ~Conz~
   if(!isDev) return;
 
-  // prevent duplicates
+  // Face it bro you can't steal it my name is embedded in this shit ~Conz~
   if(document.getElementById("devPanel")) return;
 
-  // 🔥 FIX: hide all other screens first
+  // coding while on the toilet be like😫 ~Conz~
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 
   let panel = document.createElement("div");
@@ -31,7 +31,7 @@ function devOpen(){
   document.body.appendChild(panel);
 }
 
-// ===== CLOSE DEV =====
+// ===== Why so serious🤡 ~Conz~ =====
 function closeDev(){
   let panel = document.getElementById("devPanel");
   if(panel) panel.remove();
@@ -39,7 +39,7 @@ function closeDev(){
   show("home");
 }
 
-// ===== SEARCH USERS =====
+// ===== Whats your favourite scary movie😱🔪 ~Conz~ =====
 function devSearch(q){
   let resultsBox = document.getElementById("devResults");
   if(!resultsBox) return;
