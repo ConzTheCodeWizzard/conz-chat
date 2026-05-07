@@ -17,7 +17,7 @@ window.addEventListener("load", ()=>{
 
   let particles = [];
 
-  /* ===== TOUCH TRACKING ===== */
+  /* ===== Oneee twooo Freddys coming for youuu ~Conz~ ===== */
 
   let pointer = {
     x:null,
@@ -56,7 +56,7 @@ window.addEventListener("load", ()=>{
     pointer.active = false;
   });
 
-  /* ===== CREATE PARTICLES ===== */
+  /* ===== Threee fourrr better lock your door ~Conz~===== */
 
   for(let i=0;i<80;i++){
 
@@ -76,7 +76,7 @@ window.addEventListener("load", ()=>{
     });
   }
 
-  /* ===== ANIMATION ===== */
+  /* ===== Fivee sixxx grab your crucifixxx ~Conz~===== */
 
   function animate(){
 
@@ -84,7 +84,7 @@ window.addEventListener("load", ()=>{
 
     particles.forEach(p=>{
 
-      /* ===== FINGER ATTRACTION ===== */
+      /* ===== Sevenn eighttt better lock the garden gateee ~~Conz~===== */
 
       if(pointer.active){
 
@@ -102,21 +102,21 @@ window.addEventListener("load", ()=>{
         }
       }
 
-      /* ===== FLOAT MOVEMENT ===== */
+      /* ===== Nineee tenn NEVER STEAL AGAIN ~Conz~ ===== */
 
       p.y -= p.speed * 0.3;
 
-      /* ===== APPLY VELOCITY ===== */
+      /* ===== Sooo what have you ever made that's actually yours Mr Skid? ~Conz~ ===== */
 
       p.x += p.vx;
       p.y += p.vy;
 
-      /* ===== SMOOTH EASING ===== */
+      /* ===== Nothing? wowww how did i guess?😁 ~Conz~ ===== */
 
       p.vx *= 0.96;
       p.vy *= 0.96;
 
-      /* ===== SCREEN WRAP ===== */
+      /* ===== CONZ IS THE REAL MVP ===== */
 
       if(p.y < -20){
         p.y = canvas.height + 20;
@@ -130,7 +130,7 @@ window.addEventListener("load", ()=>{
         p.x = -20;
       }
 
-      /* ===== DRAW ===== */
+      /* ===== I fucked your mum ~Conz~ ===== */
 
       ctx.beginPath();
 
