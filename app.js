@@ -49,6 +49,80 @@ window.unsubscribeMessages = null;
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
+/* ===== THEMES ===== */
+
+const themes = {
+
+  gothic:{
+    main:"#000000",
+    secondary:"#9d00ff"
+  },
+
+  joker:{
+    main:"#1aff00",
+    secondary:"#7b00ff"
+  },
+
+  zombie:{
+    main:"#001a00",
+    secondary:"#00ff00"
+  },
+
+  princess:{
+    main:"#ffb6d9",
+    secondary:"#ff4fa3"
+  },
+
+  ocean:{
+    main:"#0044ff",
+    secondary:"#7fdfff"
+  },
+
+  fire:{
+    main:"#ff2200",
+    secondary:"#ff8800"
+  },
+
+  forest:{
+    main:"#001f00",
+    secondary:"#00cc44"
+  },
+
+  batman:{
+    main:"#111111",
+    secondary:"#666666"
+  },
+
+  harley:{
+    main:"#ff69b4",
+    secondary:"#00bfff"
+  }
+};
+
+window.applyTheme=function(name){
+
+  let t = themes[name];
+
+  if(!t) return;
+
+  document.documentElement.style
+  .setProperty("--main", t.main);
+
+  document.documentElement.style
+  .setProperty("--secondary", t.secondary);
+
+  localStorage.setItem("conz_theme", name);
+};
+
+/* ===== LOAD SAVED THEME ===== */
+
+let savedTheme = localStorage.getItem("conz_theme");
+
+if(savedTheme && themes[savedTheme]){
+
+  applyTheme(savedTheme);
+}
+
 auth.onAuthStateChanged(user=>{
 
   if(user){
@@ -312,7 +386,6 @@ function openChat(uid,name,photo){
 
   show("chat");
 
-  /* 🔥 RESTORE DM PROFILE CLICK */
   chatName.onclick=()=>{
     openProfile(uid);
   };
