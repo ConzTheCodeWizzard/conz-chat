@@ -57,6 +57,9 @@
     <!-- Make your own shit ~Conz~ -->
     <div onclick="createGroup()">Start Group</div>
 
+    <!-- 🔥 THEMES -->
+    <div onclick="show('themes')">Themes</div>
+
     <div onclick="show('updates')">Update Log</div>
   </div>
 </div>
@@ -106,6 +109,38 @@
   <p id="daysOnApp"></p>
 </div>
 
+<!-- 🔥 THEMES SCREEN -->
+<div id="themes" class="screen">
+
+  <div class="topbar">
+    <button onclick="show('home')">Back</button>
+    <span>Themes</span>
+  </div>
+
+  <div class="themeList">
+
+    <button onclick="applyTheme('gothic')">🟣 Gothic</button>
+
+    <button onclick="applyTheme('joker')">🟢 Joker</button>
+
+    <button onclick="applyTheme('zombie')">☣️ Zombie</button>
+
+    <button onclick="applyTheme('princess')">🩷 Princess</button>
+
+    <button onclick="applyTheme('ocean')">🌊 Ocean</button>
+
+    <button onclick="applyTheme('fire')">🔥 Fire</button>
+
+    <button onclick="applyTheme('forest')">🌲 Forest</button>
+
+    <button onclick="applyTheme('batman')">🦇 Batman</button>
+
+    <button onclick="applyTheme('harley')">🩵 Harley Quinn</button>
+
+  </div>
+
+</div>
+
 <!-- Get fucked ~Conz~ -->
 <div id="updates" class="screen">
   <div class="topbar">
@@ -120,6 +155,7 @@
   <p>➕️ Added magnetic properties to welcome screen (floating paticles are now attracted to your finger and will follow you</p>
   <p>✅️ Fixed Message send button being inconsistent </p>
   <p>➕️ Added group chat system (solo for now im working on backend logic ~Conz~)</p>
+  <p>➕️ Added full custom theme system</p>
   <br>
   <p>Future changes??</p>
   <br>
