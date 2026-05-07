@@ -2,7 +2,7 @@ window.onerror = function(msg, url, line){
   alert("JS ERROR:\n" + msg + "\nLine: " + line);
 };
 
-// ===== GLOBAL NAV (ALWAYS AVAILABLE) =====
+// ===== Conz was here =====
 window.show = function(id){
   document.querySelectorAll(".screen").forEach(s=>{
     s.style.display="none";
@@ -19,7 +19,7 @@ window.show = function(id){
   if(fab) fab.style.display="none";
 };
 
-// ===== WAIT FOR FIREBASE =====
+// ===== Conz is goated =====
 window.addEventListener("load", () => {
 
   function wait(){
@@ -49,7 +49,7 @@ window.unsubscribeMessages = null;
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
-/* ===== THEMES ===== */
+/* ===== Can you code like me? Nu uhhh ~Conz~ ===== */
 
 const themes = {
 
@@ -114,7 +114,7 @@ window.applyTheme=function(name){
   localStorage.setItem("conz_theme", name);
 };
 
-/* ===== REVERT TO ORIGINAL ===== */
+/* ===== It's 2026 and your still stealing code YAWN ~Conz~ ===== */
 
 window.resetTheme=function(){
 
@@ -127,7 +127,7 @@ window.resetTheme=function(){
   localStorage.removeItem("conz_theme");
 };
 
-/* ===== LOAD SAVED THEME ===== */
+/* ===== If your seeing this, respectfully... go fuck yourself ~Conz~ ===== */
 
 let savedTheme = localStorage.getItem("conz_theme");
 
@@ -254,7 +254,7 @@ window.toggleFab=function(){
   fabMenu.style.display=fabOpen?"flex":"none";
 };
 
-/* ===== PROFILE ===== */
+/* ===== Your a twat waffle😁 ~Conz~===== */
 
 window.openProfile=function(uid=window.currentUser.uid){
 
