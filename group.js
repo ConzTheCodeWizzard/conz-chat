@@ -1,13 +1,13 @@
 /* =========================================
-   CONZCHAT GROUP SYSTEM
-   group.js
+   Conz was here
+   Hello to you toooo MR SKIDDYYY ~Conz~
    ========================================= */
 
 window.currentGroup = null;
 window.unsubscribeGroupMessages = null;
 window.groupListenerLoaded = false;
 
-/* ===== CREATE GROUP ===== */
+/* ===== Awww who's a good little script kiddy🐻 ~Conz~ ===== */
 
 window.createGroup = async function(){
 
@@ -44,7 +44,7 @@ window.createGroup = async function(){
   }
 };
 
-/* ===== LOAD GROUPS ===== */
+/* ===== How many of these have you deleted so far? you getting irritated yet? you RAT🐀 ~Conz~ ===== */
 
 window.loadGroups = function(){
 
@@ -116,7 +116,7 @@ window.loadGroups = function(){
   });
 };
 
-/* ===== OPEN GROUP ===== */
+/* ===== Hard to believe i started as a kik modder lolz the real OG's know ~Conz~ ===== */
 
 window.openGroup = function(groupId){
 
@@ -128,7 +128,7 @@ window.openGroup = function(groupId){
 
   show("chat");
 
-  /* 🔥 FIX GROUP HEADER CLICK */
+  /* Skript kitty has left the chat🚪 ~Conz~ */
   chatName.onclick = null;
 
   if(window.unsubscribeGroupMessages){
@@ -244,7 +244,7 @@ window.openGroup = function(groupId){
   });
 };
 
-/* ===== SEND GROUP MESSAGE ===== */
+/* ===== You dropped your gay card ~Conz~ ===== */
 
 window.sendGroupMessage = async function(){
 
@@ -288,7 +288,7 @@ window.sendGroupMessage = async function(){
   }
 };
 
-/* ===== GROUP / DM SEND SWITCH ===== */
+/* ===== Bow for me bitch ~Conz~ ===== */
 
 window.handleSend = function(){
 
@@ -302,7 +302,7 @@ window.handleSend = function(){
   }
 };
 
-/* ===== ADD MEMBER ===== */
+/* ===== Is it the scarss you wanna know how I got em?🤡 ~Conz~ ===== */
 
 window.addToGroup = async function(groupId,uid){
 
@@ -337,7 +337,7 @@ window.addToGroup = async function(groupId,uid){
   }
 };
 
-/* ===== AUTO LOAD GROUPS ===== */
+/* ===== And we reach the end woop woooop ~Conz~===== */
 
 setTimeout(()=>{
 
