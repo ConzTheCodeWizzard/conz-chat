@@ -48,7 +48,79 @@ window.unsubscribeMessages = null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
+/* ===== ROTATING TEXT SYSTEM ===== */
 
+const rotatingMessages = [
+
+  "Built by ~Conz~",
+
+  "You are currently running Version 1.3",
+
+  "New theme system was added",
+
+  "Group chat system is in the works",
+
+  "Conz is actively looking for co devs to partner with",
+
+  "Report any issues you find to @Borg on ConzChat",
+
+  "Send any suggestions for new stuff to @Borg on ConzChat",
+
+  "If you know how to code hit me up let's work together",
+
+  "Version 1.4 will be released on May 13th",
+
+  "Did you notice the particles are attracted to your touch?"
+];
+
+let rotatingIndex = 0;
+let hue = 0;
+
+function startRotatingText(){
+
+  let textEl = document.getElementById("rotatingText");
+
+  if(!textEl) return;
+
+  textEl.style.fontSize = "18px";
+  textEl.style.marginTop = "12px";
+  textEl.style.minHeight = "24px";
+  textEl.style.fontWeight = "bold";
+  textEl.style.transition = "0.4s ease";
+
+  textEl.innerText = rotatingMessages[0];
+
+  setInterval(()=>{
+
+    textEl.style.opacity = "0";
+
+    setTimeout(()=>{
+
+      rotatingIndex++;
+
+      if(rotatingIndex >= rotatingMessages.length){
+        rotatingIndex = 0;
+      }
+
+      hue += 35;
+
+      textEl.innerText =
+      rotatingMessages[rotatingIndex];
+
+      textEl.style.color =
+      `hsl(${hue},100%,60%)`;
+
+      textEl.style.textShadow =
+      `0 0 12px hsl(${hue},100%,60%)`;
+
+      textEl.style.opacity = "1";
+
+    },300);
+
+  },3000);
+}
+
+startRotatingText();
 /* ===== Can you code like me? Nu uhhh ~Conz~ ===== */
 
 const themes = {
