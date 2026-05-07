@@ -35,6 +35,21 @@ window.addEventListener("load", ()=>{
   canvas.addEventListener("mouseleave", ()=>{
 
     pointer.active = false;
+
+    particles.forEach(p=>{
+
+      p.vx += (Math.random()-0.5) * 6;
+      p.vy += (Math.random()-0.5) * 6;
+    });
+  });
+
+  canvas.addEventListener("mouseup", ()=>{
+
+    particles.forEach(p=>{
+
+      p.vx += (Math.random()-0.5) * 6;
+      p.vy += (Math.random()-0.5) * 6;
+    });
   });
 
   canvas.addEventListener("touchstart", e=>{
@@ -54,23 +69,29 @@ window.addEventListener("load", ()=>{
   canvas.addEventListener("touchend", ()=>{
 
     pointer.active = false;
+
+    particles.forEach(p=>{
+
+      p.vx += (Math.random()-0.5) * 6;
+      p.vy += (Math.random()-0.5) * 6;
+    });
   });
 
   /* ===== Threee fourrr better lock your door ~Conz~===== */
 
-  for(let i=0;i<80;i++){
+  for(let i=0;i<160;i++){
 
     particles.push({
 
       x:Math.random()*canvas.width,
       y:Math.random()*canvas.height,
 
-      vx:(Math.random()-0.5)*0.5,
-      vy:(Math.random()-0.5)*0.5,
+      vx:(Math.random()-0.5)*1.2,
+      vy:(Math.random()-0.5)*1.2,
 
-      size:Math.random()*2+1,
+      size:Math.random()*2.5+1,
 
-      speed:Math.random()*0.7+0.3,
+      speed:Math.random()*1.2+0.5,
 
       hue:Math.random()*360
     });
@@ -93,18 +114,18 @@ window.addEventListener("load", ()=>{
 
         let dist = Math.sqrt(dx*dx + dy*dy);
 
-        if(dist < 160){
+        if(dist < 260){
 
-          let force = (160 - dist) / 160;
+          let force = (260 - dist) / 260;
 
-          p.vx += dx * 0.0008 * force;
-          p.vy += dy * 0.0008 * force;
+          p.vx += dx * 0.0035 * force;
+          p.vy += dy * 0.0035 * force;
         }
       }
 
       /* ===== Nineee tenn NEVER STEAL AGAIN ~Conz~ ===== */
 
-      p.y -= p.speed * 0.3;
+      p.y -= p.speed * 0.15;
 
       /* ===== Sooo what have you ever made that's actually yours Mr Skid? ~Conz~ ===== */
 
@@ -113,32 +134,33 @@ window.addEventListener("load", ()=>{
 
       /* ===== Nothing? wowww how did i guess?😁 ~Conz~ ===== */
 
-      p.vx *= 0.96;
-      p.vy *= 0.96;
+      p.vx *= 0.985;
+      p.vy *= 0.985;
 
       /* ===== CONZ IS THE REAL MVP ===== */
 
-      if(p.y < -20){
-        p.y = canvas.height + 20;
+      if(p.x <= 0 || p.x >= canvas.width){
+        p.vx *= -1;
       }
 
-      if(p.x < -20){
-        p.x = canvas.width + 20;
-      }
-
-      if(p.x > canvas.width + 20){
-        p.x = -20;
+      if(p.y <= 0 || p.y >= canvas.height){
+        p.vy *= -1;
       }
 
       /* ===== I fucked your mum ~Conz~ ===== */
 
+      let speedGlow =
+      Math.abs(p.vx) + Math.abs(p.vy);
+
       ctx.beginPath();
 
-      ctx.fillStyle = `hsla(${p.hue},100%,60%,0.7)`;
+      ctx.fillStyle =
+      `hsla(${p.hue},100%,60%,${0.45 + speedGlow * 0.06})`;
 
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 45;
 
-      ctx.shadowColor = `hsl(${p.hue},100%,60%)`;
+      ctx.shadowColor =
+      `hsl(${p.hue},100%,60%)`;
 
       ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
 
