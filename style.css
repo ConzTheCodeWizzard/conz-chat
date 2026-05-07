@@ -6,7 +6,7 @@
 body{
 margin:0;
 font-family:sans-serif;
-background:#000;
+background:var(--main);
 color:#fff;
 overflow:hidden;
 }
@@ -78,7 +78,7 @@ padding:12px 18px;
 margin:6px;
 border:none;
 border-radius:10px;
-background:linear-gradient(135deg,#ff0033,#ff0066);
+background:linear-gradient(135deg,var(--secondary),#ff0066);
 color:#fff;
 font-weight:bold;
 cursor:pointer;
@@ -157,7 +157,6 @@ flex-direction:column;
 height:100vh;
 }
 
-/* 🔥 FIX: allow space for bottom bar */
 #messages{
 flex:1;
 overflow-y:auto;
@@ -170,7 +169,7 @@ padding-bottom:80px;
 display:flex;
 align-items:center;
 padding:8px;
-background:#000;
+background:var(--main);
 border-top:1px solid rgba(255,255,255,0.05);
 position:fixed;
 bottom:0;
@@ -194,7 +193,7 @@ font-size:14px;
 .sendText{
 margin-left:10px;
 font-weight:bold;
-color:#ff0033;
+color:var(--secondary);
 opacity:0.3;
 cursor:pointer;
 transition:0.2s;
@@ -246,7 +245,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 font-size:30px;
-background:linear-gradient(135deg,#ff0033,#ff00ff);
+background:linear-gradient(135deg,var(--secondary),#ff00ff);
 }
 
 #fabMenu{
@@ -320,4 +319,20 @@ cursor:pointer;
 #updates{
 overflow-y:auto;
 padding-bottom:80px;
+}
+
+/* ===== THEMES ===== */
+
+.themeList{
+display:flex;
+flex-direction:column;
+padding:20px;
+gap:12px;
+overflow-y:auto;
+}
+
+.themeList button{
+font-size:18px;
+padding:14px;
+border-radius:14px;
 }
