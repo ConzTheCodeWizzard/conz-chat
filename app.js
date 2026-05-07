@@ -114,6 +114,19 @@ window.applyTheme=function(name){
   localStorage.setItem("conz_theme", name);
 };
 
+/* ===== REVERT TO ORIGINAL ===== */
+
+window.resetTheme=function(){
+
+  document.documentElement.style
+  .setProperty("--main","#000");
+
+  document.documentElement.style
+  .setProperty("--secondary","#ff0033");
+
+  localStorage.removeItem("conz_theme");
+};
+
 /* ===== LOAD SAVED THEME ===== */
 
 let savedTheme = localStorage.getItem("conz_theme");
