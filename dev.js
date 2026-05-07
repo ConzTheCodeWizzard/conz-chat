@@ -66,7 +66,7 @@ function devSearch(q){
   });
 }
 
-// ===== BOOT USER =====
+// ===== HELLO CINDY🔪 ~conz~ =====
 function devBoot(uid){
   db.collection("users").doc(uid).update({
     forceLogout:true
