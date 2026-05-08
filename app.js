@@ -168,6 +168,10 @@ const themes = {
   harley:{
     main:"#ff69b4",
     secondary:"#00bfff"
+  },
+  conz:{
+  main:"#050505",
+  secondary:"#ff003c"
   }
 };
 
@@ -185,12 +189,19 @@ window.applyTheme=function(name){
 
   localStorage.setItem("conz_theme", name);
   document.body.classList.remove(
-  "harleyTheme"
+  "harleyTheme",
+  "conzTheme"
 );
 
 if(name === "harley"){
   document.body.classList.add(
     "harleyTheme"
+  );
+}
+
+if(name === "conz"){
+  document.body.classList.add(
+    "conzTheme"
   );
 }
 };
