@@ -560,25 +560,6 @@ function openChat(uid,name,photo){
     });
 
     messages.scrollTop=messages.scrollHeight;
-    if (Notification.permission === "granted") {
-
-  navigator.serviceWorker.getRegistration().then(reg => {
-
-    if (reg) {
-
-      reg.showNotification("ConzChat", {
-
-        body: "New message received",
-
-        icon: "icon-192.png"
-
-      });
-
-    }
-
-  });
-
-}
 
 window.sendMessage=function(){
 
