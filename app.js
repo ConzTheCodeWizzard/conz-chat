@@ -184,6 +184,15 @@ window.applyTheme=function(name){
   .setProperty("--secondary", t.secondary);
 
   localStorage.setItem("conz_theme", name);
+  document.body.classList.remove(
+  "harleyTheme"
+);
+
+if(name === "harley"){
+  document.body.classList.add(
+    "harleyTheme"
+  );
+}
 };
 
 /* ===== It's 2026 and your still stealing code YAWN ~Conz~ ===== */
