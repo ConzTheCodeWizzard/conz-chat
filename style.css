@@ -336,3 +336,17 @@ font-size:18px;
 padding:14px;
 border-radius:14px;
 }
+/* ===== HARLEY THEME ===== */
+
+body.harleyTheme{
+background:
+linear-gradient(
+rgba(0,0,0,0.55),
+rgba(0,0,0,0.55)
+),
+url("harley.jpg");
+
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+}
