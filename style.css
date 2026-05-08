@@ -350,3 +350,19 @@ background-size:cover;
 background-position:center;
 background-attachment:fixed;
 }
+/* ===== CONZ THEME ===== */
+
+body.conzTheme{
+
+background:
+linear-gradient(
+rgba(0,0,0,0.55),
+rgba(0,0,0,0.75)
+),
+url("conz.jpg");
+
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+
+}
