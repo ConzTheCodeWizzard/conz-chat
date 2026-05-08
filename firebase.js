@@ -15,3 +15,19 @@ firebase.initializeApp(firebaseConfig);
 // Services
 const auth = firebase.auth();
 const db = firebase.firestore();
+const messaging = firebase.messaging();
+Notification.requestPermission().then((permission) => {
+
+  if (permission === "granted") {
+
+    messaging.getToken({
+      vapidKey: "BOZAAEfBvHwcKjFA59G4BDZyZLCI1vmp3WotfFuCkZEE6BF0pQfbwZ5e6ebiWvGWfsTutgN1Fef1r9i5Go9ATJk"
+    }).then((token) => {
+
+      console.log(token);
+
+    });
+
+  }
+
+});
