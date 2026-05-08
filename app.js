@@ -560,6 +560,17 @@ function openChat(uid,name,photo){
     });
 
     messages.scrollTop=messages.scrollHeight;
+    if (Notification.permission === "granted") {
+
+  new Notification("ConzChat", {
+
+    body: "New message received",
+
+    icon: "icon-192.png"
+
+  });
+
+    }
   });
 }
 
