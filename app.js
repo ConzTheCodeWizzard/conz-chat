@@ -204,7 +204,7 @@ window.resetTheme=function(){
 
   document.documentElement.style
   .setProperty("--secondary","#ff0033");
-
+  document.body.classList.remove("harleyTheme");
   localStorage.removeItem("conz_theme");
 };
 
