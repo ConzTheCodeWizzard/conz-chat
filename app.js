@@ -560,7 +560,9 @@ function openChat(uid,name,photo){
     });
 
     messages.scrollTop=messages.scrollHeight;
-  }
+  });
+}
+
 window.sendMessage=function(){
 
   if(!msgInput || !msgInput.value) return;
