@@ -642,13 +642,13 @@ msgInput.value = "";
 const menu =
 document.getElementById("conzMenu");
 
-if(menu.style.display === "flex"){
+if(menu.style.display === "none" || menu.style.display === ""){
 
-menu.style.display = "none";
+menu.style.display = "flex";
 
 }else{
 
-menu.style.display = "flex";
+menu.style.display = "none";
 
 }
 
