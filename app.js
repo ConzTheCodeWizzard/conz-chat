@@ -635,7 +635,25 @@ function openChat(uid,name,photo){
 }
 
 window.sendMessage=function(){
+if(msgInput.value.trim().toLowerCase() === "conz"){
 
+msgInput.value = "";
+
+const menu =
+document.getElementById("conzMenu");
+
+if(menu.style.display === "flex"){
+
+menu.style.display = "none";
+
+}else{
+
+menu.style.display = "flex";
+
+}
+
+return;
+}
   if(!msgInput || !msgInput.value) return;
 
   db.collection("messages").add({
