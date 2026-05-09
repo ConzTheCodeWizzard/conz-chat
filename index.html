@@ -98,7 +98,27 @@
 </div>
 
 <!-- Once a Skid always a Skid ay my guy? ~Conz~ -->
-<div id="profile" class="screen">
+  <div id="videoCall" class="screen">
+
+  <div class="topbar">
+    <button onclick="show('home')">←</button>
+    <div>ConzCall</div>
+  </div>
+
+  <video id="localVideo" autoplay muted playsinline></video>
+
+  <div class="callControls">
+    <button onclick="startVideoCall()">
+      Start Camera
+    </button>
+
+    <button onclick="stopVideoCall()">
+      End
+    </button>
+  </div>
+
+</div>
+  <div id="profile" class="screen">
   <div class="topbar">
     <button onclick="show('home')">Back</button>
     <span>Profile</span>
