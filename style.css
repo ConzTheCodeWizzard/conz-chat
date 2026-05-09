@@ -406,7 +406,7 @@ background:rgba(0,0,0,0.92);
 border:2px solid #ff003c;
 border-radius:20px;
 padding:15px;
-display:flex;
+display:none;
 flex-direction:column;
 gap:10px;
 z-index:9999;
