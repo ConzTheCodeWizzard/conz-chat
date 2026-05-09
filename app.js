@@ -219,7 +219,15 @@ window.resetTheme=function(){
   localStorage.removeItem("conz_theme");
 };
 let localStream;
+let peerConnection;
 
+const servers = {
+    iceServers:[
+        {
+            urls:"stun:stun.l.google.com:19302"
+        }
+    ]
+};
 window.startVideoCall = async function(){
 
   try{
@@ -231,7 +239,16 @@ window.startVideoCall = async function(){
 
     document.getElementById("localVideo").srcObject =
     localStream;
+peerConnection = new RTCPeerConnection(servers);
 
+localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+});
+
+peerConnection.ontrack = event => {
+    document.getElementById("remoteVideo").srcObject =
+    event.streams[0];
+};
   }catch(err){
 
     alert("Camera/Mic permission denied");
