@@ -218,7 +218,41 @@ window.resetTheme=function(){
   document.body.classList.remove("harleyTheme");
   localStorage.removeItem("conz_theme");
 };
+let localStream;
 
+window.startVideoCall = async function(){
+
+  try{
+
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video:true,
+      audio:true
+    });
+
+    document.getElementById("localVideo").srcObject =
+    localStream;
+
+  }catch(err){
+
+    alert("Camera/Mic permission denied");
+
+    console.log(err);
+
+  }
+
+}
+
+window.stopVideoCall = function(){
+
+  if(localStream){
+
+    localStream.getTracks().forEach(track=>{
+      track.stop();
+    });
+
+  }
+
+}
 /* ===== If your seeing this, respectfully... go fuck yourself ~Conz~ ===== */
 
 let savedTheme = localStorage.getItem("conz_theme");
