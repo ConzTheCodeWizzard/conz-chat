@@ -365,4 +365,30 @@ background-size:cover;
 background-position:center;
 background-attachment:fixed;
 
+#videoCall{
+background:black;
+position:relative;
+}
+
+#localVideo{
+width:100%;
+height:100vh;
+object-fit:cover;
+background:black;
+}
+
+.callControls{
+position:absolute;
+bottom:30px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:15px;
+z-index:20;
+}
+
+.callControls button{
+padding:14px 20px;
+border-radius:50px;
+font-size:16px;
 }
