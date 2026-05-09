@@ -801,3 +801,74 @@ peerConnection.addIceCandidate(candidate);
 });
 
 }
+window.answerCall = async function(){
+
+const callId =
+document.getElementById("callInput").value;
+
+const callDoc =
+db.collection("calls").doc(callId);
+
+const answerCandidates =
+callDoc.collection("answerCandidates");
+
+const offerCandidates =
+callDoc.collection("offerCandidates");
+
+peerConnection.onicecandidate = event => {
+
+if(event.candidate){
+
+answerCandidates.add(
+event.candidate.toJSON()
+);
+
+}
+
+};
+
+const callData = (await callDoc.get()).data();
+
+const offerDescription =
+callData.offer;
+
+await peerConnection.setRemoteDescription(
+new RTCSessionDescription(offerDescription)
+);
+
+const answerDescription =
+await peerConnection.createAnswer();
+
+await peerConnection.setLocalDescription(
+answerDescription
+);
+
+const answer = {
+type: answerDescription.type,
+sdp: answerDescription.sdp
+};
+
+await callDoc.update({
+answer
+});
+
+offerCandidates.onSnapshot(snapshot => {
+
+snapshot.docChanges().forEach(change => {
+
+if(change.type === "added"){
+
+const data = change.doc.data();
+
+peerConnection.addIceCandidate(
+new RTCIceCandidate(data)
+);
+
+}
+
+});
+
+});
+
+}
+
