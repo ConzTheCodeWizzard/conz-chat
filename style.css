@@ -109,7 +109,10 @@ position:relative;
 position:absolute;
 left:10px;
 }
-
+.topbar button:last-child{
+  left:auto;
+  right:10px;
+}
 #profileBtn{
 position:absolute;
 right:10px;
