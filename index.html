@@ -111,13 +111,26 @@
   <video id="remoteVideo" autoplay playsinline></video>
     
   <div class="callControls">
-    <button onclick="startVideoCall()">
-      Start Camera
-    </button>
 
-    <button onclick="stopVideoCall()">
-      End
-    </button>
+<button onclick="startVideoCall()">
+Start Camera
+</button>
+
+<button onclick="createCall()">
+Create Call
+</button>
+
+<input id="callInput"
+placeholder="Enter Call ID">
+
+<button onclick="answerCall()">
+Join Call
+</button>
+
+<button onclick="stopVideoCall()">
+End
+</button>
+
   </div>
 
 </div>
