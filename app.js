@@ -722,3 +722,82 @@ setTimeout(()=>{
 },500);
 
 }
+window.createCall = async function(){
+
+const callDoc = db.collection("calls").doc();
+
+const offerCandidates =
+callDoc.collection("offerCandidates");
+
+const answerCandidates =
+callDoc.collection("answerCandidates");
+
+document.getElementById("callInput").value =
+callDoc.id;
+
+peerConnection.onicecandidate = event => {
+
+if(event.candidate){
+
+offerCandidates.add(
+event.candidate.toJSON()
+);
+
+}
+
+};
+
+const offerDescription =
+await peerConnection.createOffer();
+
+await peerConnection.setLocalDescription(
+offerDescription
+);
+
+const offer = {
+sdp: offerDescription.sdp,
+type: offerDescription.type
+};
+
+await callDoc.set({
+offer
+});
+
+callDoc.onSnapshot(snapshot => {
+
+const data = snapshot.data();
+
+if(
+!peerConnection.currentRemoteDescription &&
+data?.answer
+){
+
+const answerDescription =
+new RTCSessionDescription(data.answer);
+
+peerConnection.setRemoteDescription(
+answerDescription
+);
+
+}
+
+});
+
+answerCandidates.onSnapshot(snapshot => {
+
+snapshot.docChanges().forEach(change => {
+
+if(change.type === "added"){
+
+const candidate =
+new RTCIceCandidate(change.doc.data());
+
+peerConnection.addIceCandidate(candidate);
+
+}
+
+});
+
+});
+
+}
