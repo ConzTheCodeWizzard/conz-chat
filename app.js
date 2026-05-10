@@ -920,7 +920,7 @@ let i = 0;
 const interval = setInterval(()=>{
 
 consoleBox.innerHTML +=
-lines[i] + "\\n";
+lines[i] + "\n";
 
 consoleBox.scrollTop =
 consoleBox.scrollHeight;
