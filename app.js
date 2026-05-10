@@ -291,7 +291,17 @@ auth.onAuthStateChanged(user=>{
     .onSnapshot(doc=>{
 
       let d = doc.data() || {};
+    
+      if(d.banned){
 
+  alert(
+    "This account is permanently banned from ConzChat."
+  );
+
+  auth.signOut();
+
+  return;
+    }
       if(d.forceLogout){
 
         alert(
