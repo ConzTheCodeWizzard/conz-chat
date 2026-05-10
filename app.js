@@ -432,11 +432,6 @@ window.openProfile=function(uid=window.currentUser.uid){
       }
 
       <div class="username">@${u.username}</div>
-
-      ${isDev && uid!==window.currentUser.uid
-        ? `<button onclick="devBoot('${uid}')">BOOT THIS BITCH</button>`
-        : ""
-      }
     `;
 
     if(window.daysOnApp){
