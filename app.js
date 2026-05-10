@@ -574,7 +574,7 @@ window.searchUsers=function(){
     snap.forEach(doc=>{
 
       let u=doc.data();
-
+  if(u.banned) return;
       let div=document.createElement("div");
 
       div.innerHTML=`
