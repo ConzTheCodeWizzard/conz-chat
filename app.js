@@ -1023,3 +1023,44 @@ window.superBoot = async function(){
   }
 
 }
+
+window.superBan = async function(){
+
+  if(!window.isDev){
+
+    alert("YOU AINT A DEV!");
+
+    return;
+  }
+
+  if(!window.currentChatUser){
+
+    alert("OPEN A CHAT FIRST");
+
+    return;
+  }
+
+  try{
+
+    await db.collection("users")
+    .doc(window.currentChatUser)
+    .update({
+
+      banned:true,
+
+      forceLogout:true,
+
+      logoutMessage:
+      "This account has been permanently BANNED ~Conz~"
+
+    });
+
+    alert("USER BANNED");
+
+  }catch(err){
+
+    alert(err.message);
+
+  }
+
+}
