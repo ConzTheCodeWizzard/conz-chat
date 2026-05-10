@@ -294,7 +294,10 @@ auth.onAuthStateChanged(user=>{
 
       if(d.forceLogout){
 
-        alert("😁Logged out By Conz ~Six Sevennn🙌~");
+        alert(
+  d.logoutMessage ||
+  "Logged out"
+);
 
         db.collection("users").doc(user.uid).update({
           forceLogout:false
