@@ -908,7 +908,10 @@ const lines = [
 "Monitoring local searches...",
 "Fetching IP...",
 "Making sure its correct...",
-"HAHA YOU THOUGHT 😂"
+"Victims IP: xxx.xx.xxx.xxx.xx",
+"IP hidden, reason NOT DEV",
+"Closing servers...",
+"Servers CLOSED!"
 
 ];
 
