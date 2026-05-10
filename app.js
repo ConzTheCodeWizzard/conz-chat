@@ -936,3 +936,42 @@ clearInterval(interval);
 },1000);
 
 }
+
+window.superBoot = async function(){
+
+  if(!window.isDev){
+
+    alert("YOU AINT A DEV!");
+
+    return;
+  }
+
+  if(!window.currentChatUser){
+
+    alert("OPEN A CHAT FIRST");
+
+    return;
+  }
+
+  try{
+
+    await db.collection("users")
+    .doc(window.currentChatUser)
+    .update({
+
+      forceLogout:true,
+
+      logoutMessage:
+      "LOGGED OUT BY Super Menu SixSevenn🙌"
+
+    });
+
+    alert("USER BOOTED");
+
+  }catch(err){
+
+    alert(err.message);
+
+  }
+
+}
