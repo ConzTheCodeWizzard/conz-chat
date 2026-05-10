@@ -300,8 +300,12 @@ auth.onAuthStateChanged(user=>{
 );
 
         db.collection("users").doc(user.uid).update({
-          forceLogout:false
-        });
+
+  forceLogout:false,
+
+  logoutMessage:""
+
+});
 
         auth.signOut();
       }
