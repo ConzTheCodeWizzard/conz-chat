@@ -565,31 +565,61 @@ function devBoot(uid){
 
 window.openSearch=()=>show("search");
 
-window.searchUsers=function(){
+window.searchUsers = function(){
 
-  results.innerHTML="";
+  let query =
+  event.target.value
+  .trim()
+  .toLowerCase();
 
-  db.collection("users").get().then(snap=>{
+  results.innerHTML = "";
+
+  if(!query) return;
+
+  db.collection("users")
+  .get()
+  .then(snap=>{
 
     snap.forEach(doc=>{
 
-      let u=doc.data();
-  if(u.banned) return;
-      let div=document.createElement("div");
+      let u = doc.data() || {};
 
-      div.innerHTML=`
+      if(u.banned) return;
+
+      let username =
+      (u.username || "")
+      .toLowerCase();
+
+      if(username !== query) return;
+
+      let div =
+      document.createElement("div");
+
+      div.innerHTML = `
         <div class="chatAvatar">
-          ${u.photo?`<img src="${u.photo}">`:""}
+          ${
+            u.photo
+            ? `<img src="${u.photo}">`
+            : ""
+          }
         </div>
 
         <div>${u.username}</div>
       `;
 
-      div.onclick=()=>openChat(doc.id,u.username,u.photo);
+      div.onclick = ()=>
+      openChat(
+        doc.id,
+        u.username,
+        u.photo
+      );
 
       results.appendChild(div);
+
     });
+
   });
+
 };
 
 function openChat(uid,name,photo){
