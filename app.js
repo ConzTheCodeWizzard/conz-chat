@@ -645,22 +645,63 @@ function openChat(uid,name,photo){
 
     let u=doc.data()||{};
 
-    if(u.online){
+    function formatLastSeen(time){
 
-      chatName.innerText=name+" 🟢 Online";
+  if(!time) return "Recently";
 
-    }else{
+  let seconds = Math.floor(
+    (Date.now()-time)/1000
+  );
 
-      let seconds=Math.floor((Date.now()-(u.lastSeen||0))/1000);
+  if(seconds < 5)
+    return "just now";
 
-      let text=seconds<60
-        ? `${seconds}s ago`
-        : seconds<3600
-        ? `${Math.floor(seconds/60)}m ago`
-        : `${Math.floor(seconds/3600)}h ago`;
+  if(seconds < 60)
+    return `${seconds}s ago`;
 
-      chatName.innerText=name+" • Last seen "+text;
-    }
+  if(seconds < 3600)
+    return `${Math.floor(seconds/60)}m ago`;
+
+  if(seconds < 86400)
+    return `${Math.floor(seconds/3600)}h ago`;
+
+  return `${Math.floor(seconds/86400)}d ago`;
+
+}
+
+function updateStatus(){
+
+  if(u.online){
+
+    chatName.innerHTML = `
+      ${name}
+      <span class="onlineDot"></span>
+    `;
+
+  }else{
+
+    chatName.innerHTML = `
+      ${name}
+      <span class="lastSeenText">
+        • Last online ${formatLastSeen(u.lastSeen)}
+      </span>
+    `;
+
+  }
+
+}
+
+updateStatus();
+
+clearInterval(window.statusInterval);
+
+window.statusInterval = setInterval(()=>{
+
+  if(!u.online){
+    updateStatus();
+  }
+
+},1000);
   });
 
   unsubscribeMessages=db.collection("messages")
