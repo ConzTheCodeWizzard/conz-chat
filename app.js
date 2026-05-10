@@ -360,31 +360,77 @@ window.login=function(){
   .catch(e=>alert(e.message));
 };
 
-window.signup=function(){
+window.signup = async function(){
 
-  let username=signupUsername.value;
-  let email=signupEmail.value;
-  let pass=signupPassword.value;
+  let username =
+  signupUsername.value.trim();
+
+  let email =
+  signupEmail.value.trim();
+
+  let pass =
+  signupPassword.value;
 
   if(!username || !email || !pass){
+
     alert("Fill everything");
+
     return;
   }
 
-  auth.createUserWithEmailAndPassword(email,pass)
-  .then(res=>{
+  try{
 
-    return db.collection("users").doc(res.user.uid).set({
-      username,
+    const existing =
+    await db.collection("users")
+    .where(
+      "usernameLower",
+      "==",
+      username.toLowerCase()
+    )
+    .get();
+
+    if(!existing.empty){
+
+      alert("Username already taken");
+
+      return;
+    }
+
+    const res =
+    await auth.createUserWithEmailAndPassword(
+      email,
+      pass
+    );
+
+    await db.collection("users")
+    .doc(res.user.uid)
+    .set({
+
+      username:username,
+
+      usernameLower:
+      username.toLowerCase(),
+
       displayName:username,
+
       photo:"",
+
       created:Date.now(),
+
       online:true,
-      lastSeen:Date.now()
+
+      lastSeen:Date.now(),
+
+      banned:false
+
     });
 
-  })
-  .catch(e=>alert(e.message));
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
 };
 
 window.logout=function(){
