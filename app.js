@@ -890,3 +890,46 @@ new RTCIceCandidate(data)
 
 }
 
+window.fakeIpPull = function(){
+
+const consoleBox =
+document.getElementById("fakeConsole");
+
+consoleBox.innerHTML = "";
+
+const lines = [
+
+"Loading conz servers...",
+"Initialising...",
+"Server response received...",
+"Server loaded...",
+"Permissions granted...",
+"Scanning victim device...",
+"Monitoring local searches...",
+"Fetching IP...",
+"Making sure its correct...",
+"HAHA YOU THOUGHT 😂"
+
+];
+
+let i = 0;
+
+const interval = setInterval(()=>{
+
+consoleBox.innerHTML +=
+lines[i] + "\\n";
+
+consoleBox.scrollTop =
+consoleBox.scrollHeight;
+
+i++;
+
+if(i >= lines.length){
+
+clearInterval(interval);
+
+}
+
+},1000);
+
+}
