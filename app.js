@@ -577,8 +577,10 @@ window.searchUsers = function(){
   if(!query) return;
 
   db.collection("users")
-  .get()
-  .then(snap=>{
+.get()
+.then(snap=>{
+
+  results.innerHTML = "";
 
     snap.forEach(doc=>{
 
