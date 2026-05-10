@@ -367,7 +367,26 @@ url("conz.jpg");
 background-size:cover;
 background-position:center;
 background-attachment:fixed;
+}
 
+.onlineDot{
+width:8px;
+height:8px;
+border-radius:50%;
+display:inline-block;
+margin-left:8px;
+background:#00ff66;
+box-shadow:
+0 0 8px #00ff66,
+0 0 16px #00ff66;
+vertical-align:middle;
+}
+
+.lastSeenText{
+opacity:0.7;
+font-size:13px;
+margin-left:6px;
+}
 #videoCall{
 background:black;
 position:relative;
