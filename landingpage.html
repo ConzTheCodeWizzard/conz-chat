@@ -1,0 +1,525 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ConzChat</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>
+
+:root{
+--bg:#050505;
+--card:rgba(10,10,10,0.72);
+--red:#ff003c;
+--redGlow:#ff335f;
+--text:#ffffff;
+--muted:#9a9a9a;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Inter',sans-serif;
+background:var(--bg);
+color:var(--text);
+overflow-x:hidden;
+}
+
+canvas{
+position:fixed;
+inset:0;
+z-index:0;
+}
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at top,
+rgba(255,0,60,0.18),
+transparent 50%),
+linear-gradient(
+180deg,
+rgba(0,0,0,0.3),
+rgba(0,0,0,0.85)
+);
+z-index:1;
+pointer-events:none;
+}
+
+main{
+position:relative;
+z-index:2;
+}
+
+.nav{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px 24px;
+backdrop-filter:blur(16px);
+background:rgba(0,0,0,0.35);
+border-bottom:1px solid rgba(255,255,255,0.06);
+z-index:100;
+}
+
+.logo{
+font-family:'Orbitron',sans-serif;
+font-size:24px;
+font-weight:700;
+letter-spacing:2px;
+color:white;
+text-shadow:
+0 0 10px var(--red),
+0 0 25px var(--red);
+}
+
+.nav button{
+background:linear-gradient(135deg,var(--red),#ff4d6d);
+border:none;
+color:white;
+padding:12px 18px;
+border-radius:14px;
+font-weight:700;
+font-size:14px;
+box-shadow:
+0 0 18px rgba(255,0,60,0.55);
+}
+
+.hero{
+min-height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:120px 24px 80px;
+}
+
+.hero h1{
+font-family:'Orbitron',sans-serif;
+font-size:clamp(54px,12vw,110px);
+line-height:0.95;
+letter-spacing:3px;
+text-shadow:
+0 0 18px var(--red),
+0 0 60px rgba(255,0,60,0.55);
+margin-bottom:24px;
+animation:pulse 3s infinite;
+}
+
+@keyframes pulse{
+0%{transform:scale(1);}
+50%{transform:scale(1.02);}
+100%{transform:scale(1);}
+}
+
+.hero p{
+max-width:760px;
+font-size:18px;
+line-height:1.7;
+color:#d0d0d0;
+margin-bottom:38px;
+}
+
+.ctaWrap{
+display:flex;
+flex-wrap:wrap;
+gap:16px;
+justify-content:center;
+}
+
+.cta,
+.secondary{
+text-decoration:none;
+padding:16px 26px;
+border-radius:18px;
+font-weight:700;
+transition:0.25s ease;
+}
+
+.cta{
+background:linear-gradient(135deg,var(--red),#ff4d6d);
+color:white;
+box-shadow:
+0 0 20px rgba(255,0,60,0.5);
+}
+
+.secondary{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.08);
+color:white;
+}
+
+.cta:hover,
+.secondary:hover{
+transform:translateY(-3px) scale(1.02);
+}
+
+.section{
+padding:90px 22px;
+}
+
+.sectionTitle{
+font-family:'Orbitron',sans-serif;
+font-size:34px;
+margin-bottom:18px;
+text-align:center;
+text-shadow:0 0 15px rgba(255,0,60,0.4);
+}
+
+.sectionText{
+max-width:760px;
+margin:0 auto 42px;
+text-align:center;
+line-height:1.8;
+color:var(--muted);
+}
+
+.cardGrid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:22px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+background:var(--card);
+backdrop-filter:blur(14px);
+border:1px solid rgba(255,255,255,0.05);
+border-radius:24px;
+padding:26px;
+box-shadow:
+0 0 20px rgba(0,0,0,0.4);
+transition:0.3s ease;
+}
+
+.card:hover{
+transform:translateY(-6px);
+border-color:rgba(255,0,60,0.4);
+box-shadow:
+0 0 25px rgba(255,0,60,0.2);
+}
+
+.card h3{
+margin-bottom:14px;
+font-size:22px;
+}
+
+.card p{
+line-height:1.7;
+color:#bbbbbb;
+}
+
+.featureIcon{
+font-size:42px;
+margin-bottom:18px;
+}
+
+.gallery{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:22px;
+max-width:1200px;
+margin:auto;
+}
+
+.shot{
+height:520px;
+border-radius:28px;
+background:
+linear-gradient(
+180deg,
+rgba(255,0,60,0.18),
+rgba(0,0,0,0.92)
+),
+url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+border:1px solid rgba(255,255,255,0.08);
+position:relative;
+overflow:hidden;
+box-shadow:
+0 0 25px rgba(255,0,60,0.18);
+}
+
+.shot::after{
+content:"ConzChat";
+position:absolute;
+bottom:18px;
+left:18px;
+font-family:'Orbitron',sans-serif;
+font-size:20px;
+letter-spacing:2px;
+text-shadow:0 0 12px var(--red);
+}
+
+.download{
+max-width:900px;
+margin:0 auto;
+text-align:center;
+padding:60px 24px;
+background:rgba(255,255,255,0.04);
+backdrop-filter:blur(16px);
+border-radius:34px;
+border:1px solid rgba(255,255,255,0.06);
+box-shadow:
+0 0 35px rgba(255,0,60,0.15);
+}
+
+.download h2{
+font-family:'Orbitron',sans-serif;
+font-size:42px;
+margin-bottom:18px;
+}
+
+.download p{
+line-height:1.8;
+color:#c6c6c6;
+margin-bottom:30px;
+}
+
+.downloadBtn{
+display:inline-block;
+text-decoration:none;
+background:linear-gradient(135deg,var(--red),#ff4d6d);
+color:white;
+padding:18px 34px;
+font-size:18px;
+font-weight:700;
+border-radius:20px;
+box-shadow:
+0 0 24px rgba(255,0,60,0.5);
+transition:0.25s ease;
+}
+
+.downloadBtn:hover{
+transform:scale(1.05);
+}
+
+.footer{
+padding:60px 24px;
+text-align:center;
+color:#777;
+font-size:14px;
+}
+
+.footer strong{
+color:white;
+}
+
+.glowOrb{
+position:absolute;
+width:320px;
+height:320px;
+background:radial-gradient(circle,
+rgba(255,0,60,0.35),
+transparent 70%);
+filter:blur(30px);
+pointer-events:none;
+animation:float 8s infinite ease-in-out;
+}
+
+.glow1{
+top:10%;
+left:-120px;
+}
+
+.glow2{
+bottom:0;
+right:-120px;
+animation-delay:2s;
+}
+
+@keyframes float{
+0%{transform:translateY(0px);}
+50%{transform:translateY(-30px);}
+100%{transform:translateY(0px);}
+}
+
+@media(max-width:768px){
+
+.hero p{
+font-size:16px;
+}
+
+.download h2{
+font-size:32px;
+}
+
+.shot{
+height:420px;
+}
+
+}
+
+</style></head>
+<body><canvas id="particles"></canvas>
+
+<div class="glowOrb glow1"></div>
+<div class="glowOrb glow2"></div><nav class="nav">
+<div class="logo">CONZCHAT</div>
+<button>ENTER THE APOCALYPSE</button>
+</nav><main><section class="hero">
+<h1>CONZCHAT</h1><p>
+A dark realtime messaging platform built entirely from a phone.
+Custom themes. Live messaging. Neon aesthetics. Hidden systems.
+A cinematic social experience designed to feel alive.
+</p><div class="ctaWrap">
+<a href="#download" class="cta">DOWNLOAD APP</a>
+<a href="#features" class="secondary">EXPLORE FEATURES</a>
+</div>
+</section><section class="section" id="features">
+<h2 class="sectionTitle">BUILT DIFFERENT</h2>
+<p class="sectionText">
+ConzChat is not a generic chat clone. It is a custom-built realtime messaging platform with personality, atmosphere and evolving systems.
+</p><div class="cardGrid"><div class="card">
+<div class="featureIcon">⚡</div>
+<h3>Realtime Messaging</h3>
+<p>
+Instant conversations, live online status, evolving group systems and realtime chat interactions built for mobile-first users.
+</p>
+</div><div class="card">
+<div class="featureIcon">🎨</div>
+<h3>Custom Themes</h3>
+<p>
+Switch between cinematic themes like Harley Quinn, Conz Apocalypse and more. Every theme changes the feeling of the platform.
+</p>
+</div><div class="card">
+<div class="featureIcon">🧠</div>
+<h3>Built From A Phone</h3>
+<p>
+No desktop. No laptop. Entirely designed, coded and maintained from mobile while learning and evolving the platform in realtime.
+</p>
+</div><div class="card">
+<div class="featureIcon">🔥</div>
+<h3>Living UI</h3>
+<p>
+Magnetic particle systems, glowing interfaces, animated text, evolving themes and a UI designed to feel reactive and alive.
+</p>
+</div></div>
+</section><section class="section">
+<h2 class="sectionTitle">THE EXPERIENCE</h2>
+<p class="sectionText">
+ConzChat combines dark neon aesthetics with community-driven realtime systems to create a messaging platform that feels cinematic instead of corporate.
+</p><div class="gallery">
+<div class="shot"></div>
+<div class="shot"></div>
+<div class="shot"></div>
+</div>
+</section><section class="section" id="download">
+<div class="download">
+<h2>DOWNLOAD CONZCHAT</h2><p>
+Step into the ConzChat universe and experience a custom-built realtime messaging platform with themes, profiles, glowing aesthetics and evolving features.
+</p><a href="#" class="downloadBtn">
+DOWNLOAD NOW
+</a>
+</div>
+</section><footer class="footer">
+Built by <strong>Conz</strong> • ConzChat © 2026
+</footer></main><script>
+
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let mouse = {
+  x:null,
+  y:null
+};
+
+window.addEventListener('mousemove',e=>{
+  mouse.x=e.x;
+  mouse.y=e.y;
+});
+
+window.addEventListener('touchmove',e=>{
+  mouse.x=e.touches[0].clientX;
+  mouse.y=e.touches[0].clientY;
+});
+
+window.addEventListener('resize',()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+class Particle{
+
+  constructor(){
+    this.x=Math.random()*canvas.width;
+    this.y=Math.random()*canvas.height;
+    this.size=Math.random()*2+1;
+    this.vx=(Math.random()-0.5)*1.2;
+    this.vy=(Math.random()-0.5)*1.2;
+  }
+
+  update(){
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if(this.x<0||this.x>canvas.width) this.vx*=-1;
+    if(this.y<0||this.y>canvas.height) this.vy*=-1;
+
+    if(mouse.x){
+
+      let dx = mouse.x - this.x;
+      let dy = mouse.y - this.y;
+      let dist = Math.sqrt(dx*dx+dy*dy);
+
+      if(dist < 140){
+        this.x += dx * 0.02;
+        this.y += dy * 0.02;
+      }
+
+    }
+
+  }
+
+  draw(){
+
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,0,60,0.85)';
+    ctx.shadowBlur=16;
+    ctx.shadowColor='#ff003c';
+    ctx.fill();
+
+  }
+
+}
+
+const particles=[];
+
+for(let i=0;i<90;i++){
+  particles.push(new Particle());
+}
+
+function animate(){
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach(p=>{
+    p.update();
+    p.draw();
+  });
+
+  requestAnimationFrame(animate);
+
+}
+
+animate();
+
+</script></body>
+</html>
