@@ -251,7 +251,7 @@ peerConnection.ontrack = event => {
 };
   }catch(err){
 
-    alert("Camera/Mic permission denied");
+    showPopup("Camera/Mic permission denied");
 
     console.log(err);
 
@@ -294,7 +294,7 @@ auth.onAuthStateChanged(user=>{
     
       if(d.banned){
 
-  alert(
+  showPopup(
     "This account is permanently banned from ConzChat."
   );
 
@@ -304,7 +304,7 @@ auth.onAuthStateChanged(user=>{
     }
       if(d.forceLogout){
 
-        alert(
+        showPopup(
   d.logoutMessage ||
   "Logged out"
 );
@@ -383,7 +383,7 @@ window.signup = async function(){
 
   if(!username || !email || !pass){
 
-    alert("Fill everything");
+    showPopup("Fill everything");
 
     return;
   }
@@ -401,7 +401,7 @@ window.signup = async function(){
 
     if(!existing.empty){
 
-      alert("Username already taken");
+      showPopup("Username already taken");
 
       return;
     }
@@ -437,7 +437,7 @@ window.signup = async function(){
 
   }catch(e){
 
-    alert(e.message);
+    showPopup("Username already taken");
 
   }
 
@@ -1072,14 +1072,14 @@ window.superBoot = async function(){
 
   if(!window.isDev){
 
-    alert("YOU AINT A DEV!");
+   rshowPopup("YOU AINT A DEV!");
 
     return;
   }
 
   if(!window.currentChatUser){
 
-    alert("OPEN A CHAT FIRST");
+    showPopup("OPEN A CHAT FIRST");
 
     return;
   }
@@ -1097,11 +1097,11 @@ window.superBoot = async function(){
 
     });
 
-    alert("USER BOOTED");
+    showPopup("USER BOOTED");
 
   }catch(err){
 
-    alert(err.message);
+    showPopup(err.message);
 
   }
 
@@ -1111,14 +1111,14 @@ window.superBan = async function(){
 
   if(!window.isDev){
 
-    alert("YOU AINT A DEV!");
+    showPopup("YOU AINT A DEV!");
 
     return;
   }
 
   if(!window.currentChatUser){
 
-    alert("OPEN A CHAT FIRST");
+    showPopup("OPEN A CHAT FIRST");
 
     return;
   }
@@ -1138,7 +1138,7 @@ window.superBan = async function(){
 
     });
 
-    alert("USER BANNED");
+    showPopup("USER BANNED");
 
   }catch(err){
 
