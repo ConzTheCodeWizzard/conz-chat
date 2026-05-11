@@ -367,7 +367,7 @@ window.login=function(){
   }
 
   auth.signInWithEmailAndPassword(email,pass)
-  .catch(e=>showPopup(e.message));
+  .catch(e=>showPopup("Invalid email or password"));
 };
 
 window.signup = async function(){
