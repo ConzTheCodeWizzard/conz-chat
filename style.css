@@ -600,7 +600,7 @@ transform:scale(1);
 
 }
 
-#publicGroupCreate button{
+#publicGroupCreate .groupCreateWrap button{
 
   width:90%;
 
