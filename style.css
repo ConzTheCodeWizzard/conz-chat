@@ -98,22 +98,22 @@ z-index:10;
 /* ===== I'm a scouser WE DONT GET KNOCKED OUT ~Conz~ ===== */
 .topbar{
 display:flex;
-justify-content:space-between;
+justify-content:center;
 align-items:center;
 padding:10px;
-min-height:50px;
 background:var(--secondary);
 position:relative;
+min-height:50px;
 }
 
 .topbar button{
 position:absolute;
 left:10px;
+top:50%;
+transform:translateY(-50%);
+z-index:5;
 }
-.topbar button:last-child{
-  left:auto;
-  right:10px;
-}
+
 #profileBtn{
 position:absolute;
 right:10px;
