@@ -80,6 +80,49 @@ placeholder="Search..."
   <div id="results"></div>
 </div>
 
+  <div id="publicGroupCreate" class="screen">
+
+  <div class="topbar">
+
+    <button onclick="show('home')">
+      Back
+    </button>
+
+    <span>Create Public Group</span>
+
+    <div></div>
+
+  </div>
+
+  <div class="groupCreateWrap">
+
+    <div
+      id="groupPhotoPreview"
+      class="groupPhotoPreview"
+      onclick="pickGroupPhoto()"
+    >
+      +
+    </div>
+
+    <input
+      id="publicGroupTag"
+      placeholder="#group-name"
+      maxlength="20"
+    >
+
+    <input
+      id="publicGroupDisplay"
+      placeholder="Group display name"
+      maxlength="30"
+    >
+
+    <button onclick="createPublicGroup()">
+      CREATE GROUP
+    </button>
+
+  </div>
+
+  </div>
 <!-- CONZ IS THE GOD OF CODING -->
 <div id="chat" class="screen">
 
