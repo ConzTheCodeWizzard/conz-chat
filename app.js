@@ -362,12 +362,12 @@ window.login=function(){
   let pass=loginPassword.value;
 
   if(!email||!pass){
-    alert("Missing details");
+    showPopup("Missing details");
     return;
   }
 
   auth.signInWithEmailAndPassword(email,pass)
-  .catch(e=>alert(e.message));
+  .catch(e=>showPopup(e.message));
 };
 
 window.signup = async function(){
