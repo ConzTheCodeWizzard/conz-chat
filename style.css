@@ -98,9 +98,10 @@ z-index:10;
 /* ===== I'm a scouser WE DONT GET KNOCKED OUT ~Conz~ ===== */
 .topbar{
 display:flex;
-justify-content:center;
+justify-content:space-between;
 align-items:center;
 padding:10px;
+min-height:50px;
 background:var(--secondary);
 position:relative;
 }
