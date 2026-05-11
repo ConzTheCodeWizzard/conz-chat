@@ -1147,3 +1147,17 @@ window.superBan = async function(){
   }
 
 }
+
+function showPopup(text){
+
+document.getElementById("popupText").innerText=text;
+
+document.getElementById("customPopup").style.display="flex";
+
+}
+
+function closePopup(){
+
+document.getElementById("customPopup").style.display="none";
+
+}
