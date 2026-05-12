@@ -214,6 +214,157 @@ document.getElementById(
 "messages"
 ).innerHTML = "";
 
+  window.currentGroup = group;
+renderPublicGroupMessages();
 show("chat");
+
+};
+
+window.sendPublicGroupMessage =
+function(){
+
+if(!msgInput.value.trim())
+return;
+
+if(!window.currentGroup)
+return;
+
+if(!window.currentGroup.messages){
+
+window.currentGroup.messages = [];
+
+}
+
+window.currentGroup.messages.push({
+
+text:msgInput.value,
+
+sender:
+window.currentUser.uid,
+
+time:Date.now()
+
+});
+
+renderPublicGroupMessages();
+
+msgInput.value="";
+
+};
+
+window.renderPublicGroupMessages =
+function(){
+
+messages.innerHTML = "";
+
+if(
+!window.currentGroup ||
+!window.currentGroup.messages
+)
+return;
+
+window.currentGroup.messages
+.forEach(msg => {
+
+let wrap =
+document.createElement("div");
+
+wrap.className =
+"msgWrap " +
+(
+msg.sender ===
+window.currentUser.uid
+?
+"me"
+:
+"them"
+);
+
+let bubble =
+document.createElement("div");
+
+bubble.className = "msg";
+
+bubble.innerHTML = `
+
+${msg.text}
+
+<div>
+${new Date(
+msg.time
+).toLocaleTimeString()}
+</div>
+
+`;
+
+wrap.appendChild(bubble);
+
+messages.appendChild(wrap);
+
+});
+
+messages.scrollTop =
+messages.scrollHeight;
+
+};
+
+window.renderPublicGroupMessages = function(){
+
+let messages =
+document.getElementById("messages");
+
+messages.innerHTML = "";
+
+if(!window.currentGroup) return;
+
+window.currentGroup.messages.forEach(msg => {
+
+let wrap =
+document.createElement("div");
+
+wrap.className =
+msg.from === window.currentUser.uid
+?
+"msgWrap me"
+:
+"msgWrap";
+
+let bubble =
+document.createElement("div");
+
+bubble.className = "msg";
+
+bubble.innerHTML = `
+
+<div style="
+font-size:12px;
+opacity:0.7;
+margin-bottom:4px;
+">
+${msg.name || "Unknown"}
+</div>
+
+${msg.text}
+
+<div style="
+font-size:11px;
+opacity:0.5;
+margin-top:4px;
+">
+${new Date(
+msg.time
+).toLocaleTimeString()}
+</div>
+
+`;
+
+wrap.appendChild(bubble);
+
+messages.appendChild(wrap);
+
+});
+
+messages.scrollTop =
+messages.scrollHeight;
 
 };
