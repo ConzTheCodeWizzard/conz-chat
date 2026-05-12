@@ -242,6 +242,10 @@ text:msgInput.value,
 sender:
 window.currentUser.uid,
 
+name:
+window.currentUser.displayName
+|| "Unknown",
+
 time:Date.now()
 
 });
@@ -252,61 +256,6 @@ msgInput.value="";
 
 };
 
-window.renderPublicGroupMessages =
-function(){
-
-messages.innerHTML = "";
-
-if(
-!window.currentGroup ||
-!window.currentGroup.messages
-)
-return;
-
-window.currentGroup.messages
-.forEach(msg => {
-
-let wrap =
-document.createElement("div");
-
-wrap.className =
-"msgWrap " +
-(
-msg.sender ===
-window.currentUser.uid
-?
-"me"
-:
-"them"
-);
-
-let bubble =
-document.createElement("div");
-
-bubble.className = "msg";
-
-bubble.innerHTML = `
-
-${msg.text}
-
-<div>
-${new Date(
-msg.time
-).toLocaleTimeString()}
-</div>
-
-`;
-
-wrap.appendChild(bubble);
-
-messages.appendChild(wrap);
-
-});
-
-messages.scrollTop =
-messages.scrollHeight;
-
-};
 
 window.renderPublicGroupMessages = function(){
 
@@ -315,7 +264,10 @@ document.getElementById("messages");
 
 messages.innerHTML = "";
 
-if(!window.currentGroup) return;
+if(
+!window.currentGroup ||
+!window.currentGroup.messages
+) return;
 
 window.currentGroup.messages.forEach(msg => {
 
@@ -323,7 +275,7 @@ let wrap =
 document.createElement("div");
 
 wrap.className =
-msg.from === window.currentUser.uid
+msg.sender === window.currentUser.uid
 ?
 "msgWrap me"
 :
