@@ -159,6 +159,13 @@ document.createElement("div");
 div.className =
 "publicGroupItem";
 
+div.onclick = function(){
+
+window.currentGroup = group;
+
+openPublicGroup(group);
+
+};
 div.innerHTML = `
 
 <div class="chatAvatar">
@@ -193,5 +200,20 @@ ${group.tag}
 chatList.prepend(div);
 
 });
+
+};
+
+window.openPublicGroup = function(group){
+
+document.getElementById(
+"chatName"
+).innerText =
+group.displayName;
+
+document.getElementById(
+"messages"
+).innerHTML = "";
+
+show("chat");
 
 };
