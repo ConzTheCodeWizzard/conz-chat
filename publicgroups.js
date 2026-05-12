@@ -61,7 +61,7 @@ document
 
 if(!tag || !display){
 
-alert("Fill everything in");
+showPopup("Fill everything in");
 
 return;
 
@@ -69,7 +69,7 @@ return;
 
 if(!tag.startsWith("#")){
 
-alert("Group name must start with #");
+showPopup("Group name must start with #");
 
 return;
 
@@ -80,7 +80,7 @@ let valid =
 
 if(!valid.test(tag)){
 
-alert(
+showPopup(
 "Only letters, numbers, - and _ allowed"
 );
 
@@ -96,7 +96,7 @@ g => g.tag.toLowerCase()
 
 if(exists){
 
-alert(
+showPopup(
 "This group name is already taken"
 );
 
@@ -133,7 +133,7 @@ console.log(
 group
 );
 renderPublicGroups();
-alert(
+showPopup(
 "Public group created"
 );
 
