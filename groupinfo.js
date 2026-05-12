@@ -45,7 +45,10 @@ document.getElementById(
 
 grid.innerHTML = "";
 
-if(!window.currentGroup)
+if(
+!window.currentGroup ||
+!window.currentGroup.members
+)
 return;
 
 window.currentGroup.members
