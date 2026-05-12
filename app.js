@@ -766,6 +766,13 @@ window.statusInterval = setInterval(()=>{
 }
 
 window.sendMessage=function(){
+  if(window.currentGroup){
+
+sendPublicGroupMessage();
+
+return;
+
+  }
 if(msgInput.value.trim().toLowerCase() === "conz"){
 
 msgInput.value = "";
