@@ -205,11 +205,19 @@ chatList.prepend(div);
 
 window.openPublicGroup = function(group){
 
+  document.getElementById(
+"chatName"
+).onclick = function(){
+
+openGroupInfo(group);
+
+};
 document.getElementById(
 "chatName"
 ).innerText =
 group.displayName;
 
+  
 document.getElementById(
 "messages"
 ).innerHTML = "";
