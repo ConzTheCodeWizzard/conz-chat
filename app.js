@@ -1168,3 +1168,122 @@ function closePopup(){
 document.getElementById("customPopup").style.display="none";
 
 }
+
+window.openPremiumMenu = function(){
+
+document.getElementById(
+"conzMenu"
+).style.display = "none";
+
+document.getElementById(
+"premiumMenu"
+).style.display = "flex";
+
+};
+
+window.closePremiumMenu = function(){
+
+document.getElementById(
+"premiumMenu"
+).style.display = "none";
+
+document.getElementById(
+"conzMenu"
+).style.display = "flex";
+
+};
+
+window.startAnimatedMessage =
+function(){
+
+if(
+!window.currentUser?.premium
+){
+
+showPopup(
+"You are currently using a standard account, this menu is for premium users, contact Conz/@Borg to purchase premium, lifetime premium is currently £10."
+);
+
+return;
+
+}
+
+let text =
+document.getElementById(
+"animatedMessageInput"
+).value.trim();
+
+if(!text) return;
+
+window.animatedMessageLoop =
+setInterval(function(){
+
+msgInput.value =
+"✨ " + text + " ✨";
+
+handleSend();
+
+}, 1500);
+
+document.getElementById(
+"premiumConsole"
+).innerHTML =
+"Animated messages started";
+
+};
+
+window.stopAnimatedMessage =
+function(){
+
+clearInterval(
+window.animatedMessageLoop
+);
+
+document.getElementById(
+"premiumConsole"
+).innerHTML =
+"Animated messages stopped";
+
+};
+
+window.givePremium = function(){
+
+if(
+window.currentUser?.uid
+!== "GAEtvdjvwla73GscQWnGthTPG6f1"
+){
+
+showPopup(
+"YOU AINT A DEV! You do not have the power to give premium."
+);
+
+return;
+
+}
+
+if(!window.currentChatUser){
+
+showPopup(
+"No user selected."
+);
+
+return;
+
+}
+
+window.currentChatUser.premium =
+true;
+
+showPopup(
+"Premium granted successfully"
+);
+
+setTimeout(function(){
+
+alert(
+"Premium has been successfully added to your account, ENJOY!"
+);
+
+}, 500);
+
+};
