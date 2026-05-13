@@ -791,3 +791,53 @@ background:orange;
 color:white;
 
 }
+
+#premiumMenu{
+
+display:none;
+flex-direction:column;
+position:absolute;
+bottom:80px;
+left:20px;
+right:20px;
+background:#111;
+border:2px solid #ff0088;
+border-radius:20px;
+padding:20px;
+z-index:9999;
+box-shadow:0 0 25px #ff0088;
+
+}
+
+#premiumMenu input{
+
+background:black;
+border:none;
+padding:14px;
+border-radius:12px;
+color:white;
+margin-top:15px;
+margin-bottom:15px;
+
+}
+
+.premiumButtons{
+
+display:flex;
+gap:10px;
+
+}
+
+.premiumButtons button{
+
+flex:1;
+
+}
+
+#premiumConsole{
+
+margin-top:15px;
+font-size:12px;
+opacity:0.7;
+
+}
