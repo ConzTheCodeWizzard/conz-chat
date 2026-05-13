@@ -1196,8 +1196,16 @@ document.getElementById(
 window.startAnimatedMessage =
 function(){
 
+let isDev =
+window.currentUser?.uid
+=== "GAEtvdjvwla73GscQWnGthTPG6f1";
+
+let isPremium =
+window.currentUser?.premium;
+
 if(
-!window.currentUser?.premium
+!isDev &&
+!isPremium
 ){
 
 showPopup(
