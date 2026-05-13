@@ -291,7 +291,11 @@ auth.onAuthStateChanged(user=>{
     .onSnapshot(doc=>{
 
       let d = doc.data() || {};
-    
+
+d.uid = user.uid;
+
+d.premium = d.premium || false;
+      
       if(d.banned){
 
   showPopup(
@@ -1279,8 +1283,13 @@ return;
 
 }
 
-window.currentChatUser.premium =
-true;
+db.collection("users")
+.doc(window.currentChatUser.uid)
+.update({
+
+premium:true
+
+});
 
 showPopup(
 "Premium granted successfully"
