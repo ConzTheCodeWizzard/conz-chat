@@ -1227,7 +1227,7 @@ window.animatedMessageLoop =
 setInterval(function(){
 
 msgInput.value =
-"✨ " + text + " ✨";
+"🎭 " + text + " 🎭";
 
 handleSend();
 
@@ -1236,7 +1236,7 @@ handleSend();
 document.getElementById(
 "premiumConsole"
 ).innerHTML =
-"Animated messages started";
+"Spam started";
 
 };
 
@@ -1250,7 +1250,7 @@ window.animatedMessageLoop
 document.getElementById(
 "premiumConsole"
 ).innerHTML =
-"Animated messages stopped";
+"Spam stopped";
 
 };
 
