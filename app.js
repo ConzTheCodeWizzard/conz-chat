@@ -1298,7 +1298,7 @@ return;
 }
 
 db.collection("users")
-.doc(window.currentChatUser.uid)
+.doc(window.currentChatUser)
 .update({
 
 premium:true,
