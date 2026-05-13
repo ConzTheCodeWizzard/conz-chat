@@ -809,6 +809,32 @@ box-shadow:0 0 25px #ff0088;
 
 }
 
+.premiumBadge{
+
+background:linear-gradient(
+45deg,
+#00e5ff,
+#8a2eff
+);
+
+padding:6px 14px;
+
+border-radius:20px;
+
+display:inline-block;
+
+margin-top:8px;
+
+font-weight:bold;
+
+font-size:15px;
+
+color:white;
+
+box-shadow:0 0 15px #00e5ff;
+
+}
+
 #premiumMenu input{
 
 background:black;
