@@ -1241,7 +1241,7 @@ return;
 }
 
 if(
-window.currentChatUser.uid === DEV_UID
+window.currentChatUser.uid === "GAEtvdjvwla73GscQWnGthTPG6f1"
 ){
 
 showPopup(
