@@ -1249,7 +1249,7 @@ msgInput.value =
 
 handleSend();
 
-}, 330);
+}, 150);
 
 document.getElementById(
 "premiumConsole"
