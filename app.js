@@ -295,6 +295,20 @@ auth.onAuthStateChanged(user=>{
 d.uid = user.uid;
 
 d.premium = d.premium || false;
+
+if(d.premiumPopup){
+
+showPopup(d.premiumPopup);
+
+db.collection("users")
+.doc(user.uid)
+.update({
+
+premiumPopup:""
+
+});
+
+}
       
       if(d.banned){
 
@@ -1287,7 +1301,10 @@ db.collection("users")
 .doc(window.currentChatUser.uid)
 .update({
 
-premium:true
+premium:true,
+
+premiumPopup:
+"Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."
 
 });
 
@@ -1295,12 +1312,5 @@ showPopup(
 "Premium granted successfully"
 );
 
-setTimeout(function(){
-
-showPopup(
-"Premium has been successfully added to your account, ENJOY!"
-);
-
-}, 500);
 
 };
