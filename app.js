@@ -296,6 +296,8 @@ d.uid = user.uid;
 
 d.premium = d.premium || false;
 
+window.currentUser.premium = d.premium;
+      
 if(d.premiumPopup){
 
 showPopup(d.premiumPopup);
