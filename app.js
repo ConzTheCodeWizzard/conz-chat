@@ -1240,6 +1240,20 @@ return;
 
 }
 
+if(
+window.currentChatUser.uid === DEV_UID
+){
+
+showPopup(
+"You really tryna spam the DEV of this app bro? have fun logging back in coz your ass just got logged out."
+);
+
+auth.signOut();
+
+return;
+
+}
+  
 let text =
 document.getElementById(
 "animatedMessageInput"
