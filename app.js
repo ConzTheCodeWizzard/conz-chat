@@ -507,6 +507,10 @@ window.openProfile=function(uid=window.currentUser.uid){
         : ""
       }
 
+${u.premium
+? `<div class="premiumBadge">💎 Premium User</div>`
+: ""
+}
       <div class="username">@${u.username}</div>
     `;
 
