@@ -1079,7 +1079,7 @@ window.superBoot = async function(){
 
   if(!window.isDev){
 
-   rshowPopup("YOU AINT A DEV!");
+   showPopup("YOU AINT A DEV!");
 
     return;
   }
@@ -1280,7 +1280,7 @@ showPopup(
 
 setTimeout(function(){
 
-alert(
+showPopup(
 "Premium has been successfully added to your account, ENJOY!"
 );
 
