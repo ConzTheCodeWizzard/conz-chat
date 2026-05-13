@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConzPing</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+body{
+    margin:0;
+
+    background:black;
+    color:#00ff88;
+
+    font-family:'Orbitron', sans-serif;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    height:100vh;
+}
+
+body::before{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+
+    background:
+    radial-gradient(circle at top, rgba(0,255,100,0.15), transparent 40%),
+    radial-gradient(circle at bottom, rgba(0,255,100,0.1), transparent 50%);
+
+    z-index:-1;
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+
+    text-align:center;
+}
+
+h1{
+    font-size:60px;
+
+    text-shadow:
+    0 0 5px #00ff88,
+    0 0 15px #00ff88,
+    0 0 35px #00ff88;
+}
+
+.top{
+    margin-top:30px;
+    margin-bottom:50px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    gap:15px;
+}
+
+input{
+    width:420px;
+
+    padding:18px;
+
+    background:black;
+    color:#00ff88;
+
+    border:2px solid #00ff88;
+    border-radius:10px;
+
+    font-size:18px;
+    outline:none;
+
+    box-shadow:
+    0 0 10px #00ff88;
+}
+
+input::placeholder{
+    color:#6effb2;
+}
+
+button{
+    padding:18px 35px;
+
+    background:black;
+    color:#00ff88;
+
+    border:2px solid #00ff88;
+    border-radius:10px;
+
+    font-size:18px;
+    font-family:'Orbitron', sans-serif;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+    box-shadow:
+    0 0 10px #00ff88,
+    inset 0 0 10px #00ff88;
+}
+
+button:hover{
+    background:#00ff88;
+    color:black;
+
+    transform:scale(1.05);
+
+    box-shadow:
+    0 0 20px #00ff88,
+    0 0 50px #00ff88;
+}
+
+.bottom{
+    display:flex;
+
+    height:420px;
+
+    border-top:2px solid #00ff88;
+}
+
+.panel{
+    flex:1;
+
+    padding:25px;
+
+    overflow-y:auto;
+}
+
+.left{
+    border-right:2px solid #00ff88;
+}
+
+.panel h2{
+    margin-bottom:20px;
+
+    text-shadow:
+    0 0 5px #00ff88;
+}
+
+.log{
+    text-align:left;
+    line-height:1.8;
+    color:#b6ffcf;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>ConzPing</h1>
+
+<div class="top">
+
+<input type="text" id="target" placeholder="Enter Website or IP">
+
+<button onclick="fakePing()">
+Ping
+</button>
+
+</div>
+
+<div class="bottom">
+
+<div class="panel left">
+
+<h2>Ping</h2>
+
+<div class="log" id="pingLog">
+Waiting for ping...
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Errors / Downtime</h2>
+
+<div class="log" id="errorLog">
+No errors or downtime.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function fakePing(){
+
+    let target = document.getElementById("target").value;
+
+    if(target === ""){
+        alert("Enter a website or IP");
+        return;
+    }
+
+    let pingBox = document.getElementById("pingLog");
+    let errorBox = document.getElementById("errorLog");
+
+    pingBox.innerHTML =
+    `
+    > Pinging ${target}...<br><br>
+
+    Reply from ${target}: bytes=32 time=21ms TTL=58<br>
+    Reply from ${target}: bytes=32 time=19ms TTL=58<br>
+    Reply from ${target}: bytes=32 time=24ms TTL=58<br>
+    Reply from ${target}: bytes=32 time=17ms TTL=58<br><br>
+
+    Ping completed successfully.
+    `;
+
+    errorBox.innerHTML =
+    `
+    No errors or downtime detected.
+    `;
+}
+
+</script>
+
+</body>
+</html>
