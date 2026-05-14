@@ -172,7 +172,12 @@ const themes = {
   conz:{
   main:"#050505",
   secondary:"#ff003c"
-  }
+},
+
+sinister:{
+  main:"#050505",
+  secondary:"#ff0000"
+}
 };
 
 window.applyTheme=function(name){
@@ -190,7 +195,8 @@ window.applyTheme=function(name){
   localStorage.setItem("conz_theme", name);
   document.body.classList.remove(
   "harleyTheme",
-  "conzTheme"
+  "conzTheme",
+  "sinisterTheme"
 );
 
 if(name === "harley"){
@@ -202,6 +208,11 @@ if(name === "harley"){
 if(name === "conz"){
   document.body.classList.add(
     "conzTheme"
+  );
+}
+if(name === "sinister"){
+  document.body.classList.add(
+    "sinisterTheme"
   );
 }
 };
