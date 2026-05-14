@@ -362,6 +362,23 @@ background-position:center;
 background-attachment:fixed;
 }
 
+/* ===== SINISTER THEME ===== */
+
+body.sinisterTheme{
+
+background:
+linear-gradient(
+rgba(0,0,0,0.72),
+rgba(0,0,0,0.82)
+),
+url("sinister.jpg");
+
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+
+}
+
 .onlineDot{
 width:8px;
 height:8px;
