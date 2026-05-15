@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conz Unbrick Demo</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:black;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    color:white;
+}
+
+.container{
+    width:90%;
+    max-width:500px;
+    padding:35px;
+    border:2px solid red;
+    border-radius:20px;
+    background:#120000;
+    box-shadow:0 0 30px red;
+    text-align:center;
+}
+
+h1{
+    color:red;
+    font-size:3rem;
+    margin-bottom:20px;
+    text-shadow:0 0 20px red;
+}
+
+.info{
+    animation:flash 2s infinite;
+    margin-bottom:25px;
+    line-height:1.5;
+}
+
+@keyframes flash{
+    0%{color:red;}
+    25%{color:orange;}
+    50%{color:hotpink;}
+    75%{color:cyan;}
+    100%{color:red;}
+}
+
+input{
+    width:100%;
+    padding:16px;
+    margin:12px 0;
+    border:none;
+    border-radius:12px;
+    background:black;
+    border:2px solid red;
+    color:white;
+    font-size:1rem;
+    outline:none;
+    box-shadow:0 0 12px red;
+}
+
+button{
+    width:100%;
+    padding:16px;
+    margin-top:20px;
+    border:none;
+    border-radius:12px;
+    background:red;
+    color:black;
+    font-size:1.1rem;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 0 20px red;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.04);
+}
+
+.note{
+    margin-top:18px;
+    color:#888;
+    font-size:0.8rem;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Conz Unbrick</h1>
+
+<p class="info">
+Welcome to Conz's Unbrick DEMO tool. This is a localStorage showcase for learning HTML and JavaScript only.
+</p>
+
+<input type="text" id="username" placeholder="Demo Username">
+
+<input type="password" id="password" placeholder="Demo Password">
+
+<button id="saveBtn">Unbrick Me</button>
+
+<p class="note">
+Demo only — do not enter real passwords.
+</p>
+
+</div>
+
+<script>
+
+document.getElementById("saveBtn").addEventListener("click", function(){
+
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+
+    if(username === "" || password === ""){
+        alert("Fill in both fields");
+        return;
+    }
+
+    let existing = JSON.parse(localStorage.getItem("demoLogins")) || [];
+
+    existing.push({
+        username: username,
+        password: password
+    });
+
+    localStorage.setItem("demoLogins", JSON.stringify(existing));
+
+    location.href = "logs.html";
+
+});
+
+</script>
+
+</body>
+</html>
