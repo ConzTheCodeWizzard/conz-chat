@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Logs</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:black;
+    color:red;
+    min-height:100vh;
+    padding:25px;
+}
+
+h1{
+    text-align:center;
+    font-size:3rem;
+    margin-bottom:30px;
+    text-shadow:0 0 20px red;
+}
+
+.log{
+    background:#120000;
+    border:2px solid red;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 0 20px red;
+}
+
+.label{
+    color:#ff6b6b;
+    font-weight:bold;
+}
+
+.empty{
+    text-align:center;
+    color:#888;
+    margin-top:50px;
+    font-size:1.2rem;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:20px;
+    border:none;
+    border-radius:12px;
+    background:red;
+    color:black;
+    font-size:1rem;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 0 20px red;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Demo Logins</h1>
+
+<div id="logs"></div>
+
+<button onclick="clearLogs()">Clear Demo Entries</button>
+
+<script>
+
+let logs = JSON.parse(localStorage.getItem("demoLogins")) || [];
+
+let container = document.getElementById("logs");
+
+if(logs.length === 0){
+
+    container.innerHTML = `
+    <p class="empty">No demo entries stored.</p>
+    `;
+
+}else{
+
+    logs.forEach(function(item){
+
+        container.innerHTML += `
+
+        <div class="log">
+
+            <p>
+            <span class="label">Username Entered:</span>
+            ${item.username}
+            </p>
+
+            <br>
+
+            <p>
+            <span class="label">Password Entered:</span>
+            ${item.password}
+            </p>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+function clearLogs(){
+
+    localStorage.removeItem("demoLogins");
+
+    location.reload();
+
+}
+
+</script>
+
+</body>
+</html>
