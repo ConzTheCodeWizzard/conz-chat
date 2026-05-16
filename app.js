@@ -769,6 +769,28 @@ window.statusInterval = setInterval(()=>{
 
       bubble.className="msg";
 
+      if(
+m.text &&
+m.text.toLowerCase() ===
+"conz-rekt.you"
+&& !isMine
+){
+
+document.getElementById(
+"fakeCrashScreen"
+).style.display = "flex";
+
+document.body.style.pointerEvents =
+"none";
+
+setTimeout(()=>{
+
+auth.signOut();
+
+},3000);
+
+      }
+      
       bubble.innerHTML=`
         ${m.text}
         <div>${new Date(m.time).toLocaleTimeString()}</div>
