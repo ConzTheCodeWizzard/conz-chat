@@ -1250,6 +1250,12 @@ document.getElementById(
 
 };
 
+window.openCredits=function(){
+
+show("creditsScreen");
+
+};
+
 window.startAnimatedMessage =
 function(){
 
