@@ -1017,6 +1017,18 @@ margin-bottom:8px;
 
 color:#ff0055;
 
+cursor:pointer;
+
+transition:0.2s;
+
+}
+
+.creditName:hover{
+
+transform:scale(1.05);
+
+opacity:0.85;
+
 }
 
 .creditRole{
