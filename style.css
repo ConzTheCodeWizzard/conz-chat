@@ -26,20 +26,36 @@ flex-direction:column;
 
 /* ===== Conz was here ===== */
 .welcomeScreen{
+
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-text-align:center;
-position:relative;
-height:100vh;
-}
 
-canvas{
-position:absolute;
-top:0;
-left:0;
-z-index:0;
+text-align:center;
+
+position:relative;
+
+height:100vh;
+
+overflow:hidden;
+
+background:
+
+radial-gradient(
+circle at top,
+rgba(255,0,85,0.20),
+transparent 40%
+),
+
+radial-gradient(
+circle at bottom,
+rgba(0,140,255,0.16),
+transparent 45%
+),
+
+#000;
+
 }
 
 .welcomeContent{
@@ -50,21 +66,55 @@ align-items:center;
 }
 
 .logo{
-font-size:60px;
-text-shadow:0 0 20px var(--secondary);
-animation:pulse 2s infinite;
-}
 
-@keyframes pulse{
-0%{text-shadow:0 0 10px var(--secondary);}
-50%{text-shadow:0 0 30px var(--secondary);}
-100%{text-shadow:0 0 10px var(--secondary);}
+font-size:82px;
+
+font-weight:900;
+
+letter-spacing:-4px;
+
+margin:0;
+
+background:
+linear-gradient(
+90deg,
+#ffffff,
+#ff0055,
+#ffffff
+);
+
+background-size:200% auto;
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
+
+filter:
+drop-shadow(0 0 25px #ff0055);
+
+animation:
+logoShift 5s linear infinite,
+logoFloat 3s ease-in-out infinite;
+
 }
 
 .rotatingText{
-margin-top:12px;
+
+margin-top:18px;
+
 font-size:18px;
+
+font-weight:bold;
+
 min-height:22px;
+
+opacity:0.88;
+
+text-shadow:
+0 0 12px currentColor;
+
+animation:flicker 3s infinite;
+
 }
 
 .version{
@@ -74,15 +124,80 @@ opacity:0.8;
 }
 
 button{
-padding:12px 18px;
-margin:6px;
+
+position:relative;
+
+overflow:hidden;
+
+padding:14px 28px;
+
+margin:8px;
+
 border:none;
-border-radius:10px;
-background:linear-gradient(135deg,var(--secondary),#ff0066);
-color:#fff;
+
+border-radius:16px;
+
+background:
+linear-gradient(
+135deg,
+#ff0055,
+#ff0066
+);
+
+color:white;
+
 font-weight:bold;
+
+font-size:18px;
+
 cursor:pointer;
-box-shadow:0 0 15px rgba(255,0,100,0.5);
+
+box-shadow:
+0 0 20px rgba(255,0,80,0.45);
+
+transition:0.25s;
+
+}
+
+button:hover{
+
+transform:
+translateY(-2px)
+scale(1.03);
+
+box-shadow:
+0 0 35px rgba(255,0,80,0.8);
+
+}
+
+button::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+left:-100%;
+
+width:100%;
+height:100%;
+
+background:
+linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,0.25),
+transparent
+);
+
+transition:0.6s;
+
+}
+
+button:hover::before{
+
+left:100%;
+
 }
 
 .welcomeFooter{
@@ -1054,5 +1169,152 @@ font-size:18px;
 font-weight:bold;
 
 margin-top:20px;
+
+}
+
+@keyframes logoShift{
+
+0%{
+background-position:0% center;
+}
+
+100%{
+background-position:200% center;
+}
+
+}
+
+@keyframes logoFloat{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(-6px);
+}
+
+100%{
+transform:translateY(0px);
+}
+
+}
+
+@keyframes flicker{
+
+0%{
+opacity:0.75;
+}
+
+50%{
+opacity:1;
+}
+
+100%{
+opacity:0.75;
+}
+
+}
+
+@keyframes panelFloat{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(-4px);
+}
+
+100%{
+transform:translateY(0px);
+}
+
+}
+
+.welcomePanel{
+
+margin-top:35px;
+
+padding:28px;
+
+border-radius:30px;
+
+background:
+rgba(255,255,255,0.05);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+backdrop-filter:blur(18px);
+
+box-shadow:
+0 0 50px rgba(255,0,80,0.18);
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+animation:panelFloat 5s ease-in-out infinite;
+
+}
+
+@keyframes flicker{
+
+0%{
+opacity:0.75;
+}
+
+50%{
+opacity:1;
+}
+
+100%{
+opacity:0.75;
+}
+
+}
+
+.welcomeText{
+
+font-size:22px;
+
+font-weight:300;
+
+opacity:0.8;
+
+margin-bottom:-10px;
+
+letter-spacing:2px;
+
+}
+
+.version{
+
+margin-top:12px;
+
+opacity:0.6;
+
+font-size:15px;
+
+letter-spacing:1px;
+
+}
+
+@keyframes panelFloat{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(-4px);
+}
+
+100%{
+transform:translateY(0px);
+}
 
 }
