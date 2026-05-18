@@ -102,7 +102,7 @@ window.addEventListener("load", ()=>{
   function animate(){
 
     ctx.fillStyle =
-"rgba(0,0,0,0.18)";
+"rgba(0,0,0,0.32)";
 
 ctx.fillRect(
 0,
@@ -162,10 +162,9 @@ canvas.height
       ctx.globalAlpha = 0.55 + (p.size / 4);
       ctx.beginPath();
 
-      ctx.fillStyle =
-      `hsla(${p.hue},100%,68%,${0.55 + speedGlow * 0.05})`;
+      ctx.fillStyle = `hsla(${p.hue},100%,68%,0.45)`;
 
-      ctx.shadowBlur = 65;
+      ctx.shadowBlur = 18;
 
       ctx.shadowColor =
       `hsl(${p.hue},100%,60%)`;
