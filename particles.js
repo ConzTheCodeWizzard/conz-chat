@@ -72,14 +72,14 @@ window.addEventListener("load", ()=>{
 
     particles.forEach(p=>{
 
-      p.vx += (Math.random()-0.5) * 6;
-      p.vy += (Math.random()-0.5) * 6;
+      p.vx += (Math.random()-0.5) * 0.8;
+      p.vy += (Math.random()-0.5) * 0.8;
     });
   });
 
   /* ===== Threee fourrr better lock your door ~Conz~===== */
 
-  for(let i=0;i<160;i++){
+  for(let i=0;i<190;i++){
 
     particles.push({
 
@@ -89,7 +89,7 @@ window.addEventListener("load", ()=>{
       vx:(Math.random()-0.5)*1.2,
       vy:(Math.random()-0.5)*1.2,
 
-      size:Math.random()*2.5+1,
+      size:Math.random()*3.5+0.8,
 
       speed:Math.random()*1.2+0.5,
 
@@ -101,7 +101,15 @@ window.addEventListener("load", ()=>{
 
   function animate(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle =
+"rgba(0,0,0,0.18)";
+
+ctx.fillRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
 
     particles.forEach(p=>{
 
@@ -151,13 +159,13 @@ window.addEventListener("load", ()=>{
 
       let speedGlow =
       Math.abs(p.vx) + Math.abs(p.vy);
-
+      ctx.globalAlpha = 0.55 + (p.size / 4);
       ctx.beginPath();
 
       ctx.fillStyle =
-      `hsla(${p.hue},100%,60%,${0.45 + speedGlow * 0.06})`;
+      `hsla(${p.hue},100%,68%,${0.55 + speedGlow * 0.05})`;
 
-      ctx.shadowBlur = 45;
+      ctx.shadowBlur = 65;
 
       ctx.shadowColor =
       `hsl(${p.hue},100%,60%)`;
