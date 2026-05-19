@@ -40,7 +40,7 @@ height:100vh;
 
 overflow:hidden;
 
-background:#000;
+background:transparent;
 
 }
 
@@ -1303,7 +1303,7 @@ font-weight:300;
 
 opacity:0.8;
 
-margin-bottom:-2px;
+margin-bottom:14px;
 
 letter-spacing:2px;
 
