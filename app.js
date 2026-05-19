@@ -19,6 +19,45 @@ window.show = function(id){
   if(fab) fab.style.display="none";
 };
 
+// ===== ANDROID BACK =====
+
+window.screenHistory = [];
+
+const oldShow = window.show;
+
+window.show = function(id){
+
+  const current =
+  document.querySelector(".screen.active");
+
+  if(current && current.id !== id){
+
+    screenHistory.push(current.id);
+
+  }
+
+  oldShow(id);
+};
+
+document.addEventListener(
+"backbutton",
+function(){
+
+  if(screenHistory.length){
+
+    oldShow(
+      screenHistory.pop()
+    );
+
+  }else{
+
+    oldShow("home");
+
+  }
+
+},
+false
+);
 // ===== Conz is goated =====
 window.addEventListener("load", () => {
 
