@@ -37,27 +37,26 @@ window.show = function(id){
   }
 
   oldShow(id);
+
+  history.pushState(
+    {screen:id},
+    ""
+  );
 };
 
-document.addEventListener(
-"backbutton",
+window.addEventListener(
+"popstate",
 function(){
 
-  if(screenHistory.length){
+  if(screenHistory.length > 0){
 
     oldShow(
       screenHistory.pop()
     );
 
-  }else{
-
-    oldShow("home");
-
   }
 
-},
-false
-);
+});
 // ===== Conz is goated =====
 window.addEventListener("load", () => {
 
