@@ -101,10 +101,7 @@ window.addEventListener("load", ()=>{
 
   function animate(){
 
-    ctx.fillStyle =
-"rgba(0,0,0,0.32)";
-
-ctx.fillRect(
+    ctx.clearRect(
 0,
 0,
 canvas.width,
