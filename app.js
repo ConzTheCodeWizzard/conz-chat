@@ -54,23 +54,23 @@ const rotatingMessages = [
 
   "Built by ~Conz~",
 
-  "You are currently running Version 1.3",
+  "You are currently running Version 1.4",
 
-  "New theme system was added",
+  "Ui and style of Welcome Screen was revamped",
 
   "Group chat system is in the works",
 
-  "Conz is actively looking for co devs to partner with",
+  "ConzChat Co Devs are Void And Trojan",
 
-  "Report any issues you find to @Borg on ConzChat",
+  "Report any issues you find to @Borg on ConzChat or via kik in the credits tab",
 
-  "Send any suggestions for new stuff to @Borg on ConzChat",
+  "If you have questions about Premium contact contact Conz or a Co Dev",
 
-  "If you know how to code hit me up let's work together",
+  "If you know how to code hit me up join the team",
 
-  "Version 1.4 will be released on May 13th",
+  "Version 1.5 coming soon...",
 
-  "Did you notice the particles are attracted to your touch?"
+  "Thank you for trying ConzChat ~Conz~"
 ];
 
 let rotatingIndex = 0;
