@@ -161,7 +161,7 @@ db.collection("publicGroups")
 .where(
 "members",
 "array-contains",
-window.currentUser.uid
+window.currentUser?.uid || ""
 )
 .onSnapshot(snap=>{
 
