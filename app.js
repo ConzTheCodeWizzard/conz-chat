@@ -82,6 +82,8 @@ let myData={};
 let unsubscribeMessages=null;
 let unsubscribeStatus=null;
 
+let unreadCounts = {};
+
 window.unsubscribeMessages = null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
@@ -916,6 +918,16 @@ function loadChats(){
 
       let m=doc.data();
 
+      if(
+m.to === window.currentUser.uid &&
+m.from !== window.currentChatUser
+){
+
+unreadCounts[m.from] =
+(unreadCounts[m.from] || 0)
++ 1;
+
+      }
       if(m.from!==window.currentUser.uid&&m.to!==window.currentUser.uid) return;
 
       let other=m.from===window.currentUser.uid?m.to:m.from;
@@ -931,12 +943,28 @@ function loadChats(){
         let div=document.createElement("div");
 
         div.innerHTML=`
-          <div class="chatAvatar">
-            ${d.photo?`<img src="${d.photo}">`:""}
-          </div>
+  <div class="chatAvatar">
+    ${d.photo?`<img src="${d.photo}">`:""}
+  </div>
 
-          <div>${d.username}</div>
-        `;
+  <div class="chatNameWrap">
+
+    <div>
+      ${d.username}
+    </div>
+
+    ${
+      unreadCounts[other]
+      ? `
+      <div class="unreadBadge">
+        ${unreadCounts[other]}
+      </div>
+      `
+      : ""
+    }
+
+  </div>
+`;
 
         div.onclick=()=>openChat(other,d.username,d.photo);
 
