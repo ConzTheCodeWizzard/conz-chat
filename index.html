@@ -343,6 +343,29 @@ class="logoutBtn">
 Logout
 
 </button>
+<button onclick="toggleSettings()"
+class="settingsBtn">
+
+⚙ Settings
+
+</button>
+
+<div id="settingsPanel">
+
+<div class="settingTitle">
+Brightness Editor
+</div>
+
+<input
+type="range"
+id="brightnessSlider"
+min="0"
+max="100"
+value="50"
+oninput="updateBrightness(this.value)"
+>
+
+</div>
   </div>
 
 <!-- 🔥 THEMES SCREEN -->
