@@ -910,11 +910,7 @@ function loadChats(){
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
 
-    document
-.querySelectorAll(
-".privateChatItem"
-)
-.forEach(x=>x.remove());
+    chatList.innerHTML="";
 
     let seen={};
 
