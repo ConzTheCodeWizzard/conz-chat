@@ -1360,3 +1360,64 @@ margin:20px auto;
 display:block;
 
 }
+
+.settingsBtn{
+
+width:85%;
+
+max-width:320px;
+
+margin:0 auto;
+
+display:block;
+
+}
+
+#settingsPanel{
+
+display:none;
+
+width:85%;
+
+max-width:320px;
+
+margin:16px auto;
+
+padding:20px;
+
+border-radius:22px;
+
+background:
+rgba(10,10,10,0.82);
+
+backdrop-filter:blur(10px);
+
+border:
+1px solid rgba(255,255,255,0.08);
+
+box-shadow:
+0 0 18px rgba(255,0,85,0.18);
+
+text-align:center;
+
+}
+
+.settingTitle{
+
+font-size:20px;
+
+font-weight:bold;
+
+margin-bottom:16px;
+
+color:white;
+
+}
+
+#brightnessSlider{
+
+width:100%;
+
+accent-color:#ff0055;
+
+}
