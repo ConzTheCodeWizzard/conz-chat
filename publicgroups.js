@@ -126,18 +126,31 @@ banned:[]
 
 };
 
-window.publicGroups.push(group);
+db.collection("publicGroups")
+.add(group)
+.then(()=>{
 
 console.log(
 "GROUP CREATED:",
 group
 );
-renderPublicGroups();
+
 showPopup(
 "Public group created"
 );
 
 show("home");
+
+})
+.catch(err=>{
+
+console.log(err);
+
+showPopup(
+"Failed to create group"
+);
+
+});
 
 };
 
