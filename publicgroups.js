@@ -368,3 +368,5 @@ messages.scrollTop =
 messages.scrollHeight;
 
 };
+
+renderPublicGroups();
