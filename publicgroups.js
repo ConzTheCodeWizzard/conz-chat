@@ -158,6 +158,11 @@ window.renderPublicGroups =
 function(){
 
 db.collection("publicGroups")
+.where(
+"members",
+"array-contains",
+window.currentUser.uid
+)
 .onSnapshot(snap=>{
 
 let oldGroups =
