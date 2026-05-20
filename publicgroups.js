@@ -378,3 +378,97 @@ messages.scrollTop =
 messages.scrollHeight;
 
 };
+
+window.searchPublicGroups =
+function(){
+
+let query =
+document.getElementById(
+"publicGroupSearchInput"
+)
+.value
+.trim()
+.toLowerCase();
+
+let results =
+document.getElementById(
+"publicGroupResults"
+);
+
+results.innerHTML = "";
+
+db.collection("publicGroups")
+.get()
+.then(snap=>{
+
+snap.forEach(doc=>{
+
+let group =
+doc.data();
+
+group.id = doc.id;
+
+let tag =
+(group.tag || "")
+.toLowerCase();
+
+let display =
+(group.displayName || "")
+.toLowerCase();
+
+if(
+query &&
+!tag.includes(query) &&
+!display.includes(query)
+){
+return;
+}
+
+let div =
+document.createElement("div");
+
+div.className =
+"publicGroupItem";
+
+div.innerHTML = `
+
+<div class="chatAvatar">
+${
+group.photo
+? `<img src="${group.photo}">`
+: "👥"
+}
+</div>
+
+<div style="flex:1;">
+
+<div>
+${group.displayName}
+</div>
+
+<div style="
+font-size:12px;
+opacity:0.6;
+">
+${group.tag}
+</div>
+
+</div>
+`;
+
+div.onclick = function(){
+
+window.currentGroup =
+group;
+
+openPublicGroup(group);
+
+};
+
+results.appendChild(div);
+
+});
+
+});
+
+};
