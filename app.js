@@ -910,7 +910,11 @@ function loadChats(){
   db.collection("messages").orderBy("time","desc")
   .onSnapshot(snap=>{
 
-    chatList.innerHTML="";
+    document
+.querySelectorAll(
+".privateChatItem"
+)
+.forEach(x=>x.remove());
 
     let seen={};
 
@@ -941,6 +945,9 @@ unreadCounts[m.from] =
         let d=u.data()||{};
 
         let div=document.createElement("div");
+
+        div.className =
+"privateChatItem";
 
         div.innerHTML=`
   <div class="chatAvatar">
