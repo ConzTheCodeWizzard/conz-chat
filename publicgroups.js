@@ -242,47 +242,6 @@ chatList.prepend(div);
 
 };
 
-window.currentGroup = group;
-
-openPublicGroup(group);
-
-};
-div.innerHTML = `
-
-<div class="chatAvatar">
-
-${
-group.photo
-?
-`<img src="${group.photo}">`
-:
-"#"
-}
-
-</div>
-
-<div>
-
-<div>
-${group.displayName}
-</div>
-
-<div style="
-opacity:0.6;
-font-size:12px;
-">
-${group.tag}
-</div>
-
-</div>
-
-`;
-
-chatList.prepend(div);
-
-});
-
-};
 
 window.openPublicGroup = function(group){
 
