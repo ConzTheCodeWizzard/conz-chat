@@ -154,17 +154,36 @@ showPopup(
 
 };
 
-window.renderPublicGroups = function(){
+window.renderPublicGroups =
+function(){
 
 let chatList =
-document.getElementById("chatList");
+document.getElementById(
+"chatList"
+);
 
 let old =
-document.querySelectorAll(".publicGroupItem");
+document.querySelectorAll(
+".publicGroupItem"
+);
 
-old.forEach(x => x.remove());
+old.forEach(x=>x.remove());
 
-window.publicGroups.forEach(group => {
+db.collection("publicGroups")
+.onSnapshot(snap=>{
+
+document
+.querySelectorAll(
+".publicGroupItem"
+)
+.forEach(x=>x.remove());
+
+snap.forEach(doc=>{
+
+let group =
+doc.data();
+
+group.id = doc.id;
 
 let div =
 document.createElement("div");
@@ -172,7 +191,56 @@ document.createElement("div");
 div.className =
 "publicGroupItem";
 
-div.onclick = function(){
+div.onclick =
+function(){
+
+window.currentGroup =
+group;
+
+openPublicGroup(group);
+
+};
+
+div.innerHTML = `
+
+<div class="chatAvatar">
+
+${
+group.photo
+?
+`<img src="${group.photo}">`
+:
+"👥"
+}
+
+</div>
+
+<div>
+
+<div>
+${group.displayName}
+</div>
+
+<div style="
+opacity:0.6;
+font-size:12px;
+">
+
+${group.tag}
+
+</div>
+
+</div>
+
+`;
+
+chatList.prepend(div);
+
+});
+
+});
+
+};
 
 window.currentGroup = group;
 
@@ -341,3 +409,5 @@ messages.scrollTop =
 messages.scrollHeight;
 
 };
+
+renderPublicGroups();
