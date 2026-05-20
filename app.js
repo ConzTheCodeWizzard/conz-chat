@@ -406,13 +406,18 @@ premiumPopup:""
 
       if(!window.chatsLoaded){
 
-        window.chatsLoaded=true;
+window.chatsLoaded=true;
 
-        loadChats();
+loadChats();
 
-        if(window.loadGroups){
-          loadGroups();
-        }
+if(window.loadGroups){
+loadGroups();
+}
+
+if(window.renderPublicGroups){
+renderPublicGroups();
+}
+
       }
 
     });
