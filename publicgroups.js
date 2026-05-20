@@ -458,10 +458,7 @@ ${group.tag}
 
 div.onclick = function(){
 
-window.currentGroup =
-group;
-
-openPublicGroup(group);
+joinPublicGroup(group);
 
 };
 
@@ -470,5 +467,56 @@ results.appendChild(div);
 });
 
 });
+
+};
+
+window.joinPublicGroup =
+async function(group){
+
+try{
+
+let ref =
+db.collection("publicGroups")
+.doc(group.id);
+
+let doc =
+await ref.get();
+
+let data =
+doc.data() || {};
+
+let members =
+data.members || [];
+
+if(
+members.includes(
+window.currentUser.uid
+)
+){
+
+openPublicGroup(group);
+return;
+
+}
+
+members.push(
+window.currentUser.uid
+);
+
+await ref.update({
+members:members
+});
+
+showPopup(
+"Joined public group"
+);
+
+openPublicGroup(group);
+
+}catch(err){
+
+alert(err.message);
+
+}
 
 };
