@@ -1411,3 +1411,75 @@ showPopup(
 
 
 };
+
+window.toggleSettings = function(){
+
+const panel =
+document.getElementById(
+"settingsPanel"
+);
+
+if(
+panel.style.display ===
+"block"
+){
+
+panel.style.display =
+"none";
+
+}else{
+
+panel.style.display =
+"block";
+
+}
+
+};
+
+window.updateBrightness =
+function(value){
+
+const brightness =
+0.25 + (value / 100) * 0.75;
+
+document.body.style.filter =
+`brightness(${brightness})`;
+
+localStorage.setItem(
+"conz_brightness",
+value
+);
+
+};
+
+window.addEventListener(
+"load",
+function(){
+
+let saved =
+localStorage.getItem(
+"conz_brightness"
+);
+
+if(saved){
+
+document.body.style.filter =
+`brightness(${
+0.25 + (saved / 100)
+* 0.75
+})`;
+
+const slider =
+document.getElementById(
+"brightnessSlider"
+);
+
+if(slider){
+
+slider.value = saved;
+
+}
+
+}
+
+});
