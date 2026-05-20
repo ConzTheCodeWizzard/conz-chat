@@ -157,49 +157,41 @@ showPopup(
 window.renderPublicGroups =
 function(){
 
-let chatList =
-document.getElementById(
-"chatList"
-);
+db.collection("publicGroups")
+.onSnapshot(snap=>{
 
-let old =
+let oldGroups =
 document.querySelectorAll(
 ".publicGroupItem"
 );
 
-old.forEach(x=>x.remove());
+oldGroups.forEach(
+el=>el.remove()
+);
 
-db.collection("publicGroups")
-.onSnapshot(snap=>{
-
-document
-.querySelectorAll(
-".publicGroupItem"
-)
-.forEach(x=>x.remove());
+let groups = [];
 
 snap.forEach(doc=>{
 
-let group =
-doc.data();
+groups.push({
 
-group.id = doc.id;
+id:doc.id,
+
+...doc.data()
+
+});
+
+});
+
+groups.forEach(group=>{
 
 let div =
-document.createElement("div");
+document.createElement(
+"div"
+);
 
 div.className =
 "publicGroupItem";
-
-div.onclick =
-function(){
-
-window.currentGroup =
-group;
-
-openPublicGroup(group);
-
-};
 
 div.innerHTML = `
 
@@ -207,10 +199,8 @@ div.innerHTML = `
 
 ${
 group.photo
-?
-`<img src="${group.photo}">`
-:
-"👥"
+? `<img src="${group.photo}">`
+: `👥`
 }
 
 </div>
@@ -222,8 +212,9 @@ ${group.displayName}
 </div>
 
 <div style="
-opacity:0.6;
 font-size:12px;
+opacity:0.6;
+margin-top:2px;
 ">
 
 ${group.tag}
@@ -231,15 +222,29 @@ ${group.tag}
 </div>
 
 </div>
-
 `;
+
+div.onclick = ()=>{
+
+window.currentGroup =
+group;
+
+openPublicGroup(
+group
+);
+
+};
 
 chatList.prepend(div);
 
 });
 
-});
+},
+err=>{
 
+alert(err.message);
+
+});
 };
 
 
