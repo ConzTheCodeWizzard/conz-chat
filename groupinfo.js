@@ -36,7 +36,7 @@ show("groupInfo");
 };
 
 window.renderGroupMembers =
-function(){
+async function(){
 
 let grid =
 document.getElementById(
@@ -51,8 +51,8 @@ if(
 )
 return;
 
-window.currentGroup.members
-.forEach(uid => {
+for(const uid of
+window.currentGroup.members){
 
 let member =
 document.createElement("div");
@@ -88,17 +88,39 @@ badge = `
 
 }
 
+let userDoc =
+await db.collection("users")
+.doc(uid)
+.get();
+
+let user =
+userDoc.data() || {};
+
 member.innerHTML = `
 
 <div class="groupMemberPhoto">
 
 ${badge}
 
+${
+user.photo
+?
+`<img src="${user.photo}">`
+:
+"👤"
+}
+
 </div>
 
 <div class="groupMemberName">
 
-${uid}
+${
+user.displayName
+||
+user.username
+||
+"Unknown User"
+}
 
 </div>
 
@@ -106,6 +128,6 @@ ${uid}
 
 grid.appendChild(member);
 
-});
+}
 
 };
