@@ -1421,3 +1421,45 @@ width:100%;
 accent-color:#ff0055;
 
 }
+
+.chatNameWrap{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+width:100%;
+
+}
+
+.unreadBadge{
+
+min-width:24px;
+
+height:24px;
+
+padding:0 8px;
+
+border-radius:999px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+background:#ff0055;
+
+color:white;
+
+font-size:14px;
+
+font-weight:bold;
+
+box-shadow:
+
+0 0 10px rgba(255,0,85,0.7);
+
+}
