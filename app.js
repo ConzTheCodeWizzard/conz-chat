@@ -904,7 +904,9 @@ return;
   });
 
   msgInput.value="";
-
+setTimeout(()=>{
+msgInput.focus();
+},10);
   if(window.sendBtn){
     sendBtn.classList.remove("active");
   }
