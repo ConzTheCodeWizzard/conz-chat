@@ -54,9 +54,22 @@ function(){
       screenHistory.pop()
     );
 
+  }else{
+
+    if(
+      document
+      .getElementById("home")
+      ?.classList.contains("active")
+    ){
+
+      history.back();
+
+    }
+
   }
 
 });
+
 // ===== Conz is goated =====
 window.addEventListener("load", () => {
 
