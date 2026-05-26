@@ -805,7 +805,34 @@ window.statusInterval = setInterval(()=>{
 
     snap.forEach(doc=>{
 
-      let m=doc.data();
+      let m = doc.data();
+
+if(
+m.to === window.currentUser.uid &&
+m.from === uid &&
+m.receipt === "S"
+){
+
+db.collection("messages")
+.doc(doc.id)
+.update({
+receipt:"D"
+});
+
+}
+      if(
+m.to === window.currentUser.uid &&
+m.from === uid &&
+m.receipt !== "R"
+){
+
+db.collection("messages")
+.doc(doc.id)
+.update({
+receipt:"R"
+});
+
+      }
 
       if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
 
@@ -914,6 +941,7 @@ return;
     from:window.currentUser.uid,
     to:window.currentChatUser,
     time:Date.now()
+    receipt:"s"
   });
 
   msgInput.value="";
