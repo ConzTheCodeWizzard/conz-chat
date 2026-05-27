@@ -940,8 +940,8 @@ return;
     text:msgInput.value,
     from:window.currentUser.uid,
     to:window.currentChatUser,
-    time:Date.now()
-    receipt:"s"
+    time:Date.now(),
+    receipt:"S"
   });
 
   msgInput.value="";
