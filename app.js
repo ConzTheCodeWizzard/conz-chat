@@ -877,9 +877,30 @@ auth.signOut();
       }
       
       bubble.innerHTML=`
-        ${m.text}
-        <div>${new Date(m.time).toLocaleTimeString()}</div>
-      `;
+  ${m.text}
+
+  <div style="
+    font-size:11px;
+    opacity:0.7;
+    margin-top:4px;
+    text-align:right;
+  ">
+    ${new Date(m.time).toLocaleTimeString()}
+
+    ${
+      isMine
+      ? (
+          m.receipt === "R"
+          ? " • Read"
+          : m.receipt === "D"
+          ? " • Delivered"
+          : " • Sent"
+        )
+      : ""
+    }
+
+  </div>
+`;
 
       if(isMine){
 
