@@ -29,7 +29,7 @@ function compressImageFile(file, maxSize, quality, callback){
 }
 
 /* ===== SEND MEDIA MESSAGE ===== */
-function sendMediaMessage(type, url, isCamera, transcript){
+function sendMediaMessage(type, url, isCamera, transcript, viewOnce){
   let msgData = {
     from: window.currentUser.uid,
     time: Date.now(),
@@ -37,7 +37,9 @@ function sendMediaMessage(type, url, isCamera, transcript){
     url: url,
     isCamera: isCamera || false,
     text: "",
-    transcript: transcript || ""
+    transcript: transcript || "",
+    viewOnce: viewOnce || false,
+    viewed: false
   };
 
   if(window.currentGroup && typeof window.currentGroup === "object" && window.currentGroup.tag){
@@ -99,9 +101,12 @@ document.addEventListener("change", function(e){
   if(e.target.id === "galleryInput"){
     let file = e.target.files[0];
     if(!file) return;
+    let useCamera = !!(window.conzMods && window.conzMods.fakeCamera);
+    let useViewOnce = !!window.viewOnceMode;
     if(file.type.startsWith("image/")){
       compressImageFile(file, 1000, 0.82, (dataUrl)=>{
-        sendMediaMessage("image", dataUrl, false);
+        sendMediaMessage("image", dataUrl, useCamera, "", useViewOnce);
+        if(useViewOnce){ window.viewOnceMode=false; window.toggleViewOnce && window.toggleViewOnce(); }
       });
     }
     e.target.value = "";
@@ -110,15 +115,17 @@ document.addEventListener("change", function(e){
   if(e.target.id === "videoInput"){
     let file = e.target.files[0];
     if(!file) return;
-    // Videos stored as base64 (small clips only — warn if large)
     if(file.size > 15 * 1024 * 1024){
       showPopup("Video too large. Please send clips under 15MB.");
       e.target.value = "";
       return;
     }
+    let useCamera = !!(window.conzMods && window.conzMods.fakeCamera);
+    let useViewOnce = !!window.viewOnceMode;
     let reader = new FileReader();
     reader.onload = ()=>{
-      sendMediaMessage("video", reader.result, false);
+      sendMediaMessage("video", reader.result, useCamera, "", useViewOnce);
+      if(useViewOnce){ window.viewOnceMode=false; }
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -216,6 +223,42 @@ function formatVoiceTime(s){
   let sec = s % 60;
   return `${m}:${sec.toString().padStart(2,"0")}`;
 }
+
+/* ===== CONZCHAT MODS ===== */
+window.conzMods = {};
+window.viewOnceMode = false;
+
+window.saveMod = function(key, val){
+  window.conzMods[key] = val;
+  try{ localStorage.setItem('conz_mods', JSON.stringify(window.conzMods)); }catch(e){}
+};
+
+window.loadMods = function(){
+  try{
+    let saved = localStorage.getItem('conz_mods');
+    if(saved) window.conzMods = JSON.parse(saved);
+  }catch(e){}
+  // Apply toggle states to checkboxes
+  setTimeout(()=>{
+    let r = document.getElementById('modDisableReceipts');
+    let t = document.getElementById('modDisableTyping');
+    let f = document.getElementById('modFakeCamera');
+    if(r) r.checked = !!window.conzMods.disableReceipts;
+    if(t) t.checked = !!window.conzMods.disableTyping;
+    if(f) f.checked = !!window.conzMods.fakeCamera;
+  }, 800);
+};
+window.loadMods();
+
+window.toggleViewOnce = function(){
+  window.viewOnceMode = !window.viewOnceMode;
+  let btn = document.getElementById('viewOnceBtn');
+  if(btn){
+    btn.style.background = window.viewOnceMode ? 'rgba(255,0,85,0.25)' : '';
+    btn.style.borderColor = window.viewOnceMode ? '#ff0055' : '';
+    btn.querySelector('.mediaBarLabel').textContent = window.viewOnceMode ? 'View Once ON' : 'View Once';
+  }
+};
 
 /* ===== TOGGLE MEDIA BAR ===== */
 window.toggleMediaBar = function(){

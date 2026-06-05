@@ -62,10 +62,11 @@
     <div onclick="openSearch()">Find Friends</div>
     <div onclick="createGroup()">Start Group</div>
     <div onclick="openPublicGroupCreate()">Create Public Group</div>
-    <button onclick="show('publicGroupSearch')">🔎 Search Public Groups</button>
+    <div onclick="show('publicGroupSearch')">🔎 Search Public Groups</div>
     <div onclick="show('themes')">Themes</div>
     <div onclick="show('updates')">Update Log</div>
-    <button onclick="openCredits()">⭐ Credits</button>
+    <div onclick="show('conzMods')">🛠️ ConzChat Mods</div>
+    <div onclick="openCredits()">⭐ Credits</div>
   </div>
 </div>
 
@@ -152,17 +153,21 @@
 
   <!-- Media Bar (hidden by default) -->
   <div id="mediaBar" class="mediaBar" style="display:none;">
-    <div class="mediaBarItem" onclick="openCamera()">
-      <div class="mediaBarIcon">📷</div>
-      <div class="mediaBarLabel">Camera</div>
+    <div class="mediaBarBtn" onclick="openCamera()">
+      <span class="mediaBarIcon">📷</span>
+      <span class="mediaBarLabel">Camera</span>
     </div>
-    <div class="mediaBarItem" onclick="openGallery()">
-      <div class="mediaBarIcon">🖼️</div>
-      <div class="mediaBarLabel">Gallery</div>
+    <div class="mediaBarBtn" onclick="openGallery()">
+      <span class="mediaBarIcon">🖼️</span>
+      <span class="mediaBarLabel">Gallery</span>
     </div>
-    <div class="mediaBarItem" onclick="openVideoPicker()">
-      <div class="mediaBarIcon">🎥</div>
-      <div class="mediaBarLabel">Video</div>
+    <div class="mediaBarBtn" onclick="openVideoPicker()">
+      <span class="mediaBarIcon">🎬</span>
+      <span class="mediaBarLabel">Video</span>
+    </div>
+    <div class="mediaBarBtn" id="viewOnceBtn" onclick="toggleViewOnce()">
+      <span class="mediaBarIcon">🔥</span>
+      <span class="mediaBarLabel">View Once</span>
     </div>
   </div>
 
@@ -298,6 +303,50 @@
     <div class="creditRole">Hit my boy up for that shit</div>
   </div>
   <p class="creditsHint">Devs & Co Devs & VPN Service are all clickable and take you directly to their Kik profiles</p>
+</div>
+
+<!-- ConzChat Mods Screen -->
+<div id="conzMods" class="screen">
+  <div class="topbar">
+    <button class="backBtn" onclick="show('home')">←</button>
+    <span>Conz Mods</span>
+  </div>
+  <div class="modsContainer">
+
+    <div class="modRow">
+      <div class="modInfo">
+        <div class="modTitle">Disable Read Receipts</div>
+        <div class="modDesc">Other people will not see that you read their messages.</div>
+      </div>
+      <label class="modToggle">
+        <input type="checkbox" id="modDisableReceipts" onchange="saveMod('disableReceipts',this.checked)">
+        <span class="modSlider"></span>
+      </label>
+    </div>
+
+    <div class="modRow">
+      <div class="modInfo">
+        <div class="modTitle">Disable Typing Indicator</div>
+        <div class="modDesc">Other people will not see you typing.</div>
+      </div>
+      <label class="modToggle">
+        <input type="checkbox" id="modDisableTyping" onchange="saveMod('disableTyping',this.checked)">
+        <span class="modSlider"></span>
+      </label>
+    </div>
+
+    <div class="modRow">
+      <div class="modInfo">
+        <div class="modTitle">Fake Camera</div>
+        <div class="modDesc">Send gallery media as live. Gallery photos and videos will display with a camera icon as if taken live.</div>
+      </div>
+      <label class="modToggle">
+        <input type="checkbox" id="modFakeCamera" onchange="saveMod('fakeCamera',this.checked)">
+        <span class="modSlider"></span>
+      </label>
+    </div>
+
+  </div>
 </div>
 
 <!-- Fake Crash Screen -->

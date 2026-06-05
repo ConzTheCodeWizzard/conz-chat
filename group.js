@@ -272,6 +272,8 @@ window.handleSend = function(){
 /* ===== GROUP TYPING INDICATOR ===== */
 
 function setGroupTyping(){
+  // Skip if Disable Typing mod is ON
+  if(window.conzMods && window.conzMods.disableTyping) return;
   let gId = typeof window.currentGroup === "object"
     ? window.currentGroup.id
     : window.currentGroup;

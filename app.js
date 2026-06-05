@@ -466,10 +466,13 @@ window.openChat=function(uid,name,photo){
     messages.innerHTML="";
     snap.forEach(doc=>{
       let m=doc.data();
-      if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S")
-        db.collection("messages").doc(doc.id).update({receipt:"D"});
-      if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R")
-        db.collection("messages").doc(doc.id).update({receipt:"R"});
+      // Only update receipts if Disable Read Receipts mod is OFF
+      if(!(window.conzMods && window.conzMods.disableReceipts)){
+        if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S")
+          db.collection("messages").doc(doc.id).update({receipt:"D"});
+        if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R")
+          db.collection("messages").doc(doc.id).update({receipt:"R"});
+      }
 
       if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
       let other=m.from===window.currentUser.uid?m.to:m.from;
@@ -511,11 +514,31 @@ window.openChat=function(uid,name,photo){
       // Handle image/video/voice messages
       let contentHtml="";
       if(m.type==="image"){
-        contentHtml=`<img src="${m.url}" class="msgImage" onclick="viewFullImage('${m.url}')">`;
-        if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+        if(m.viewOnce){
+          if(m.viewed && !isMine){
+            contentHtml=`<div class="viewOnceOpened">🔥 Photo opened</div>`;
+          } else if(!isMine){
+            contentHtml=`<div class="viewOnceThumb" onclick="openViewOnce('${msgId}','image','${m.url}')"><span class="viewOnceIcon">🔥</span><span class="viewOnceLabel">Tap to open · Disappears after viewing</span></div>`;
+          } else {
+            contentHtml=`<div class="viewOnceSent">🔥 Disappearing photo${m.viewed?' · <span style="color:#ff6b6b">Opened</span>':' · Unopened'}</div>`;
+          }
+        } else {
+          contentHtml=`<img src="${m.url}" class="msgImage" onclick="viewFullImage('${m.url}')">`;
+          if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+        }
       } else if(m.type==="video"){
-        contentHtml=`<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
-        if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+        if(m.viewOnce){
+          if(m.viewed && !isMine){
+            contentHtml=`<div class="viewOnceOpened">🔥 Video opened</div>`;
+          } else if(!isMine){
+            contentHtml=`<div class="viewOnceThumb" onclick="openViewOnce('${msgId}','video','${m.url}')"><span class="viewOnceIcon">🔥</span><span class="viewOnceLabel">Tap to open · Disappears after viewing</span></div>`;
+          } else {
+            contentHtml=`<div class="viewOnceSent">🔥 Disappearing video${m.viewed?' · <span style="color:#ff6b6b">Opened</span>':' · Unopened'}</div>`;
+          }
+        } else {
+          contentHtml=`<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
+          if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+        }
       } else if(m.type==="voice"){
         let transcriptHtml = m.transcript ? `<div class="voiceTranscript">“${m.transcript}”</div>` : "";
         contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div>${transcriptHtml}</div>`;
@@ -703,6 +726,8 @@ window.sendMessage=window.handleSend;
 /* ===== DM TYPING ===== */
 function setDMTyping(){
   if(!window.currentChatUser) return;
+  // Skip if Disable Typing mod is ON
+  if(window.conzMods && window.conzMods.disableTyping) return;
   db.collection("dmTyping").doc(window.currentUser.uid+"_"+window.currentChatUser).set({
     from:window.currentUser.uid,to:window.currentChatUser,typing:true,ts:Date.now()
   });
@@ -810,6 +835,31 @@ window.viewFullImage=function(url){
   overlay.innerHTML=`<img src="${url}" style="max-width:95%;max-height:90%;border-radius:8px;">`;
   overlay.onclick=()=>overlay.remove();
   document.body.appendChild(overlay);
+};
+
+/* ===== VIEW ONCE (DISAPPEARING MEDIA) ===== */
+window.openViewOnce=function(msgId, type, url){
+  // Show the media fullscreen
+  let overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;";
+  let closeBtn=`<div style="position:absolute;top:16px;right:16px;color:#fff;font-size:28px;cursor:pointer;z-index:2;" id="viewOnceClose">✕</div>`;
+  let label=`<div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.7);font-size:13px;background:rgba(0,0,0,0.6);padding:4px 12px;border-radius:20px;">🔥 Disappears when you close</div>`;
+  if(type==="image"){
+    overlay.innerHTML=closeBtn+label+`<img src="${url}" style="max-width:100%;max-height:90%;object-fit:contain;">`;
+  } else {
+    overlay.innerHTML=closeBtn+label+`<video src="${url}" autoplay controls playsinline style="max-width:100%;max-height:90%;"></video>`;
+  }
+  document.body.appendChild(overlay);
+
+  // Mark as viewed in Firestore and wipe the URL
+  let collection = window.currentGroup && window.currentGroup.tag ? "publicGroupMessages"
+    : window.currentGroup ? "groupMessages" : "messages";
+  db.collection(collection).doc(msgId).update({ viewed:true, url:"" }).catch(()=>{});
+
+  // Close on X or tap outside media
+  overlay.addEventListener("click", function(e){
+    if(e.target===overlay || e.target.id==="viewOnceClose") overlay.remove();
+  });
 };
 
 /* ===== DEV FUNCTIONS ===== */

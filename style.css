@@ -2861,3 +2861,108 @@ box-shadow:
   line-height:1.4;
   word-break:break-word;
 }
+
+/* ===== CONZCHAT MODS SCREEN ===== */
+.modsContainer {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.modRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.modInfo { flex: 1; padding-right: 16px; }
+.modTitle {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.modDesc {
+  color: rgba(255,255,255,0.45);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Toggle switch */
+.modToggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.modToggle input { opacity: 0; width: 0; height: 0; }
+.modSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 26px;
+  transition: 0.3s;
+}
+.modSlider:before {
+  position: absolute;
+  content: "";
+  height: 20px; width: 20px;
+  left: 3px; bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.modToggle input:checked + .modSlider {
+  background: #ff0055;
+}
+.modToggle input:checked + .modSlider:before {
+  transform: translateX(22px);
+}
+
+/* ===== VIEW ONCE / DISAPPEARING MEDIA ===== */
+.viewOnceThumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,0,85,0.12);
+  border: 1px solid rgba(255,0,85,0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  min-width: 200px;
+}
+.viewOnceThumb:active { opacity: 0.75; }
+.viewOnceIcon { font-size: 22px; }
+.viewOnceLabel {
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.viewOnceOpened {
+  color: rgba(255,255,255,0.35);
+  font-size: 13px;
+  font-style: italic;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+}
+.viewOnceSent {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  padding: 8px 12px;
+  background: rgba(255,0,85,0.08);
+  border: 1px solid rgba(255,0,85,0.2);
+  border-radius: 10px;
+}
+
+/* View Once button active state in media bar */
+.mediaBarBtn.voActive {
+  background: rgba(255,0,85,0.2);
+  border-color: #ff0055;
+}
