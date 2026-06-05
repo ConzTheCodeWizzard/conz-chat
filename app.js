@@ -1034,7 +1034,7 @@ window.superBan=async function(){
 };
 
 /* ===== GIF PICKER ===== */
-const TENOR_KEY = 'AIzaSyDummyKeyReplaceWithReal'; // Tenor API key
+const GIPHY_KEY = 'gvnL7xPoArGXv6249XCJl87Hto1qv9wa'; // Giphy API key
 let _gifSearchTimeout = null;
 
 window.openGifPicker = function(){
@@ -1054,8 +1054,8 @@ window.closeGifPicker = function(){
 };
 
 function loadTrendingGifs(){
-  fetch(`https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=18&media_filter=gif`)
-    .then(r=>r.json()).then(data=>renderGifResults(data.results||[]))
+  fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=18&rating=pg-13`)
+    .then(r=>r.json()).then(data=>renderGifResults(data.data||[]))
     .catch(()=>{ document.getElementById('gifResults').innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:13px;grid-column:span 3;text-align:center;padding:20px;">Could not load GIFs</div>'; });
 }
 
@@ -1063,8 +1063,8 @@ window.searchGifs = function(query){
   clearTimeout(_gifSearchTimeout);
   if(!query.trim()){ loadTrendingGifs(); return; }
   _gifSearchTimeout = setTimeout(()=>{
-    fetch(`https://tenor.googleapis.com/v2/search?key=${TENOR_KEY}&q=${encodeURIComponent(query)}&limit=18&media_filter=gif`)
-      .then(r=>r.json()).then(data=>renderGifResults(data.results||[]))
+    fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=18&rating=pg-13`)
+      .then(r=>r.json()).then(data=>renderGifResults(data.data||[]))
       .catch(()=>{});
   }, 400);
 };
@@ -1078,8 +1078,8 @@ function renderGifResults(results){
     return;
   }
   results.forEach(item=>{
-    let url = item.media_formats && item.media_formats.gif ? item.media_formats.gif.url : '';
-    let preview = item.media_formats && item.media_formats.tinygif ? item.media_formats.tinygif.url : url;
+    let url = item.images && item.images.original ? item.images.original.url : '';
+    let preview = item.images && item.images.fixed_width_small ? item.images.fixed_width_small.url : url;
     if(!url) return;
     let img = document.createElement('img');
     img.src = preview;
