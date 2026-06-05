@@ -3419,11 +3419,12 @@ box-shadow:
   margin-top: 8px !important;
 }
 .version {
-  font-size: 11px !important;
-  letter-spacing: 3px !important;
-  color: rgba(255,255,255,0.3) !important;
-  margin-top: 6px !important;
+  font-size: 13px !important;
+  letter-spacing: 2px !important;
+  color: rgba(255,255,255,0.65) !important;
+  margin-top: 8px !important;
   text-transform: uppercase !important;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8) !important;
 }
 .welcomePanel {
   width: 100% !important;
@@ -3477,10 +3478,11 @@ box-shadow:
   opacity: 0.6 !important;
 }
 .premiumText {
-  font-size: 11px !important;
-  color: rgba(255,255,255,0.35) !important;
+  font-size: 12px !important;
+  color: rgba(255,255,255,0.7) !important;
   margin-top: 12px !important;
-  line-height: 1.5 !important;
+  line-height: 1.6 !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9) !important;
 }
 
 /* ===== AUTH SCREENS (Login / Signup) ===== */
@@ -3561,6 +3563,25 @@ box-shadow:
   background: linear-gradient(135deg, #ff0055, #ff3377, #cc0044) !important;
   box-shadow: 0 4px 24px rgba(255,0,85,0.45), inset 0 1px 0 rgba(255,255,255,0.15) !important;
   border: none !important;
+}
+.authBackBtn {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: rgba(255,255,255,0.55) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 0 0 16px 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  align-self: flex-start !important;
+  cursor: pointer !important;
+  letter-spacing: 0 !important;
+  display: block !important;
+  transition: color 0.2s !important;
+}
+.authBackBtn:hover {
+  color: rgba(255,255,255,0.85) !important;
 }
 
 /* ===== TOPBAR OVERHAUL ===== */

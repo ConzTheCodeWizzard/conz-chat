@@ -221,22 +221,25 @@ let sessionUnsubscribe=null;
 function startSessionGuard(uid){
   // Generate a unique ID for this session
   mySessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-  // Write it to Firestore
-  db.collection("sessions").doc(uid).set({ sessionId: mySessionId, ts: Date.now() });
-  // Watch for changes — skip the first snapshot (it fires immediately on subscribe
-  // and would falsely trigger the kicked popup on every login)
-  let isFirstSnap = true;
-  if(sessionUnsubscribe) sessionUnsubscribe();
-  sessionUnsubscribe = db.collection("sessions").doc(uid).onSnapshot(snap=>{
-    if(isFirstSnap){ isFirstSnap = false; return; }
-    if(!snap.exists) return;
-    let data = snap.data();
-    // If the sessionId in Firestore no longer matches ours, someone else logged in
-    if(data.sessionId && data.sessionId !== mySessionId){
-      if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
-      // Show the popup then force logout
-      showSessionKickedPopup();
-    }
+  // Unsubscribe any previous listener first
+  if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
+  // Write our sessionId, then wait 2 seconds before subscribing so the
+  // initial onSnapshot fire (which always fires immediately) is safely past
+  // the write and won't be mistaken for a foreign login.
+  db.collection("sessions").doc(uid).set({ sessionId: mySessionId, ts: Date.now() }).then(()=>{
+    setTimeout(()=>{
+      // Double-check we haven't already been unsubscribed (e.g. user logged out)
+      if(!auth.currentUser || auth.currentUser.uid !== uid) return;
+      sessionUnsubscribe = db.collection("sessions").doc(uid).onSnapshot(snap=>{
+        if(!snap.exists) return;
+        let data = snap.data();
+        // If the sessionId in Firestore no longer matches ours, someone else logged in
+        if(data.sessionId && data.sessionId !== mySessionId){
+          if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
+          showSessionKickedPopup();
+        }
+      });
+    }, 2000);
   });
 }
 
