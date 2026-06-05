@@ -241,8 +241,11 @@ window.openProfile=function(uid=window.currentUser.uid){
     let isMe=uid===window.currentUser.uid;
 
     // Build full profile HTML first
+    let coverStyle = u.coverPhoto
+      ? 'background-image:url("'+u.coverPhoto+'");background-size:cover;background-position:center top;'
+      : '';
     profileContent.innerHTML=`
-      <div class="profileCover" id="profileCoverArea">
+      <div class="profileCover" id="profileCoverArea" style="${coverStyle}">
         ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
       </div>
       <div class="profileAvatarWrap">
@@ -271,11 +274,11 @@ window.openProfile=function(uid=window.currentUser.uid){
         </div>
       `:""}
     `;
-    // Apply cover photo AFTER innerHTML is set, using JS (avoids base64 escaping in template literals)
+    // Also apply via JS as a belt-and-braces fallback
     if(u.coverPhoto){
       let coverEl = document.getElementById("profileCoverArea");
       if(coverEl){
-        coverEl.style.backgroundImage = "url('" + u.coverPhoto + "')";
+        coverEl.style.backgroundImage = 'url("' + u.coverPhoto + '")';
         coverEl.style.backgroundSize = "cover";
         coverEl.style.backgroundPosition = "center top";
       }
@@ -348,15 +351,7 @@ document.addEventListener("change",function(e){
       db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed})
         .then(()=>{
           window.myData.coverPhoto=compressed;
-          // Apply immediately to DOM without re-opening profile
-          let coverEl=document.getElementById("profileCoverArea");
-          if(coverEl){
-            coverEl.style.backgroundImage="url('"+compressed+"')";
-            coverEl.style.backgroundSize="cover";
-            coverEl.style.backgroundPosition="center top";
-          } else {
-            openProfile(window.currentUser.uid);
-          }
+          openProfile(window.currentUser.uid);
         })
         .catch(err=>{ showPopup("Cover photo too large, try a smaller image."); });
     };
