@@ -431,8 +431,19 @@ document.addEventListener("change",function(e){
 });
 
 window.editDisplayName=function(){
-  let newName=prompt("Enter new display name",window.myData.displayName||window.myData.username);
-  if(!newName||!newName.trim()) return;
+  let popup=document.getElementById('changeNamePopup');
+  if(!popup) return;
+  let inp=document.getElementById('newDisplayNameInput');
+  if(inp) inp.value=window.myData.displayName||window.myData.username||'';
+  popup.style.display='flex';
+  if(inp) setTimeout(()=>inp.focus(),100);
+};
+
+window.submitChangeDisplayName=function(){
+  let inp=document.getElementById('newDisplayNameInput');
+  let newName=inp?inp.value.trim():'';
+  if(!newName){ showPopup("Please enter a name"); return; }
+  document.getElementById('changeNamePopup').style.display='none';
   db.collection("users").doc(window.currentUser.uid).update({displayName:newName});
   window.myData.displayName=newName;
   openProfile(window.currentUser.uid);
@@ -445,8 +456,21 @@ function loadAvatar(){
 }
 
 /* ===== BLOCK USER ===== */
-window.blockUser=async function(uid,username){
-  if(!confirm(`Block @${username}? They won't be able to message you.`)) return;
+let _pendingBlockUid=null, _pendingBlockUsername=null;
+window.blockUser=function(uid,username){
+  _pendingBlockUid=uid; _pendingBlockUsername=username;
+  let title=document.getElementById('blockConfirmTitle');
+  let text=document.getElementById('blockConfirmText');
+  if(title) title.textContent=`Block @${username}?`;
+  if(text) text.textContent="They won't be able to message you.";
+  let popup=document.getElementById('blockConfirmPopup');
+  if(popup) popup.style.display='flex';
+};
+
+window.confirmBlockUser=async function(){
+  document.getElementById('blockConfirmPopup').style.display='none';
+  let uid=_pendingBlockUid, username=_pendingBlockUsername;
+  if(!uid) return;
   try{
     let myRef=db.collection("users").doc(window.currentUser.uid);
     let myDoc=await myRef.get();

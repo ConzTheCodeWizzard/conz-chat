@@ -12,10 +12,20 @@ let unsubscribePrivateGroupTyping = null;
 
 /* ===== CREATE PRIVATE GROUP ===== */
 
-window.createGroup = async function(){
-  let name = prompt("Enter group name");
-  if(!name || !name.trim()) return;
+window.createGroup = function(){
+  let popup=document.getElementById('groupNamePopup');
+  if(!popup) return;
+  let inp=document.getElementById('groupNameInput');
+  if(inp) inp.value='';
+  popup.style.display='flex';
+  if(inp) setTimeout(()=>inp.focus(),100);
+};
 
+window.submitCreateGroup = async function(){
+  let inp=document.getElementById('groupNameInput');
+  let name=inp?inp.value.trim():'';
+  if(!name){ showPopup("Please enter a group name"); return; }
+  document.getElementById('groupNamePopup').style.display='none';
   try{
     let ref = await db.collection("groups").add({
       name: name,
@@ -27,7 +37,6 @@ window.createGroup = async function(){
       lastMessage: "",
       lastTime: Date.now()
     });
-
     showPopup("Group created!");
     openGroup(ref.id);
   }catch(err){

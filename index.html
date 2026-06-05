@@ -454,6 +454,42 @@
   </div>
 </div>
 
+<!-- Text Story Popup -->
+<div id="textStoryPopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle">Post a Text Story</div>
+    <textarea id="textStoryInput" class="inputPopupField" placeholder="What's on your mind... (max 120 chars)" maxlength="120" rows="3" style="resize:none;"></textarea>
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('textStoryPopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" onclick="submitTextStory()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- Group Name Popup -->
+<div id="groupNamePopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle">Create a Group</div>
+    <input type="text" id="groupNameInput" class="inputPopupField" placeholder="Enter group name" maxlength="40">
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('groupNamePopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" onclick="submitCreateGroup()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Block Confirm Popup -->
+<div id="blockConfirmPopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle" id="blockConfirmTitle">Block User?</div>
+    <div class="inputPopupText" id="blockConfirmText">They won't be able to message you.</div>
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('blockConfirmPopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" style="background:#c0392b;" onclick="confirmBlockUser()">Block</button>
+    </div>
+  </div>
+</div>
+
 <!-- Fake Crash Screen -->
 <div id="fakeCrashScreen">
   <div id="fakeCrashText">⚠ SYSTEM CRASH DETECTED ⚠</div>

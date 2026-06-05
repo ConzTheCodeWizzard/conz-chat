@@ -25,16 +25,27 @@ function compressStoryImage(file, callback){
 
 /* ---- Post a text story ---- */
 window.postTextStory=function(){
-  let text=prompt("What's on your mind? (max 120 chars)","");
-  if(!text||!text.trim()) return;
+  let popup=document.getElementById('textStoryPopup');
+  if(!popup) return;
+  let inp=document.getElementById('textStoryInput');
+  if(inp) inp.value='';
+  popup.style.display='flex';
+  if(inp) setTimeout(()=>inp.focus(),100);
+};
+
+window.submitTextStory=function(){
+  let inp=document.getElementById('textStoryInput');
+  let text=inp?inp.value.trim():'';
+  if(!text){ showPopup("Please write something first"); return; }
   if(text.length>120){ showPopup("Max 120 characters"); return; }
+  document.getElementById('textStoryPopup').style.display='none';
   let uid=window.currentUser.uid;
   let name=window.myData.displayName||window.myData.username;
   db.collection("stories").add({
     uid, name,
     photo: window.myData.photo||"",
     type:"text",
-    text: text.trim(),
+    text: text,
     time: Date.now(),
     expires: Date.now()+(24*60*60*1000),
     seenBy:[]
