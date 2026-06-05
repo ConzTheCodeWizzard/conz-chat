@@ -67,7 +67,28 @@
     <div onclick="show('updates')">Update Log</div>
     <div onclick="show('conzMods')">🛠️ ConzChat Mods</div>
     <div onclick="openCredits()">⭐ Credits</div>
+    <div onclick="openLeaveSuggestions()">💡 Leave Suggestions</div>
+    <div id="devSuggestionsBtn" style="display:none" onclick="openDevSuggestions()">📬 Suggestions</div>
   </div>
+</div>
+
+<!-- Leave Suggestions Screen (all users) -->
+<div id="leaveSuggestionsScreen" class="screen">
+  <div class="topbar"><span>Suggestions for ConzChat</span></div>
+  <div class="suggestionIntro">Have an idea to improve ConzChat? Write it below and it will be sent directly to Conz.</div>
+  <div id="myRepliesContainer">
+    <div id="myRepliesList"></div>
+  </div>
+  <div class="suggestionInputRow">
+    <input id="suggestionInput" type="text" placeholder="Write your suggestion..." maxlength="500">
+    <button onclick="submitSuggestion()">Send</button>
+  </div>
+</div>
+
+<!-- Dev Suggestions Inbox Screen (DEV only) -->
+<div id="devSuggestionsScreen" class="screen">
+  <div class="topbar"><span>📬 Suggestions Inbox</span></div>
+  <div id="devSuggestionsList"></div>
 </div>
 
 <!-- Search -->

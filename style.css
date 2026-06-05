@@ -3222,3 +3222,160 @@ box-shadow:
   font-style:italic;
   opacity:0.75;
 }
+
+/* ===== SUGGESTIONS SYSTEM ===== */
+
+/* Leave Suggestions screen */
+#leaveSuggestionsScreen {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.suggestionIntro {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 16px 20px 8px;
+  line-height: 1.5;
+}
+#myRepliesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px;
+}
+.suggestionReplyItem {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.suggestionReplyYou {
+  color: #ccc;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.suggestionReplyFrom {
+  color: #e040fb;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+.suggestionReplyText {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  background: rgba(224,64,251,0.1);
+  border-left: 3px solid #e040fb;
+  padding: 8px 10px;
+  border-radius: 0 8px 8px 0;
+}
+.suggestionInputRow {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.3);
+}
+.suggestionInputRow input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 22px;
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 14px;
+  outline: none;
+}
+.suggestionInputRow button {
+  background: linear-gradient(135deg, #e040fb, #7c4dff);
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Dev Suggestions Inbox screen */
+#devSuggestionsScreen {
+  display: flex;
+  flex-direction: column;
+}
+#devSuggestionsList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.devSuggestionCard {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.devSuggMeta {
+  font-size: 13px;
+  color: #ccc;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.devSuggDate {
+  color: #666;
+  font-size: 11px;
+}
+.suggRepliedBadge {
+  background: #2e7d32;
+  color: #a5d6a7;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.4px;
+}
+.devSuggText {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.devSuggDevReplyRow,
+.suggDevReplyRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.suggDevReplyRow input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 13px;
+  outline: none;
+}
+.suggDevReplyRow button {
+  background: linear-gradient(135deg, #e040fb, #7c4dff);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.suggDevReplyShown {
+  color: #ce93d8;
+  font-size: 13px;
+  font-style: italic;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(224,64,251,0.08);
+  border-radius: 8px;
+}
