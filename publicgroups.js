@@ -142,9 +142,6 @@ window.openPublicGroup = function(group){
     chatName.onclick = function(){ openGroupInfo(freshGroup); };
     chatName.innerHTML = `👥 ${freshGroup.displayName}`;
 
-    let callBar = document.getElementById("chatCallBar");
-    if(callBar) callBar.style.display = "flex";
-
     let messagesEl = document.getElementById("messages");
     messagesEl.innerHTML = "";
 

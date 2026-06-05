@@ -536,9 +536,6 @@ window.openChat=function(uid,name,photo){
 
   show("chat");
 
-  let callBar=document.getElementById("chatCallBar");
-  if(callBar) callBar.style.display="flex";
-
   // Plain centered name — no status indicator
   chatName.innerHTML = name;
   chatName.onclick=()=>{ openProfile(uid); };

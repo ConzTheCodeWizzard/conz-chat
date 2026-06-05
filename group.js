@@ -98,10 +98,6 @@ window.openGroup = function(groupId){
 
     show("chat");
 
-    // Show call buttons
-    let callBar = document.getElementById("chatCallBar");
-    if(callBar) callBar.style.display = "flex";
-
     chatName.onclick = function(){ openGroupInfo(g); };
     chatName.innerHTML = `👥 ${g.name}`;
 
