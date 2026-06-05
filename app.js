@@ -399,18 +399,18 @@ window.revertChatBg=function(otherUid){
 window.applyCurrentChatBg=function(otherUid){
   let myUid=window.currentUser.uid;
   let pair=[myUid,otherUid].sort().join('_');
-  let msgEl=document.getElementById('messages');
-  if(!msgEl) return;
+  let chatEl=document.getElementById('chat');
+  if(!chatEl) return;
+  // Remove any existing bg overlay
+  let old=document.getElementById('chatBgOverlay');
+  if(old) old.remove();
   db.collection('chatBgs').doc(pair).get().then(doc=>{
     if(doc.exists&&doc.data().bg){
-      msgEl.style.backgroundImage='url("'+doc.data().bg+'")';
-      msgEl.style.backgroundSize='cover';
-      msgEl.style.backgroundPosition='center';
-      msgEl.style.backgroundAttachment='local';
-    } else {
-      msgEl.style.backgroundImage='';
-      msgEl.style.backgroundSize='';
-      msgEl.style.backgroundPosition='';
+      let overlay=document.createElement('div');
+      overlay.id='chatBgOverlay';
+      overlay.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;background-image:url("'+doc.data().bg+'");background-size:cover;background-position:center;z-index:0;pointer-events:none;';
+      chatEl.style.position='relative';
+      chatEl.insertBefore(overlay,chatEl.firstChild);
     }
   });
 };
@@ -418,9 +418,15 @@ window.applyCurrentChatBg=function(otherUid){
 /* ===== STATUS ===== */
 window.editStatus=function(){
   let current=(window.myData&&window.myData.status)||'';
-  let val=prompt("Set your status (max 60 chars):",current);
-  if(val===null) return; // cancelled
-  val=val.trim().slice(0,60);
+  let inp=document.getElementById('statusInput');
+  if(inp) inp.value=current;
+  document.getElementById('editStatusPopup').style.display='flex';
+  if(inp) setTimeout(()=>inp.focus(),100);
+};
+
+window.submitStatus=function(){
+  let val=(document.getElementById('statusInput').value||'').trim().slice(0,60);
+  document.getElementById('editStatusPopup').style.display='none';
   db.collection("users").doc(window.currentUser.uid).update({status:val}).then(()=>{
     if(window.myData) window.myData.status=val;
     openProfile(window.currentUser.uid);
@@ -674,8 +680,10 @@ window.openChat=function(uid,name,photo){
           if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
         }
       } else if(m.type==="voice"){
-        let transcriptHtml = m.transcript ? `<div class="voiceTranscript">“${m.transcript}”</div>` : "";
-        contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div>${transcriptHtml}</div>`;
+        let transcriptHtml = m.transcript ? `<div class="voiceTranscript">"${m.transcript}"</div>` : "";
+        contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎤️ Voice Note</div>${transcriptHtml}</div>`;
+      } else if(m.type==="gif"){
+        contentHtml=`<img src="${m.url}" class="msgImage msgGif" style="border-radius:10px;max-width:220px;" onclick="viewFullImage('${m.url}')">`;
       } else {
         contentHtml=`<div class="msgText">${m.text||""}</div>`;
       }
@@ -1023,6 +1031,87 @@ window.superBan=async function(){
     await db.collection("users").doc(window.currentChatUser).update({banned:true,forceLogout:true,logoutMessage:"This account has been permanently BANNED ~Conz~"});
     showPopup("USER BANNED");
   }catch(err){ showPopup(err.message); }
+};
+
+/* ===== GIF PICKER ===== */
+const TENOR_KEY = 'AIzaSyDummyKeyReplaceWithReal'; // Tenor API key
+let _gifSearchTimeout = null;
+
+window.openGifPicker = function(){
+  let picker = document.getElementById('gifPicker');
+  if(!picker) return;
+  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+  if(picker.style.display === 'block'){
+    loadTrendingGifs();
+    let inp = document.getElementById('gifSearchInput');
+    if(inp){ inp.value=''; setTimeout(()=>inp.focus(),100); }
+  }
+};
+
+window.closeGifPicker = function(){
+  let picker = document.getElementById('gifPicker');
+  if(picker) picker.style.display = 'none';
+};
+
+function loadTrendingGifs(){
+  fetch(`https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=18&media_filter=gif`)
+    .then(r=>r.json()).then(data=>renderGifResults(data.results||[]))
+    .catch(()=>{ document.getElementById('gifResults').innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:13px;grid-column:span 3;text-align:center;padding:20px;">Could not load GIFs</div>'; });
+}
+
+window.searchGifs = function(query){
+  clearTimeout(_gifSearchTimeout);
+  if(!query.trim()){ loadTrendingGifs(); return; }
+  _gifSearchTimeout = setTimeout(()=>{
+    fetch(`https://tenor.googleapis.com/v2/search?key=${TENOR_KEY}&q=${encodeURIComponent(query)}&limit=18&media_filter=gif`)
+      .then(r=>r.json()).then(data=>renderGifResults(data.results||[]))
+      .catch(()=>{});
+  }, 400);
+};
+
+function renderGifResults(results){
+  let container = document.getElementById('gifResults');
+  if(!container) return;
+  container.innerHTML = '';
+  if(!results.length){
+    container.innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:13px;grid-column:span 3;text-align:center;padding:20px;">No GIFs found</div>';
+    return;
+  }
+  results.forEach(item=>{
+    let url = item.media_formats && item.media_formats.gif ? item.media_formats.gif.url : '';
+    let preview = item.media_formats && item.media_formats.tinygif ? item.media_formats.tinygif.url : url;
+    if(!url) return;
+    let img = document.createElement('img');
+    img.src = preview;
+    img.style.cssText = 'width:100%;border-radius:8px;cursor:pointer;object-fit:cover;aspect-ratio:1;';
+    img.onclick = ()=>sendGif(url);
+    container.appendChild(img);
+  });
+}
+
+window.sendGif = function(url){
+  closeGifPicker();
+  // Close media bar too
+  let mb = document.getElementById('mediaBar');
+  if(mb) mb.style.display='none';
+  // Send as a gif type message
+  let msgData = {
+    from: window.currentUser.uid,
+    time: Date.now(),
+    type: 'gif',
+    url: url,
+    text: '',
+    isCamera: false,
+    viewOnce: false,
+    viewed: false
+  };
+  if(window.currentGroup && typeof window.currentGroup === 'object' && window.currentGroup.tag){
+    db.collection('publicGroupMessages').add({...msgData, groupId: window.currentGroup.id});
+  } else if(window.currentGroup){
+    db.collection('groupMessages').add({...msgData, groupId: typeof window.currentGroup==='string'?window.currentGroup:window.currentGroup.id});
+  } else if(window.currentChatUser){
+    db.collection('messages').add({...msgData, to: window.currentChatUser, receipt:'S'});
+  }
 };
 
 /* ===== POPUP ===== */

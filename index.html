@@ -191,6 +191,19 @@
       <span class="mediaBarIcon">🔥</span>
       <span class="mediaBarLabel">View Once</span>
     </div>
+    <div class="mediaBarBtn" onclick="openGifPicker()">
+      <span class="mediaBarIcon">🎞️</span>
+      <span class="mediaBarLabel">GIF</span>
+    </div>
+  </div>
+
+  <!-- GIF Picker Panel -->
+  <div id="gifPicker" style="display:none;position:absolute;bottom:110px;left:0;right:0;background:#1a1a1a;border-top:1px solid rgba(255,255,255,0.1);z-index:200;padding:10px;max-height:320px;overflow-y:auto;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="gifSearchInput" placeholder="Search GIFs..." style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:8px 14px;color:#fff;font-size:14px;outline:none;" oninput="searchGifs(this.value)">
+      <button onclick="closeGifPicker()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div id="gifResults" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
   </div>
 
   <!-- Typing indicator — BOTTOM, above input bar -->
@@ -401,6 +414,18 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Edit Status Popup -->
+<div id="editStatusPopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle">Set your status</div>
+    <input type="text" id="statusInput" class="inputPopupField" placeholder="What's on your mind..." maxlength="60">
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('editStatusPopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" onclick="submitStatus()">Save</button>
+    </div>
   </div>
 </div>
 
