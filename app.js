@@ -61,7 +61,7 @@ window.currentGroup=null;
 let fabOpen=false;
 window.myData={};
 let unsubscribeMessages=null;
-let unsubscribeStatus=null;
+// unsubscribeStatus removed — online status feature removed
 let unsubscribeDMTyping=null;
 
 // Accurate unread: track per-conversation last-seen timestamp
@@ -180,28 +180,7 @@ auth.onAuthStateChanged(user=>{
       }
     });
 
-    // ===== ACCURATE PRESENCE =====
-    const presenceRef = db.collection("users").doc(user.uid);
-    presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
-
-    // Heartbeat every 30s — if missed for >60s, user is considered offline
-    window._presenceHeartbeat = setInterval(()=>{
-      if(document.visibilityState==="visible"){
-        presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
-      }
-    }, 30000);
-
-    // Go offline when tab/app is hidden or closed
-    function goOffline(){
-      presenceRef.set({online:false, lastSeen:Date.now()},{merge:true});
-    }
-    document.addEventListener("visibilitychange", function(){
-      if(document.visibilityState==="hidden") goOffline();
-      else presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
-    });
-    window.addEventListener("beforeunload", goOffline);
-    window.addEventListener("pagehide", goOffline);
-    // ===== END PRESENCE =====
+    // Online status feature removed by user request
 
     db.collection("users").doc(user.uid).onSnapshot(doc=>{
       window.myData=doc.data()||{};
@@ -242,14 +221,13 @@ window.signup=async function(){
     const res=await auth.createUserWithEmailAndPassword(email,pass);
     await db.collection("users").doc(res.user.uid).set({
       username,usernameLower:username.toLowerCase(),displayName:username,
-      photo:"",coverPhoto:"",created:Date.now(),online:true,
-      lastSeen:Date.now(),banned:false,blockedUsers:[]
+      photo:"",coverPhoto:"",created:Date.now(),
+      banned:false,blockedUsers:[]
     });
   }catch(e){ showPopup("Signup failed: "+e.message); }
 };
 
 window.logout=function(){
-  db.collection("users").doc(window.currentUser.uid).set({online:false,lastSeen:Date.now()},{merge:true});
   auth.signOut();
 };
 
@@ -452,7 +430,6 @@ window.openChat=function(uid,name,photo){
   window.currentChatUser=uid;
 
   if(unsubscribeMessages) unsubscribeMessages();
-  if(unsubscribeStatus) unsubscribeStatus();
   if(unsubscribeDMTyping) unsubscribeDMTyping();
   if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages=null; }
   if(window.unsubscribePublicGroupMessages){ window.unsubscribePublicGroupMessages(); window.unsubscribePublicGroupMessages=null; }
@@ -466,28 +443,9 @@ window.openChat=function(uid,name,photo){
   let callBar=document.getElementById("chatCallBar");
   if(callBar) callBar.style.display="flex";
 
+  // Plain centered name — no status indicator
+  chatName.innerHTML = name;
   chatName.onclick=()=>{ openProfile(uid); };
-
-  // Status listener
-  unsubscribeStatus=db.collection("users").doc(uid).onSnapshot(doc=>{
-    let u=doc.data()||{};
-    function formatLastSeen(time){
-      if(!time) return "Recently";
-      let s=Math.floor((Date.now()-time)/1000);
-      if(s<5) return "just now";
-      if(s<60) return `${s}s ago`;
-      if(s<3600) return `${Math.floor(s/60)}m ago`;
-      if(s<86400) return `${Math.floor(s/3600)}h ago`;
-      return `${Math.floor(s/86400)}d ago`;
-    }
-    function updateStatus(){
-      if(u.online) chatName.innerHTML=`${name}<span class="onlineDot"></span>`;
-      else chatName.innerHTML=`${name}<span class="lastSeenText">• Last online ${formatLastSeen(u.lastSeen)}</span>`;
-    }
-    updateStatus();
-    clearInterval(window.statusInterval);
-    window.statusInterval=setInterval(()=>{ if(!u.online) updateStatus(); },1000);
-  });
 
   // DM typing listener
   unsubscribeDMTyping=db.collection("dmTyping")
@@ -560,7 +518,8 @@ window.openChat=function(uid,name,photo){
         contentHtml=`<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
         if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
       } else if(m.type==="voice"){
-        contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div></div>`;
+        let transcriptHtml = m.transcript ? `<div class="voiceTranscript">“${m.transcript}”</div>` : "";
+        contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div>${transcriptHtml}</div>`;
       } else {
         contentHtml=`<div class="msgText">${m.text||""}</div>`;
       }

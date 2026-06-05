@@ -2867,25 +2867,24 @@ box-shadow:
 
 /* ---- Chat topbar right cluster ---- */
 .chatTopbarRight {
-  display:flex; align-items:center; gap:6px; margin-left:auto;
+  display:flex; align-items:center; gap:6px;
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
 }
 .chatBackBtn {
   background:none !important; border:none !important; color:#fff !important;
-  font-size:20px; cursor:pointer; padding:0 8px 0 0 !important; line-height:1;
+  font-size:20px; cursor:pointer; padding:0 !important; line-height:1;
   width:auto !important; margin:0 !important; box-shadow:none !important;
+  position:absolute; left:10px; top:50%; transform:translateY(-50%);
+}
+/* Chat name centered in topbar */
+.chatTopbarMain #chatName {
+  text-align:center;
+  flex:1;
+  font-size:16px;
+  font-weight:700;
 }
 
-/* ---- Online dot on chat list avatars ---- */
-.onlineDot {
-  position:absolute; bottom:1px; right:1px;
-  width:10px; height:10px; border-radius:50%;
-  background:#22c55e; border:2px solid #111;
-}
-.offlineDot {
-  position:absolute; bottom:1px; right:1px;
-  width:10px; height:10px; border-radius:50%;
-  background:#555; border:2px solid #111;
-}
+/* Online/offline dots removed by user request */
 .chatAvatar { position:relative; }
 
 /* ---- Deleted message style ---- */
@@ -2898,4 +2897,18 @@ box-shadow:
   background:none !important; border:none !important; color:#fff !important;
   font-size:18px; cursor:pointer; padding:4px !important;
   width:auto !important; margin:0 !important; box-shadow:none !important;
+}
+
+/* ---- Voice Note Transcript ---- */
+.voiceTranscript {
+  font-size:12px;
+  color:rgba(255,255,255,0.55);
+  font-style:italic;
+  margin-top:5px;
+  padding:4px 8px;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;
+  border-left:2px solid rgba(255,0,85,0.5);
+  line-height:1.4;
+  word-break:break-word;
 }

@@ -29,14 +29,15 @@ function compressImageFile(file, maxSize, quality, callback){
 }
 
 /* ===== SEND MEDIA MESSAGE ===== */
-function sendMediaMessage(type, url, isCamera){
+function sendMediaMessage(type, url, isCamera, transcript){
   let msgData = {
     from: window.currentUser.uid,
     time: Date.now(),
     type: type,
     url: url,
     isCamera: isCamera || false,
-    text: ""
+    text: "",
+    transcript: transcript || ""
   };
 
   if(window.currentGroup && typeof window.currentGroup === "object" && window.currentGroup.tag){
@@ -137,12 +138,34 @@ window.startVoiceNote = async function(){
       if(e.data.size > 0) voiceChunks.push(e.data);
     };
 
+    // Speech recognition for transcript
+    let transcript = "";
+    let recognition = null;
+    if(window.SpeechRecognition || window.webkitSpeechRecognition){
+      let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+      recognition.onresult = (e)=>{
+        for(let i=e.resultIndex; i<e.results.length; i++){
+          if(e.results[i].isFinal) transcript += e.results[i][0].transcript + " ";
+        }
+      };
+      recognition.onerror = ()=>{};
+      try{ recognition.start(); }catch(e){}
+    }
+
     mediaRecorder.onstop = ()=>{
       stream.getTracks().forEach(t => t.stop());
+      if(recognition){ try{ recognition.stop(); }catch(e){} }
       let blob = new Blob(voiceChunks, { type: "audio/webm" });
       let reader = new FileReader();
       reader.onload = ()=>{
-        sendMediaMessage("voice", reader.result, false);
+        // Small delay to let recognition finish
+        setTimeout(()=>{
+          sendMediaMessage("voice", reader.result, false, transcript.trim());
+        }, 600);
       };
       reader.readAsDataURL(blob);
       voiceChunks = [];

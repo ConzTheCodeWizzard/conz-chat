@@ -202,7 +202,8 @@ window.openPublicGroup = function(group){
           } else if(m.type === "video"){
             contentHtml = `<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
           } else if(m.type === "voice"){
-            contentHtml = `<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div></div>`;
+            let transcriptHtml = m.transcript ? `<div class="voiceTranscript">“${m.transcript}”</div>` : "";
+            contentHtml = `<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div>${transcriptHtml}</div>`;
           } else {
             contentHtml = `<div class="msgText">${m.text||""}</div>`;
           }
