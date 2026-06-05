@@ -3211,3 +3211,14 @@ box-shadow:
   0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
   40% { transform: scale(1.1); opacity: 1; }
 }
+
+/* Credits solo note */
+.creditsSoloNote{
+  text-align:center;
+  color:#888;
+  font-size:13px;
+  margin:18px 16px 24px;
+  line-height:1.6;
+  font-style:italic;
+  opacity:0.75;
+}

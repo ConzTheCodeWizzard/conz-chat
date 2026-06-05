@@ -1102,3 +1102,15 @@ window.formatKikTime=function(ts){
 };
 
 } // end startApp
+
+// Opens the dev (Conz/@Borg) profile inside ConzChat from the credits screen
+window.openDevProfile = function(){
+  if(!window.db){ return; }
+  db.collection("users").doc(DEV_UID).get().then(doc=>{
+    if(!doc.exists){ showPopup("Could not load profile."); return; }
+    let u = doc.data();
+    u.uid = DEV_UID;
+    if(window.openUserProfile) window.openUserProfile(u);
+    else showPopup("Profile viewer not ready yet.");
+  }).catch(()=>showPopup("Could not load profile."));
+};
