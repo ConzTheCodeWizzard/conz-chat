@@ -194,6 +194,8 @@ auth.onAuthStateChanged(user=>{
         loadChats();
         if(window.loadGroups) loadGroups();
         if(window.renderPublicGroups) renderPublicGroups();
+        // Inject Conz AI bot row at top of chat list
+        setTimeout(()=>{ if(window.injectConzAIRow) window.injectConzAIRow(); }, 600);
       }
     });
 
@@ -465,6 +467,10 @@ window.searchUsers=function(){
 window.openChat=function(uid,name,photo){
   window.currentGroup=null;
   window.currentChatUser=uid;
+  window._conzAIMode=false;
+  // Hide bot badge when opening a normal chat
+  let topbarBadge=document.getElementById('chatTopbarBadge');
+  if(topbarBadge){ topbarBadge.style.display='none'; topbarBadge.textContent=''; }
 
   if(unsubscribeMessages) unsubscribeMessages();
   if(unsubscribeDMTyping) unsubscribeDMTyping();
@@ -731,6 +737,16 @@ window.handleSend=function(){
   }
 
   if(!window.currentChatUser) return;
+
+  // Route to Conz AI if in bot chat mode
+  if(window._conzAIMode && window.sendConzAIMessage){
+    let text=val;
+    msgInput.value="";
+    sendBtn.classList.remove("active");
+    msgInput.focus();
+    window.sendConzAIMessage(text);
+    return;
+  }
 
   clearDMTyping();
 

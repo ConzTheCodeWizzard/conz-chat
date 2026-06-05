@@ -1,4 +1,7 @@
 // ===== Conz was here =====
+// Conz AI — OpenAI API key for the built-in bot
+// Replace with your actual OpenAI API key from platform.openai.com
+window.OPENAI_KEY = 'YOUR_OPENAI_API_KEY_HERE';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to",

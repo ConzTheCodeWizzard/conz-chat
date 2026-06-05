@@ -117,7 +117,10 @@
 <!-- ===== CHAT SCREEN ===== -->
 <div id="chat" class="screen">
   <div class="topbar chatTopbarMain">
-    <span id="chatName"></span>
+    <div class="chatNameBlock">
+      <span id="chatName"></span>
+      <span id="chatTopbarBadge" class="chatTopbarBadge" style="display:none;"></span>
+    </div>
     <div id="chatTopbarRight" class="chatTopbarRight">
       <button class="callIconBtn" id="voiceCallBtn" onclick="startVoiceCall()" title="Voice Call" style="display:none;">🎙️</button>
       <button class="callIconBtn" id="videoCallBtn" onclick="startVideoCall()" title="Video Call" style="display:none;">📹</button>
@@ -279,6 +282,7 @@
 <script src="calls.js"></script>
 <script src="mediabar.js"></script>
 <script src="stories.js"></script>
+<script src="conzai.js"></script>
 
 
 <!-- Credits Screen -->
