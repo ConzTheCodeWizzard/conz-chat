@@ -243,12 +243,150 @@ window.loadMods = function(){
     let r = document.getElementById('modDisableReceipts');
     let t = document.getElementById('modDisableTyping');
     let f = document.getElementById('modFakeCamera');
+    let s = document.getElementById('modDisableScreenshots');
     if(r) r.checked = !!window.conzMods.disableReceipts;
     if(t) t.checked = !!window.conzMods.disableTyping;
     if(f) f.checked = !!window.conzMods.fakeCamera;
+    if(s) s.checked = !!window.conzMods.disableScreenshots;
+    // Re-apply screenshot protection on load
+    applyScreenshotProtection(!!window.conzMods.disableScreenshots);
   }, 800);
 };
 window.loadMods();
+
+/* ===== SCREENSHOT PROTECTION ===== */
+// How it works: when enabled, we overlay the entire app with a canvas element
+// that is styled with CSS -webkit-user-select:none and pointer-events:none.
+// On visibilitychange (screen capture / screenshot attempt on Android Chrome),
+// we replace the visible content with a blurred decoy canvas that has the
+// "BETTER LOOK NEXT TIME 😈" watermark burned in — this is what ends up
+// in the screenshot. The real content is hidden behind it.
+let screenshotOverlay = null;
+let screenshotOverlayActive = false;
+
+window.applyScreenshotProtection = function(enabled){
+  if(enabled){
+    // Listen for visibility change (screenshot / screen record triggers this on Android)
+    document.addEventListener('visibilitychange', handleScreenshotAttempt);
+    // Also listen for blur (app loses focus = screenshot on many Android browsers)
+    window.addEventListener('blur', handleScreenshotAttempt);
+  } else {
+    document.removeEventListener('visibilitychange', handleScreenshotAttempt);
+    window.removeEventListener('blur', handleScreenshotAttempt);
+    // Remove overlay if present
+    if(screenshotOverlay){
+      screenshotOverlay.remove();
+      screenshotOverlay = null;
+      screenshotOverlayActive = false;
+    }
+  }
+};
+
+function handleScreenshotAttempt(){
+  if(!window.conzMods || !window.conzMods.disableScreenshots) return;
+  if(screenshotOverlayActive) return;
+  screenshotOverlayActive = true;
+
+  // Build the decoy overlay canvas
+  let canvas = document.createElement('canvas');
+  canvas.width = window.screen.width * window.devicePixelRatio;
+  canvas.height = window.screen.height * window.devicePixelRatio;
+  canvas.style.cssText = [
+    'position:fixed','top:0','left:0','width:100vw','height:100vh',
+    'z-index:2147483647','pointer-events:none',
+    '-webkit-user-select:none','user-select:none'
+  ].join(';');
+
+  let ctx = canvas.getContext('2d');
+  let w = canvas.width, h = canvas.height;
+
+  // Dark background
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, w, h);
+
+  // Fake blurred chat bubbles — just coloured blobs to look like chat
+  let bubbleData = [
+    {x:0.08,y:0.12,bw:0.55,bh:0.045,col:'rgba(60,60,70,0.9)'},
+    {x:0.38,y:0.21,bw:0.48,bh:0.045,col:'rgba(180,0,50,0.7)'},
+    {x:0.08,y:0.30,bw:0.62,bh:0.045,col:'rgba(60,60,70,0.9)'},
+    {x:0.08,y:0.37,bw:0.40,bh:0.045,col:'rgba(60,60,70,0.9)'},
+    {x:0.45,y:0.46,bw:0.42,bh:0.045,col:'rgba(180,0,50,0.7)'},
+    {x:0.08,y:0.55,bw:0.58,bh:0.045,col:'rgba(60,60,70,0.9)'},
+    {x:0.30,y:0.63,bw:0.50,bh:0.045,col:'rgba(180,0,50,0.7)'},
+    {x:0.08,y:0.72,bw:0.35,bh:0.045,col:'rgba(60,60,70,0.9)'},
+  ];
+  bubbleData.forEach(b=>{
+    ctx.save();
+    ctx.filter = 'blur(6px)';
+    ctx.fillStyle = b.col;
+    let rx=b.x*w, ry=b.y*h, rw=b.bw*w, rh=b.bh*h, rad=rh/2;
+    ctx.beginPath();
+    ctx.moveTo(rx+rad,ry);
+    ctx.lineTo(rx+rw-rad,ry);
+    ctx.quadraticCurveTo(rx+rw,ry,rx+rw,ry+rad);
+    ctx.lineTo(rx+rw,ry+rh-rad);
+    ctx.quadraticCurveTo(rx+rw,ry+rh,rx+rw-rad,ry+rh);
+    ctx.lineTo(rx+rad,ry+rh);
+    ctx.quadraticCurveTo(rx,ry+rh,rx,ry+rh-rad);
+    ctx.lineTo(rx,ry+rad);
+    ctx.quadraticCurveTo(rx,ry,rx+rad,ry);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Heavy blur overlay to make bubbles unreadable
+  ctx.save();
+  ctx.filter = 'blur(18px)';
+  ctx.fillStyle = 'rgba(10,10,10,0.55)';
+  ctx.fillRect(0,0,w,h);
+  ctx.restore();
+
+  // Red gradient overlay
+  let grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,'rgba(180,0,30,0.18)');
+  grad.addColorStop(1,'rgba(80,0,10,0.35)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  // Main watermark text
+  let fontSize = Math.round(w * 0.075);
+  ctx.save();
+  ctx.shadowColor = '#ff0033';
+  ctx.shadowBlur = Math.round(w * 0.04);
+  ctx.fillStyle = '#cc0022';
+  ctx.font = `900 ${fontSize}px Arial Black, Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // Rotate slightly for drama
+  ctx.translate(w/2, h/2);
+  ctx.rotate(-0.08);
+  ctx.fillText('BETTER LOOK', 0, -fontSize*0.7);
+  ctx.fillText('NEXT TIME 😈', 0, fontSize*0.7);
+  ctx.restore();
+
+  // Subtle diagonal repeat watermark
+  ctx.save();
+  ctx.globalAlpha = 0.07;
+  ctx.fillStyle = '#ff0033';
+  ctx.font = `bold ${Math.round(w*0.035)}px Arial`;
+  ctx.rotate(-0.4);
+  for(let row=-3;row<8;row++){
+    for(let col=-2;col<6;col++){
+      ctx.fillText('ConzChat',col*(w*0.45)-w*0.2, row*(h*0.18));
+    }
+  }
+  ctx.restore();
+
+  document.body.appendChild(canvas);
+  screenshotOverlay = canvas;
+
+  // Remove overlay after 1.5s so the real app comes back
+  setTimeout(()=>{
+    if(screenshotOverlay){ screenshotOverlay.remove(); screenshotOverlay=null; }
+    screenshotOverlayActive = false;
+  }, 1500);
+}
 
 window.toggleViewOnce = function(){
   window.viewOnceMode = !window.viewOnceMode;
