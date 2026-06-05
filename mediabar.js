@@ -243,27 +243,17 @@ window.loadMods = function(){
     let r = document.getElementById('modDisableReceipts');
     let t = document.getElementById('modDisableTyping');
     let f = document.getElementById('modFakeCamera');
-    let s = document.getElementById('modDisableScreenshots');
     if(r) r.checked = !!window.conzMods.disableReceipts;
     if(t) t.checked = !!window.conzMods.disableTyping;
     if(f) f.checked = !!window.conzMods.fakeCamera;
-    if(s) s.checked = !!window.conzMods.disableScreenshots;
-    // Re-apply screenshot protection on load
-    applyScreenshotProtection(!!window.conzMods.disableScreenshots);
   }, 800);
 };
 window.loadMods();
 
-/* ===== SCREENSHOT PROTECTION ===== */
-// Strategy: use a persistent full-screen canvas with mix-blend-mode:screen
-// and opacity near-zero (0.01). To the human eye it is completely invisible.
-// Android's WebView screenshot compositor captures canvas elements at full
-// opacity regardless of CSS opacity — so the decoy image is what lands in
-// the gallery while the real chat remains perfectly visible on screen.
-// Additionally we use a CSS ::before pseudo-overlay on body with
-// -webkit-user-select:none to block long-press save on images.
+/* ===== SCREENSHOT PROTECTION REMOVED ===== */
+// Not reliably achievable from web/WebView without native FLAG_SECURE.
 
-let ssCanvas = null;
+window.applyScreenshotProtection = function(){}; // no-op kept for safety
 
 function buildDecoyCanvas(){
   let canvas = document.createElement('canvas');
