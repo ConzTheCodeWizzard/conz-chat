@@ -207,24 +207,11 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-window.login=async function(){
-  let username=(loginUsername.value||'').trim();
+window.login=function(){
+  let email=loginEmail.value;
   let pass=loginPassword.value;
-  if(!username||!pass){ showPopup("Missing details"); return; }
-  // Look up the email address stored against this username in Firestore
-  try{
-    let snap = await db.collection("users").where("username","==",username).limit(1).get();
-    if(snap.empty){ showPopup("No account found with that username"); return; }
-    let email = snap.docs[0].data().email;
-    if(!email){ showPopup("Account error — please contact @Borg"); return; }
-    await auth.signInWithEmailAndPassword(email, pass);
-  } catch(e){
-    if(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential"){
-      showPopup("Incorrect password");
-    } else {
-      showPopup("Login failed — check your details and try again");
-    }
-  }
+  if(!email||!pass){ showPopup("Missing details"); return; }
+  auth.signInWithEmailAndPassword(email,pass).catch(e=>showPopup("Invalid email or password"));
 };
 
 /* ===== SESSION GUARD ===== */
