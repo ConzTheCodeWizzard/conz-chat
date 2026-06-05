@@ -323,10 +323,6 @@ window.openProfile=function(uid=window.currentUser.uid){
           <button class="profileActionBtn" onclick="openChat('${uid}','${u.username}','${u.photo||''}')">💬 Message</button>
           <button class="profileActionBtn blockBtn" onclick="blockUser('${uid}','${u.username}')">🚫 Block</button>
         </div>
-        <div class="chatBgActions">
-          <button class="chatBgBtn" onclick="pickChatBg('${uid}')">🖼️ Change Chat Background</button>
-          <button class="chatBgRevertBtn" onclick="revertChatBg('${uid}')">↩ Revert Background</button>
-        </div>
       `:""}
     `;
     // Also apply via JS as a belt-and-braces fallback
@@ -354,66 +350,6 @@ window.openProfile=function(uid=window.currentUser.uid){
 /* ===== PROFILE PICTURE ===== */
 window.pickImage=function(){ filePicker.click(); };
 
-/* ===== CHAT BACKGROUND ===== */
-// Hidden file input for chat bg picker
-(function(){
-  let inp=document.createElement('input');
-  inp.type='file'; inp.accept='image/*'; inp.id='chatBgPicker'; inp.style.display='none';
-  document.body.appendChild(inp);
-  let _pendingBgUid=null;
-
-  window.pickChatBg=function(otherUid){
-    _pendingBgUid=otherUid;
-    inp.value='';
-    inp.click();
-  };
-
-  inp.onchange=function(e){
-    let f=e.target.files[0];
-    if(!f||!_pendingBgUid) return;
-    let reader=new FileReader();
-    reader.onload=function(ev){
-      let dataUrl=ev.target.result;
-      // Store in Firestore under chatBgs/{sortedPair}
-      let myUid=window.currentUser.uid;
-      let pair=[myUid,_pendingBgUid].sort().join('_');
-      db.collection('chatBgs').doc(pair).set({bg:dataUrl,setBy:myUid,ts:Date.now()}).then(()=>{
-        showPopup('Chat background updated for both of you!');
-        // Apply immediately if this chat is open
-        applyCurrentChatBg(_pendingBgUid);
-      });
-    };
-    reader.readAsDataURL(f);
-  };
-})();
-
-window.revertChatBg=function(otherUid){
-  let myUid=window.currentUser.uid;
-  let pair=[myUid,otherUid].sort().join('_');
-  db.collection('chatBgs').doc(pair).delete().then(()=>{
-    showPopup('Chat background removed.');
-    applyCurrentChatBg(otherUid);
-  });
-};
-
-window.applyCurrentChatBg=function(otherUid){
-  let myUid=window.currentUser.uid;
-  let pair=[myUid,otherUid].sort().join('_');
-  let chatEl=document.getElementById('chat');
-  if(!chatEl) return;
-  // Remove any existing bg overlay
-  let old=document.getElementById('chatBgOverlay');
-  if(old) old.remove();
-  db.collection('chatBgs').doc(pair).get().then(doc=>{
-    if(doc.exists&&doc.data().bg){
-      let overlay=document.createElement('div');
-      overlay.id='chatBgOverlay';
-      overlay.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;background-image:url("'+doc.data().bg+'");background-size:cover;background-position:center;z-index:0;pointer-events:none;';
-      chatEl.style.position='relative';
-      chatEl.insertBefore(overlay,chatEl.firstChild);
-    }
-  });
-};
 
 /* ===== STATUS ===== */
 window.editStatus=function(){
@@ -578,9 +514,6 @@ window.openChat=function(uid,name,photo){
 
   let callBar=document.getElementById("chatCallBar");
   if(callBar) callBar.style.display="flex";
-
-  // Apply custom chat background if set
-  applyCurrentChatBg(uid);
 
   // Plain centered name — no status indicator
   chatName.innerHTML = name;
