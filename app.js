@@ -158,6 +158,8 @@ auth.onAuthStateChanged(user=>{
   if(user){
     window.currentUser=user;
     window.isDev=user.uid===DEV_UID;
+    // Start session guard — kicks this device if another login happens
+    startSessionGuard(user.uid);
 
     db.collection("users").doc(user.uid).onSnapshot(doc=>{
       let d=doc.data()||{};
@@ -208,6 +210,46 @@ window.login=function(){
   if(!email||!pass){ showPopup("Missing details"); return; }
   auth.signInWithEmailAndPassword(email,pass).catch(e=>showPopup("Invalid email or password"));
 };
+
+/* ===== SESSION GUARD ===== */
+let mySessionId=null;
+let sessionUnsubscribe=null;
+
+function startSessionGuard(uid){
+  // Generate a unique ID for this session
+  mySessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  // Write it to Firestore
+  db.collection("sessions").doc(uid).set({ sessionId: mySessionId, ts: Date.now() });
+  // Watch for changes
+  if(sessionUnsubscribe) sessionUnsubscribe();
+  sessionUnsubscribe = db.collection("sessions").doc(uid).onSnapshot(snap=>{
+    if(!snap.exists) return;
+    let data = snap.data();
+    // If the sessionId in Firestore no longer matches ours, someone else logged in
+    if(data.sessionId && data.sessionId !== mySessionId){
+      if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
+      // Show the popup then force logout
+      showSessionKickedPopup();
+    }
+  });
+}
+
+function showSessionKickedPopup(){
+  // Create a full-screen overlay that can't be dismissed
+  let overlay = document.createElement('div');
+  overlay.id = 'sessionKickedOverlay';
+  overlay.innerHTML = `
+    <div class="sessionKickedBox">
+      <div class="sessionKickedIcon">⚠️</div>
+      <div class="sessionKickedTitle">Account Logged In Elsewhere</div>
+      <div class="sessionKickedText">Your account has been logged into on another device. You have been signed out for security.</div>
+      <button class="sessionKickedBtn" onclick="document.getElementById('sessionKickedOverlay').remove(); auth.signOut();">OK</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  // Auto sign out after 4 seconds even if they don't tap OK
+  setTimeout(()=>{ auth.signOut(); }, 4000);
+}
 
 window.signup=async function(){
   let username=signupUsername.value.trim();

@@ -3092,3 +3092,57 @@ box-shadow:
   box-shadow: 0 4px 12px rgba(255,0,85,0.35);
 }
 .inputPopupConfirm:active { opacity: 0.85; }
+
+/* ===== SESSION KICKED OVERLAY ===== */
+#sessionKickedOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease;
+}
+.sessionKickedBox {
+  background: #1a1a2e;
+  border: 1px solid rgba(255,0,85,0.5);
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  width: 88%;
+  max-width: 340px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(255,0,85,0.3), 0 8px 32px rgba(0,0,0,0.7);
+  animation: popupBounce 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sessionKickedIcon {
+  font-size: 44px;
+  margin-bottom: 14px;
+}
+.sessionKickedTitle {
+  color: #ff0055;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+.sessionKickedText {
+  color: rgba(255,255,255,0.75);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+.sessionKickedBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #ff0055, #cc0044);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255,0,85,0.4);
+}
+.sessionKickedBtn:active { opacity: 0.85; }
