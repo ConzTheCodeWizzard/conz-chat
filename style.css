@@ -3379,3 +3379,58 @@ box-shadow:
   background: rgba(224,64,251,0.08);
   border-radius: 8px;
 }
+
+/* ===== PROFILE STATUS ===== */
+.profileStatus {
+  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  text-align: center;
+  margin: 4px 20px 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+.profileStatusEmpty {
+  color: rgba(255,255,255,0.3);
+  font-style: normal;
+  cursor: pointer;
+  font-size: 12px;
+}
+.profileStatusEdit {
+  color: rgba(255,0,85,0.7);
+  font-size: 11px;
+  text-align: center;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+/* ===== CHAT BACKGROUND BUTTONS ===== */
+.chatBgActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 20px 0;
+}
+.chatBgBtn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.chatBgBtn:active { background: rgba(255,0,85,0.12); }
+.chatBgRevertBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.45);
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.chatBgRevertBtn:active { background: rgba(255,0,85,0.08); }

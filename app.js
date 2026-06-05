@@ -310,6 +310,8 @@ window.openProfile=function(uid=window.currentUser.uid){
       ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
       ${u.premium?`<div class="premiumBadge">💎 Premium User</div>`:""}
       <div class="username">@${u.username}</div>
+      ${u.status?`<div class="profileStatus">${u.status}</div>`:isMe?`<div class="profileStatus profileStatusEmpty" onclick="editStatus()">+ Add a status</div>`:''}
+      ${isMe&&u.status?`<div class="profileStatusEdit" onclick="editStatus()">✏️ Edit status</div>`:''}
       ${isMe?`
         <div class="profileActions">
           <button class="profileActionBtn" onclick="logout()">🚪 Logout</button>
@@ -320,6 +322,10 @@ window.openProfile=function(uid=window.currentUser.uid){
         <div class="profileActions">
           <button class="profileActionBtn" onclick="openChat('${uid}','${u.username}','${u.photo||''}')">💬 Message</button>
           <button class="profileActionBtn blockBtn" onclick="blockUser('${uid}','${u.username}')">🚫 Block</button>
+        </div>
+        <div class="chatBgActions">
+          <button class="chatBgBtn" onclick="pickChatBg('${uid}')">🖼️ Change Chat Background</button>
+          <button class="chatBgRevertBtn" onclick="revertChatBg('${uid}')">↩ Revert Background</button>
         </div>
       `:""}
     `;
@@ -347,6 +353,79 @@ window.openProfile=function(uid=window.currentUser.uid){
 
 /* ===== PROFILE PICTURE ===== */
 window.pickImage=function(){ filePicker.click(); };
+
+/* ===== CHAT BACKGROUND ===== */
+// Hidden file input for chat bg picker
+(function(){
+  let inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*'; inp.id='chatBgPicker'; inp.style.display='none';
+  document.body.appendChild(inp);
+  let _pendingBgUid=null;
+
+  window.pickChatBg=function(otherUid){
+    _pendingBgUid=otherUid;
+    inp.value='';
+    inp.click();
+  };
+
+  inp.onchange=function(e){
+    let f=e.target.files[0];
+    if(!f||!_pendingBgUid) return;
+    let reader=new FileReader();
+    reader.onload=function(ev){
+      let dataUrl=ev.target.result;
+      // Store in Firestore under chatBgs/{sortedPair}
+      let myUid=window.currentUser.uid;
+      let pair=[myUid,_pendingBgUid].sort().join('_');
+      db.collection('chatBgs').doc(pair).set({bg:dataUrl,setBy:myUid,ts:Date.now()}).then(()=>{
+        showPopup('Chat background updated for both of you!');
+        // Apply immediately if this chat is open
+        applyCurrentChatBg(_pendingBgUid);
+      });
+    };
+    reader.readAsDataURL(f);
+  };
+})();
+
+window.revertChatBg=function(otherUid){
+  let myUid=window.currentUser.uid;
+  let pair=[myUid,otherUid].sort().join('_');
+  db.collection('chatBgs').doc(pair).delete().then(()=>{
+    showPopup('Chat background removed.');
+    applyCurrentChatBg(otherUid);
+  });
+};
+
+window.applyCurrentChatBg=function(otherUid){
+  let myUid=window.currentUser.uid;
+  let pair=[myUid,otherUid].sort().join('_');
+  let msgEl=document.getElementById('messages');
+  if(!msgEl) return;
+  db.collection('chatBgs').doc(pair).get().then(doc=>{
+    if(doc.exists&&doc.data().bg){
+      msgEl.style.backgroundImage='url("'+doc.data().bg+'")';
+      msgEl.style.backgroundSize='cover';
+      msgEl.style.backgroundPosition='center';
+      msgEl.style.backgroundAttachment='local';
+    } else {
+      msgEl.style.backgroundImage='';
+      msgEl.style.backgroundSize='';
+      msgEl.style.backgroundPosition='';
+    }
+  });
+};
+
+/* ===== STATUS ===== */
+window.editStatus=function(){
+  let current=(window.myData&&window.myData.status)||'';
+  let val=prompt("Set your status (max 60 chars):",current);
+  if(val===null) return; // cancelled
+  val=val.trim().slice(0,60);
+  db.collection("users").doc(window.currentUser.uid).update({status:val}).then(()=>{
+    if(window.myData) window.myData.status=val;
+    openProfile(window.currentUser.uid);
+  });
+};
 
 filePicker.onchange=e=>{
   let f=e.target.files[0];
@@ -493,6 +572,9 @@ window.openChat=function(uid,name,photo){
 
   let callBar=document.getElementById("chatCallBar");
   if(callBar) callBar.style.display="flex";
+
+  // Apply custom chat background if set
+  applyCurrentChatBg(uid);
 
   // Plain centered name — no status indicator
   chatName.innerHTML = name;
