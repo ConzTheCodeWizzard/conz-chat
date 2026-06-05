@@ -30,18 +30,41 @@
 </div>
 
 <!-- Login -->
-<div id="login" class="screen">
-  <input id="loginEmail" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+<div id="login" class="screen authScreen">
+  <div class="authCard">
+    <div class="authTitle">Welcome Back</div>
+    <div class="authSubtitle">Sign in to ConzChat</div>
+    <div class="authInputGroup">
+      <span class="authInputIcon">📧</span>
+      <input id="loginEmail" class="authInput" placeholder="Email address" type="email">
+    </div>
+    <div class="authInputGroup">
+      <span class="authInputIcon">🔒</span>
+      <input id="loginPassword" class="authInput" type="password" placeholder="Password">
+    </div>
+    <button class="authBtn" onclick="login()">Login</button>
+  </div>
 </div>
 
 <!-- Signup -->
-<div id="signup" class="screen">
-  <input id="signupUsername" placeholder="Username">
-  <input id="signupEmail" placeholder="Email">
-  <input id="signupPassword" type="password" placeholder="Password">
-  <button onclick="signup()">Create</button>
+<div id="signup" class="screen authScreen">
+  <div class="authCard">
+    <div class="authTitle">Join ConzChat</div>
+    <div class="authSubtitle">Create your account</div>
+    <div class="authInputGroup">
+      <span class="authInputIcon">👤</span>
+      <input id="signupUsername" class="authInput" placeholder="Username">
+    </div>
+    <div class="authInputGroup">
+      <span class="authInputIcon">📧</span>
+      <input id="signupEmail" class="authInput" placeholder="Email address" type="email">
+    </div>
+    <div class="authInputGroup">
+      <span class="authInputIcon">🔒</span>
+      <input id="signupPassword" class="authInput" type="password" placeholder="Password">
+    </div>
+    <button class="authBtn" onclick="signup()">Create Account</button>
+  </div>
 </div>
 
 <!-- Home -->
