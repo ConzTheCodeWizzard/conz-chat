@@ -325,15 +325,18 @@ document.addEventListener("change",function(e){
   reader.onload=()=>{
     img.onload=()=>{
       let canvas=document.createElement("canvas");
-      canvas.width=800;canvas.height=300;
+      // Keep well under Firestore 1MB limit: 600x220 @ 65% quality
+      canvas.width=600; canvas.height=220;
       let ctx=canvas.getContext("2d");
-      let scale=Math.max(800/img.width,300/img.height);
-      let sw=img.width*scale,sh=img.height*scale;
-      ctx.drawImage(img,(800-sw)/2,(300-sh)/2,sw,sh);
-      let compressed=canvas.toDataURL("image/jpeg",0.75);
-      db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed});
-      window.myData.coverPhoto=compressed;
-      openProfile(window.currentUser.uid);
+      // Cover-fill: scale to fill canvas, centre-crop
+      let scale=Math.max(canvas.width/img.width, canvas.height/img.height);
+      let sw=img.width*scale, sh=img.height*scale;
+      let ox=(canvas.width-sw)/2, oy=(canvas.height-sh)/2;
+      ctx.drawImage(img, ox, oy, sw, sh);
+      let compressed=canvas.toDataURL("image/jpeg",0.65);
+      db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed})
+        .then(()=>{ window.myData.coverPhoto=compressed; openProfile(window.currentUser.uid); })
+        .catch(err=>{ showPopup("Cover photo too large, try a smaller image."); });
     };
     img.src=reader.result;
   };

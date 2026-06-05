@@ -10,17 +10,34 @@ window.pickGroupPhoto = function(){
 
 window.selectedGroupPhoto = "";
 
+// Compress image to max ~150KB for Firestore storage
+function compressGroupPhoto(file, callback){
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+  let img = new Image();
+  let url = URL.createObjectURL(file);
+  img.onload = function(){
+    let maxSize = 200;
+    let w = img.width, h = img.height;
+    if(w > h){ if(w > maxSize){ h = h*(maxSize/w); w = maxSize; } }
+    else { if(h > maxSize){ w = w*(maxSize/h); h = maxSize; } }
+    canvas.width = w; canvas.height = h;
+    ctx.drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    callback(canvas.toDataURL("image/jpeg", 0.7));
+  };
+  img.src = url;
+}
+
 document.addEventListener("change", function(e){
   if(e.target.id !== "groupPhotoInput") return;
   let file = e.target.files[0];
   if(!file) return;
-  let reader = new FileReader();
-  reader.onload = function(){
-    window.selectedGroupPhoto = reader.result;
+  compressGroupPhoto(file, function(compressed){
+    window.selectedGroupPhoto = compressed;
     document.getElementById("groupPhotoPreview").innerHTML =
-      `<img src="${reader.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-  };
-  reader.readAsDataURL(file);
+      `<img src="${compressed}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` ;
+  });
 });
 
 window.publicGroups = [];
@@ -134,19 +151,19 @@ window.openPublicGroup = function(group){
     show("chat");
 
     // ---- MESSAGES LISTENER ----
-    // Use simple time-ordered query — no compound index needed
+    // NO orderBy — avoids composite index requirement. Sort client-side instead.
     let query = db.collection("publicGroupMessages")
-      .where("groupId","==", freshGroup.id)
-      .orderBy("time","asc");
+      .where("groupId","==", freshGroup.id);
 
     window.unsubscribePublicGroupMessages = query.onSnapshot(snap=>{
       messagesEl.innerHTML = "";
 
-      let promises = [];
       let msgList = [];
       let userCache = {};
 
       snap.forEach(doc=>{ msgList.push({ id: doc.id, ...doc.data() }); });
+      // Sort by time ascending client-side
+      msgList.sort((a,b)=>(a.time||0)-(b.time||0));
 
       // Collect unique uids to fetch
       let uids = [...new Set(msgList.map(m=>m.from))];
