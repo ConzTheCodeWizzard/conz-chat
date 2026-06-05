@@ -346,6 +346,72 @@
   </div>
 </div>
 
+<!-- Settings Screen -->
+<div id="settings" class="screen">
+  <div class="topbar">
+    <span>Settings</span>
+  </div>
+  <div class="settingsContainer">
+
+    <div class="settingsSection">
+      <div class="settingsSectionTitle">Account</div>
+      <div class="settingsRow" onclick="openChangeDisplayName()">
+        <div class="settingsRowIcon">✏️</div>
+        <div class="settingsRowText">
+          <div class="settingsRowTitle">Change Display Name</div>
+          <div class="settingsRowDesc">Update the name others see</div>
+        </div>
+        <div class="settingsRowArrow">›</div>
+      </div>
+      <div class="settingsRow" onclick="openChangePassword()">
+        <div class="settingsRowIcon">🔑</div>
+        <div class="settingsRowText">
+          <div class="settingsRowTitle">Change Password</div>
+          <div class="settingsRowDesc">Update your account password</div>
+        </div>
+        <div class="settingsRowArrow">›</div>
+      </div>
+    </div>
+
+    <div class="settingsSection">
+      <div class="settingsSectionTitle">Display</div>
+      <div class="settingsRow settingsRowNoArrow">
+        <div class="settingsRowIcon">☀️</div>
+        <div class="settingsRowText">
+          <div class="settingsRowTitle">Brightness</div>
+        </div>
+        <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness(this.value)" class="settingsBrightnessSlider">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Change Display Name Popup -->
+<div id="changeNamePopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle">Set new name</div>
+    <input type="text" id="newDisplayNameInput" class="inputPopupField" placeholder="Enter display name" maxlength="30">
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('changeNamePopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" onclick="submitChangeDisplayName()">Set</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Popup -->
+<div id="changePasswordPopup" class="customInputPopup" style="display:none;">
+  <div class="inputPopupBox">
+    <div class="inputPopupTitle">ConzChat pw changer</div>
+    <input type="password" id="currentPasswordInput" class="inputPopupField" placeholder="Current Password">
+    <input type="password" id="newPasswordInput" class="inputPopupField" placeholder="New Password" style="margin-top:10px;">
+    <div class="inputPopupBtns">
+      <button class="inputPopupCancel" onclick="document.getElementById('changePasswordPopup').style.display='none'">Cancel</button>
+      <button class="inputPopupConfirm" onclick="submitChangePassword()">Change</button>
+    </div>
+  </div>
+</div>
+
 <!-- Fake Crash Screen -->
 <div id="fakeCrashScreen">
   <div id="fakeCrashText">⚠ SYSTEM CRASH DETECTED ⚠</div>
@@ -354,6 +420,7 @@
 <!-- Custom Popup -->
 <div id="customPopup">
   <div id="popupBox">
+    <div id="popupTitle" style="display:none;"></div>
     <div id="popupText">Popup text</div>
     <button onclick="closePopup()">OK</button>
   </div>

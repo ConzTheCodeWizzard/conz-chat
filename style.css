@@ -2966,3 +2966,129 @@ box-shadow:
   background: rgba(255,0,85,0.2);
   border-color: #ff0055;
 }
+
+/* ===== SETTINGS SCREEN ===== */
+.settingsContainer {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.settingsSection {
+  margin-bottom: 24px;
+}
+.settingsSectionTitle {
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 0 4px 8px 4px;
+}
+.settingsRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: background 0.15s;
+}
+.settingsRow:active { background: rgba(255,255,255,0.09); }
+.settingsRowNoArrow { cursor: default; }
+.settingsRowIcon { font-size: 20px; width: 28px; text-align: center; }
+.settingsRowText { flex: 1; }
+.settingsRowTitle { color: #fff; font-size: 15px; font-weight: 500; }
+.settingsRowDesc { color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 2px; }
+.settingsRowArrow { color: rgba(255,255,255,0.3); font-size: 20px; }
+.settingsBrightnessSlider {
+  width: 120px;
+  accent-color: #ff0055;
+  flex-shrink: 0;
+}
+
+/* ===== POPUP TITLE ===== */
+#popupTitle {
+  color: #ff0055;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+/* ===== CUSTOM INPUT POPUPS ===== */
+.customInputPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(6px);
+}
+.inputPopupBox {
+  background: #1a1a2e;
+  border: 1px solid rgba(255,0,85,0.4);
+  border-radius: 18px;
+  padding: 24px 20px 20px;
+  width: 88%;
+  max-width: 360px;
+  box-shadow: 0 0 40px rgba(255,0,85,0.25), 0 8px 32px rgba(0,0,0,0.6);
+  animation: popupBounce 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.inputPopupTitle {
+  color: #ff0055;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+.inputPopupField {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  padding: 12px 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.inputPopupField:focus {
+  border-color: rgba(255,0,85,0.6);
+}
+.inputPopupField::placeholder { color: rgba(255,255,255,0.35); }
+.inputPopupBtns {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.inputPopupCancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  font-size: 15px;
+  cursor: pointer;
+}
+.inputPopupConfirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ff0055, #cc0044);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255,0,85,0.35);
+}
+.inputPopupConfirm:active { opacity: 0.85; }

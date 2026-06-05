@@ -254,18 +254,14 @@ window.openProfile=function(uid=window.currentUser.uid){
           ${u.photo?`<img src="${u.photo}">`:`<div style="font-size:40px;">👤</div>`}
         </div>
       </div>
-      <div class="displayName" ${isMe?'onclick="editDisplayName()"':''}>${u.displayName||u.username}</div>
+      <div class="displayName">${u.displayName||u.username}</div>
       ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
       ${u.premium?`<div class="premiumBadge">💎 Premium User</div>`:""}
       <div class="username">@${u.username}</div>
       ${isMe?`
         <div class="profileActions">
           <button class="profileActionBtn" onclick="logout()">🚪 Logout</button>
-          <button class="profileActionBtn" onclick="toggleSettings()">⚙ Settings</button>
-        </div>
-        <div id="settingsPanel" style="display:none;width:90%;margin-top:10px;">
-          <div class="settingTitle">Brightness</div>
-          <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness(this.value)" style="width:100%;">
+          <button class="profileActionBtn" onclick="show('settings')">⚙ Settings</button>
         </div>
       `:''}
       ${!isMe?`
@@ -902,6 +898,19 @@ window.showPopup=function(text){
 window.closePopup=function(){
   document.getElementById("customPopup").style.display="none";
 };
+window.showTitledPopup=function(title,text){
+  let titleEl=document.getElementById('popupTitle');
+  let textEl=document.getElementById('popupText');
+  if(titleEl){ titleEl.innerText=title; titleEl.style.display='block'; }
+  if(textEl) textEl.innerText=text;
+  document.getElementById('customPopup').style.display='flex';
+};
+const _origClosePopup=window.closePopup;
+window.closePopup=function(){
+  let titleEl=document.getElementById('popupTitle');
+  if(titleEl){ titleEl.innerText=''; titleEl.style.display='none'; }
+  _origClosePopup();
+};
 
 /* ===== PREMIUM MENU ===== */
 window.openPremiumMenu=function(){
@@ -940,9 +949,66 @@ window.givePremium=function(){
 };
 
 /* ===== SETTINGS ===== */
-window.toggleSettings=function(){
-  const panel=document.getElementById("settingsPanel");
-  panel.style.display=panel.style.display==="block"?"none":"block";
+// Settings now opens a full screen — toggleSettings kept as no-op for safety
+window.toggleSettings=function(){ show('settings'); };
+
+window.openChangeDisplayName=function(){
+  let popup=document.getElementById('changeNamePopup');
+  let inp=document.getElementById('newDisplayNameInput');
+  if(inp) inp.value=window.myData.displayName||window.myData.username||'';
+  if(popup) popup.style.display='flex';
+  setTimeout(()=>{ if(inp) inp.focus(); },100);
+};
+
+window.submitChangeDisplayName=async function(){
+  let inp=document.getElementById('newDisplayNameInput');
+  let name=(inp?inp.value:'').trim();
+  if(!name){ showPopup('Please enter a display name.'); return; }
+  try{
+    await db.collection('users').doc(window.currentUser.uid).update({displayName:name});
+    window.myData.displayName=name;
+    document.getElementById('changeNamePopup').style.display='none';
+    showPopup('Display name updated!');
+    // Refresh profile if open
+    if(document.getElementById('profile')?.classList.contains('active')){
+      openProfile(window.currentUser.uid);
+    }
+  }catch(e){ showPopup('Failed to update: '+e.message); }
+};
+
+window.openChangePassword=function(){
+  let popup=document.getElementById('changePasswordPopup');
+  let cur=document.getElementById('currentPasswordInput');
+  let nw=document.getElementById('newPasswordInput');
+  if(cur) cur.value='';
+  if(nw) nw.value='';
+  if(popup) popup.style.display='flex';
+  setTimeout(()=>{ if(cur) cur.focus(); },100);
+};
+
+window.submitChangePassword=async function(){
+  let cur=document.getElementById('currentPasswordInput')?.value||'';
+  let nw=document.getElementById('newPasswordInput')?.value||'';
+  if(!cur||!nw){ showPopup('Please fill in both fields.'); return; }
+  if(nw.length<6){ showPopup('New password must be at least 6 characters.'); return; }
+  try{
+    // Re-authenticate then change password
+    let credential=firebase.auth.EmailAuthProvider.credential(
+      window.currentUser.email, cur
+    );
+    await window.currentUser.reauthenticateWithCredential(credential);
+    await window.currentUser.updatePassword(nw);
+    document.getElementById('changePasswordPopup').style.display='none';
+    showPopup('Password changed successfully!');
+  }catch(e){
+    if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'){
+      // Show the specific Uh Oh popup
+      document.getElementById('changePasswordPopup').style.display='none';
+      showTitledPopup('Uh Oh!','The current password you entered seems to be incorrect, please ensure you typed it correctly and try again.');
+    } else {
+      showPopup('Error: '+e.message);
+    }
+  }
 };
 window.updateBrightness=function(value){
   document.body.style.filter=`brightness(${0.25+(value/100)*0.75})`;
