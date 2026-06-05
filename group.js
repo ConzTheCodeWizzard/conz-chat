@@ -7,343 +7,524 @@ window.currentGroup = null;
 window.unsubscribeGroupMessages = null;
 window.groupListenerLoaded = false;
 
-/* ===== Awww who's a good little script kiddy🐻 ~Conz~ ===== */
+let groupTypingTimeout = null;
+let unsubscribePrivateGroupTyping = null;
+
+/* ===== CREATE PRIVATE GROUP ===== */
 
 window.createGroup = async function(){
-
   let name = prompt("Enter group name");
-
   if(!name || !name.trim()) return;
 
   try{
-
     let ref = await db.collection("groups").add({
-
-      name:name,
-
-      owner:window.currentUser.uid,
-
-      members:[window.currentUser.uid],
-
-      created:Date.now(),
-
-      photo:"",
-
-      lastMessage:"",
-
-      lastTime:Date.now()
+      name: name,
+      owner: window.currentUser.uid,
+      members: [window.currentUser.uid],
+      admins: [],
+      created: Date.now(),
+      photo: "",
+      lastMessage: "",
+      lastTime: Date.now()
     });
 
-    alert("Group created!");
-
+    showPopup("Group created!");
     openGroup(ref.id);
-
   }catch(err){
-
-    alert(err.message);
+    showPopup(err.message);
   }
 };
 
-/* ===== How many of these have you deleted so far? you getting irritated yet? you RAT🐀 ~Conz~ ===== */
+/* ===== LOAD PRIVATE GROUPS LIST ===== */
 
 window.loadGroups = function(){
-
   if(!window.currentUser) return;
-
   if(window.groupListenerLoaded) return;
-
   window.groupListenerLoaded = true;
 
   db.collection("groups")
-  .where("members","array-contains",window.currentUser.uid)
+  .where("members","array-contains", window.currentUser.uid)
   .onSnapshot(snap=>{
-
-    let oldGroups = document.querySelectorAll(".groupItem");
-
-    oldGroups.forEach(el=>el.remove());
+    document.querySelectorAll(".groupItem").forEach(el=>el.remove());
 
     let groups = [];
-
-    snap.forEach(doc=>{
-
-      groups.push({
-        id:doc.id,
-        ...doc.data()
-      });
-    });
-
+    snap.forEach(doc=>{ groups.push({ id: doc.id, ...doc.data() }); });
     groups.sort((a,b)=>(b.lastTime||0)-(a.lastTime||0));
 
     groups.forEach(g=>{
-
       let div = document.createElement("div");
-
       div.className = "groupItem";
-
       div.innerHTML = `
         <div class="chatAvatar">
-          ${
-            g.photo
-            ? `<img src="${g.photo}">`
-            : `👥`
-          }
+          ${g.photo ? `<img src="${g.photo}">` : `👥`}
         </div>
-
-        <div>
+        <div class="chatNameWrap">
           <div>${g.name}</div>
-
-          <div style="
-            font-size:12px;
-            opacity:0.6;
-            margin-top:2px;
-          ">
+          <div style="font-size:12px;opacity:0.6;margin-top:2px;">
             ${g.lastMessage || "No messages yet"}
           </div>
         </div>
       `;
-
-      div.onclick = ()=>{
-
-        openGroup(g.id);
-      };
-
+      div.onclick = ()=>{ openGroup(g.id); };
       chatList.prepend(div);
     });
-  },
-  err=>{
-
-    alert(err.message);
-  });
+  }, err=>{ showPopup(err.message); });
 };
 
-/* ===== Hard to believe i started as a kik modder lolz the real OG's know ~Conz~ ===== */
+/* ===== OPEN PRIVATE GROUP ===== */
 
 window.openGroup = function(groupId){
-
   if(!window.currentUser) return;
 
-  window.currentGroup = groupId;
+  // Unsubscribe previous listeners
+  if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages = null; }
+  if(window.unsubscribeMessages){ window.unsubscribeMessages(); window.unsubscribeMessages = null; }
+  if(unsubscribePrivateGroupTyping){ unsubscribePrivateGroupTyping(); unsubscribePrivateGroupTyping = null; }
 
   window.currentChatUser = null;
 
-  show("chat");
+  db.collection("groups").doc(groupId).get().then(doc=>{
+    let g = { id: doc.id, ...doc.data() };
+    window.currentGroup = g;
 
-  /* Skript kitty has left the chat🚪 ~Conz~ */
-  chatName.onclick = null;
+    show("chat");
 
-  if(window.unsubscribeGroupMessages){
-    window.unsubscribeGroupMessages();
-  }
+    // Show call buttons
+    let callBar = document.getElementById("chatCallBar");
+    if(callBar) callBar.style.display = "flex";
 
-  if(window.unsubscribeMessages){
-    window.unsubscribeMessages();
-  }
+    chatName.onclick = function(){ openGroupInfo(g); };
+    chatName.innerHTML = `👥 ${g.name}`;
 
-  db.collection("groups")
-  .doc(groupId)
-  .get()
-  .then(doc=>{
+    // Messages listener
+    window.unsubscribeGroupMessages = db.collection("groupMessages")
+    .where("groupId","==", groupId)
+    .orderBy("time","asc")
+    .onSnapshot(async snap=>{
+      messages.innerHTML = "";
 
-    let g = doc.data() || {};
+      let msgList = [];
+      snap.forEach(doc=>{ msgList.push({ id: doc.id, ...doc.data() }); });
 
-    chatName.innerHTML = `
-      👥 ${g.name}
-    `;
-  });
-
-  window.unsubscribeGroupMessages = db.collection("groupMessages")
-  .where("groupId","==",groupId)
-  .onSnapshot(async snap=>{
-
-    messages.innerHTML = "";
-
-    let groupMessages = [];
-
-    snap.forEach(doc=>{
-
-      groupMessages.push(doc.data());
-    });
-
-    groupMessages.sort((a,b)=>(a.time||0)-(b.time||0));
-
-    for(const m of groupMessages){
-
-      let userDoc = await db.collection("users")
-      .doc(m.from)
-      .get();
-
-      let u = userDoc.data() || {};
-
-      let isMine = m.from===window.currentUser.uid;
-
-      let wrap = document.createElement("div");
-
-      wrap.className =
-        "msgWrap " + (isMine ? "me" : "them");
-
-      let avatar = document.createElement("div");
-
-      avatar.className = "msgAvatar";
-
-      if(u.photo){
-
-        avatar.innerHTML = `
-          <img src="${u.photo}">
-        `;
+      let userCache = {};
+      for(const m of msgList){
+        if(!userCache[m.from]){
+          let uDoc = await db.collection("users").doc(m.from).get();
+          userCache[m.from] = uDoc.data() || {};
+        }
       }
 
-      let bubble = document.createElement("div");
+      msgList.forEach(m=>{
+        let u = userCache[m.from] || {};
+        let isMine = m.from === window.currentUser.uid;
+        let wrap = document.createElement("div");
+        wrap.className = "msgWrap " + (isMine ? "me" : "them");
 
-      bubble.className = "msg";
+        let avatar = document.createElement("div");
+        avatar.className = "msgAvatar";
+        if(u.photo){ avatar.innerHTML = `<img src="${u.photo}">`; }
 
-      bubble.innerHTML = `
-        ${
-          !isMine
-          ? `
-          <div style="
-            font-size:12px;
-            opacity:0.7;
-            margin-bottom:4px;
-          ">
-            ${u.displayName || u.username}
-          </div>
-          `
-          : ""
+        let bubble = document.createElement("div");
+        bubble.className = "msg";
+
+        let roleBadge = "";
+        if(m.from === g.owner){
+          roleBadge = `<span class="inlineBadge ownerInline">Owner</span>`;
+        } else if((g.admins||[]).includes(m.from)){
+          roleBadge = `<span class="inlineBadge adminInline">Admin</span>`;
         }
 
-        ${m.text}
+        bubble.innerHTML = `
+          ${!isMine ? `<div class="msgSenderName">${u.displayName||u.username||"Unknown"} ${roleBadge}</div>` : ""}
+          <div class="msgText">${m.text}</div>
+          <div class="msgMeta">${formatKikTime(m.time)}</div>
+        `;
 
-        <div style="
-          font-size:11px;
-          opacity:0.5;
-          margin-top:4px;
-        ">
-          ${new Date(m.time).toLocaleTimeString()}
-        </div>
-      `;
+        if(isMine){
+          wrap.appendChild(bubble);
+          wrap.appendChild(avatar);
+        } else {
+          wrap.appendChild(avatar);
+          wrap.appendChild(bubble);
+        }
+        messages.appendChild(wrap);
+      });
 
-      if(isMine){
+      messages.scrollTop = messages.scrollHeight;
+    }, err=>{ showPopup(err.message); });
 
-        wrap.appendChild(bubble);
-        wrap.appendChild(avatar);
-
-      }else{
-
-        wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
+    // Typing indicator
+    unsubscribePrivateGroupTyping = db.collection("groupTyping")
+    .where("groupId","==", groupId)
+    .onSnapshot(snap=>{
+      let typers = [];
+      snap.forEach(doc=>{
+        let d = doc.data();
+        if(d.uid !== window.currentUser.uid && d.typing && (Date.now()-d.ts) < 5000){
+          typers.push(d.name || "Someone");
+        }
+      });
+      let typingEl = document.getElementById("typingIndicator");
+      if(typingEl){
+        if(typers.length > 0){
+          typingEl.innerHTML = `<span class="typingDots">${typers[0]} is typing<span class="dot1">.</span><span class="dot2">.</span><span class="dot3">.</span></span>`;
+          typingEl.style.display = "block";
+        } else {
+          typingEl.style.display = "none";
+        }
       }
+    });
 
-      messages.appendChild(wrap);
-    }
-
-    messages.scrollTop = messages.scrollHeight;
-  },
-  err=>{
-
-    alert(err.message);
-  });
+  }).catch(err=>{ showPopup(err.message); });
 };
 
-/* ===== You dropped your gay card ~Conz~ ===== */
+/* ===== SEND GROUP MESSAGE ===== */
 
 window.sendGroupMessage = async function(){
-
   if(!window.currentGroup) return;
-
   if(!msgInput.value.trim()) return;
 
-  let text = msgInput.value;
-
+  let text = msgInput.value.trim();
   msgInput.value = "";
+  if(window.sendBtn) sendBtn.classList.remove("active");
 
-  if(window.sendBtn){
-    sendBtn.classList.remove("active");
-  }
+  // Clear typing
+  clearGroupTyping();
 
   try{
-
     await db.collection("groupMessages").add({
-
-      groupId:window.currentGroup,
-
-      from:window.currentUser.uid,
-
-      text:text,
-
-      time:Date.now()
+      groupId: window.currentGroup.id || window.currentGroup,
+      from: window.currentUser.uid,
+      text: text,
+      time: Date.now()
     });
 
-    await db.collection("groups")
-    .doc(window.currentGroup)
-    .update({
-
-      lastMessage:text,
-
-      lastTime:Date.now()
+    let gId = window.currentGroup.id || window.currentGroup;
+    await db.collection("groups").doc(gId).update({
+      lastMessage: text,
+      lastTime: Date.now()
     });
-
   }catch(err){
-
-    alert(err.message);
+    showPopup(err.message);
   }
 };
 
-/* ===== Bow for me bitch ~Conz~ ===== */
+/* ===== HANDLE SEND — ROUTES TO CORRECT SEND FUNCTION ===== */
 
 window.handleSend = function(){
-
-  if(window.currentGroup){
-
-    sendGroupMessage();
-
-  }else{
-
+  if(!window.currentGroup){
     sendMessage();
+    return;
+  }
+  // Public group has an id property (object), private group is a string ID
+  if(typeof window.currentGroup === "object" && window.currentGroup.tag){
+    sendPublicGroupMessage();
+  } else {
+    sendGroupMessage();
   }
 };
 
-/* ===== Is it the scarss you wanna know how I got em?🤡 ~Conz~ ===== */
+/* ===== GROUP TYPING INDICATOR ===== */
 
-window.addToGroup = async function(groupId,uid){
+function setGroupTyping(){
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+  if(!gId) return;
+  let myName = window.myData?.displayName || window.myData?.username || "Someone";
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroupTyping"
+    : "groupTyping";
+  db.collection(col).doc(window.currentUser.uid + "_" + gId).set({
+    groupId: gId,
+    uid: window.currentUser.uid,
+    name: myName,
+    typing: true,
+    ts: Date.now()
+  });
+}
 
+function clearGroupTyping(){
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+  if(!gId) return;
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroupTyping"
+    : "groupTyping";
+  db.collection(col).doc(window.currentUser.uid + "_" + gId).set({
+    groupId: gId,
+    uid: window.currentUser.uid,
+    typing: false,
+    ts: Date.now()
+  });
+}
+
+/* ===== ADD TO GROUP ===== */
+
+window.addToGroup = async function(groupId, uid){
   try{
-
     let ref = db.collection("groups").doc(groupId);
-
     let doc = await ref.get();
-
     let data = doc.data() || {};
-
     let members = data.members || [];
 
     if(members.includes(uid)){
-
-      alert("Already in group");
-
+      showPopup("Already in group");
       return;
     }
 
     members.push(uid);
-
-    await ref.update({
-      members:members
-    });
-
-    alert("User added!");
-
+    await ref.update({ members: members });
+    showPopup("User added!");
   }catch(err){
-
-    alert(err.message);
+    showPopup(err.message);
   }
 };
 
-/* ===== And we reach the end woop woooop ~Conz~===== */
+/* ===== LEAVE GROUP ===== */
 
-setTimeout(()=>{
+window.leaveCurrentGroup = async function(){
+  if(!window.currentGroup) return;
 
-  if(window.currentUser){
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
 
-    loadGroups();
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroups"
+    : "groups";
+
+  try{
+    let ref = db.collection(col).doc(gId);
+    let doc = await ref.get();
+    let data = doc.data() || {};
+    let members = (data.members || []).filter(m => m !== window.currentUser.uid);
+
+    await ref.update({ members: members });
+    window.currentGroup = null;
+    showPopup("You left the group.");
+    show("home");
+  }catch(err){
+    showPopup(err.message);
+  }
+};
+
+/* ===== OPEN ADD PEOPLE MODAL ===== */
+
+window.openAddPeople = async function(){
+  if(!window.currentGroup) return;
+
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroups"
+    : "groups";
+
+  // Get current group members
+  let groupDoc = await db.collection(col).doc(gId).get();
+  let groupData = groupDoc.data() || {};
+  let currentMembers = groupData.members || [];
+
+  // Get all DM contacts (people the user has chatted with)
+  let messagesSnap = await db.collection("messages")
+  .where("from","==", window.currentUser.uid)
+  .get();
+
+  let contactUids = new Set();
+  messagesSnap.forEach(doc=>{
+    let d = doc.data();
+    if(d.to && d.to !== window.currentUser.uid) contactUids.add(d.to);
+  });
+
+  let messagesSnap2 = await db.collection("messages")
+  .where("to","==", window.currentUser.uid)
+  .get();
+  messagesSnap2.forEach(doc=>{
+    let d = doc.data();
+    if(d.from && d.from !== window.currentUser.uid) contactUids.add(d.from);
+  });
+
+  // Filter out already-in-group
+  let toAdd = [...contactUids].filter(uid => !currentMembers.includes(uid));
+
+  if(toAdd.length === 0){
+    showPopup("No contacts to add. Start a DM with someone first.");
+    return;
   }
 
-},1500);
+  // Fetch user data for contacts
+  let contactData = [];
+  for(const uid of toAdd){
+    let uDoc = await db.collection("users").doc(uid).get();
+    let u = uDoc.data() || {};
+    contactData.push({ uid, ...u });
+  }
+
+  // Build modal
+  let modal = document.getElementById("addPeopleModal");
+  if(!modal){
+    modal = document.createElement("div");
+    modal.id = "addPeopleModal";
+    modal.className = "addPeopleModal";
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div class="addPeopleBox">
+      <div class="addPeopleTitle">Add People</div>
+      <div class="addPeopleList" id="addPeopleList"></div>
+      <button class="addPeopleClose" onclick="document.getElementById('addPeopleModal').style.display='none'">Close</button>
+    </div>
+  `;
+
+  let list = modal.querySelector("#addPeopleList");
+  contactData.forEach(u=>{
+    let row = document.createElement("div");
+    row.className = "addPeopleRow";
+    row.innerHTML = `
+      <div class="chatAvatar" style="width:36px;height:36px;">
+        ${u.photo ? `<img src="${u.photo}">` : "👤"}
+      </div>
+      <div style="flex:1;">${u.displayName||u.username||"Unknown"}</div>
+      <button class="addPeopleBtn" onclick="addPersonToCurrentGroup('${u.uid}', this)">Add</button>
+    `;
+    list.appendChild(row);
+  });
+
+  modal.style.display = "flex";
+};
+
+window.addPersonToCurrentGroup = async function(uid, btn){
+  if(!window.currentGroup) return;
+
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroups"
+    : "groups";
+
+  try{
+    let ref = db.collection(col).doc(gId);
+    let doc = await ref.get();
+    let data = doc.data() || {};
+    let members = data.members || [];
+
+    if(members.includes(uid)){
+      btn.textContent = "Already in";
+      return;
+    }
+
+    members.push(uid);
+    await ref.update({ members: members });
+    btn.textContent = "Added ✓";
+    btn.disabled = true;
+  }catch(err){
+    showPopup(err.message);
+  }
+};
+
+/* ===== PROMOTE TO ADMIN ===== */
+
+window.promoteToAdmin = async function(uid){
+  if(!window.currentGroup) return;
+
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroups"
+    : "groups";
+
+  let isOwner = (typeof window.currentGroup === "object")
+    ? window.currentGroup.owner === window.currentUser.uid
+    : false;
+
+  if(!isOwner){
+    showPopup("Only the owner can promote admins.");
+    return;
+  }
+
+  try{
+    let ref = db.collection(col).doc(gId);
+    let doc = await ref.get();
+    let data = doc.data() || {};
+    let admins = data.admins || [];
+
+    if(admins.includes(uid)){
+      showPopup("Already an admin.");
+      return;
+    }
+
+    admins.push(uid);
+    await ref.update({ admins: admins });
+    showPopup("User promoted to admin!");
+    // Refresh group info
+    let freshDoc = await ref.get();
+    window.currentGroup = { id: gId, ...freshDoc.data() };
+    renderGroupMembers();
+  }catch(err){
+    showPopup(err.message);
+  }
+};
+
+/* ===== REMOVE ADMIN ===== */
+
+window.removeAdmin = async function(uid){
+  if(!window.currentGroup) return;
+
+  let gId = typeof window.currentGroup === "object"
+    ? window.currentGroup.id
+    : window.currentGroup;
+
+  let col = (typeof window.currentGroup === "object" && window.currentGroup.tag)
+    ? "publicGroups"
+    : "groups";
+
+  let isOwner = (typeof window.currentGroup === "object")
+    ? window.currentGroup.owner === window.currentUser.uid
+    : false;
+
+  if(!isOwner){
+    showPopup("Only the owner can remove admins.");
+    return;
+  }
+
+  try{
+    let ref = db.collection(col).doc(gId);
+    let doc = await ref.get();
+    let data = doc.data() || {};
+    let admins = (data.admins || []).filter(a => a !== uid);
+    await ref.update({ admins: admins });
+    showPopup("Admin removed.");
+    let freshDoc = await ref.get();
+    window.currentGroup = { id: gId, ...freshDoc.data() };
+    renderGroupMembers();
+  }catch(err){
+    showPopup(err.message);
+  }
+};
+
+/* ===== INIT TYPING HOOK ===== */
+
+setTimeout(()=>{
+  let inp = document.getElementById("msgInput");
+  if(inp){
+    inp.addEventListener("input", function(){
+      if(window.currentGroup){
+        setGroupTyping();
+        clearTimeout(groupTypingTimeout);
+        groupTypingTimeout = setTimeout(clearGroupTyping, 3000);
+      }
+    });
+  }
+
+  if(window.currentUser){
+    loadGroups();
+  }
+}, 1500);

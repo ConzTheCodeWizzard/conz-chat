@@ -1474,3 +1474,612 @@ box-shadow:
 0 0 10px rgba(255,0,85,0.7);
 
 }
+
+
+/* =============================================
+   ConzChat v1.5 — New Feature Styles
+   ============================================= */
+
+/* ===== KIK-STYLE MESSAGE BUBBLES ===== */
+.msgText{
+  word-break:break-word;
+  line-height:1.4;
+}
+
+.msgSenderName{
+  font-size:12px;
+  font-weight:bold;
+  opacity:0.8;
+  margin-bottom:4px;
+  color:var(--secondary);
+}
+
+.msgMeta{
+  font-size:11px;
+  opacity:0.55;
+  margin-top:5px;
+  text-align:right;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:4px;
+}
+
+/* ===== KIK-STYLE READ RECEIPTS ===== */
+.receiptSent{
+  color:#aaa;
+  font-size:13px;
+}
+
+.receiptDelivered{
+  color:#aaa;
+  font-size:13px;
+}
+
+.receiptRead{
+  color:#00c8ff;
+  font-size:13px;
+  font-weight:bold;
+}
+
+/* ===== KIK-STYLE TYPING INDICATOR ===== */
+.typingIndicator{
+  padding:4px 14px;
+  font-size:13px;
+  color:var(--secondary);
+  opacity:0.85;
+  min-height:22px;
+}
+
+.typingDots{
+  display:inline-flex;
+  align-items:baseline;
+  gap:1px;
+}
+
+.dot1,.dot2,.dot3{
+  animation:typingBounce 1.2s infinite;
+  font-size:16px;
+  line-height:1;
+}
+.dot2{ animation-delay:0.2s; }
+.dot3{ animation-delay:0.4s; }
+
+@keyframes typingBounce{
+  0%,80%,100%{ opacity:0.3; transform:translateY(0); }
+  40%{ opacity:1; transform:translateY(-4px); }
+}
+
+/* ===== CHAT CALL BAR ===== */
+.chatCallBar{
+  display:flex;
+  gap:6px;
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.callIconBtn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.12);
+  border:none;
+  font-size:16px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  padding:0;
+  margin:0;
+  box-shadow:none;
+}
+
+.callIconBtn:hover{
+  background:rgba(255,255,255,0.22);
+  transform:scale(1.1);
+  box-shadow:none;
+}
+
+/* ===== VIDEO CALL SCREEN ===== */
+.callTopbar{
+  position:relative;
+  background:#111;
+  justify-content:center;
+}
+
+.callBackBtn{
+  position:absolute;
+  left:10px;
+  width:auto;
+  padding:6px 12px;
+  font-size:18px;
+  margin:0;
+  background:transparent;
+  box-shadow:none;
+}
+
+.callStatus{
+  font-size:13px;
+  opacity:0.7;
+  margin-left:8px;
+}
+
+.remoteVideo{
+  flex:1;
+  width:100%;
+  background:#000;
+  object-fit:cover;
+}
+
+.localVideoSmall{
+  position:absolute;
+  bottom:120px;
+  right:12px;
+  width:100px;
+  height:140px;
+  border-radius:12px;
+  object-fit:cover;
+  border:2px solid var(--secondary);
+  z-index:10;
+  background:#111;
+}
+
+.callControls{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  z-index:20;
+}
+
+.callCtrlBtn{
+  padding:12px 16px;
+  border-radius:50px;
+  font-size:14px;
+  width:auto;
+  min-width:80px;
+  margin:0;
+}
+
+.endCallBtn{
+  background:linear-gradient(135deg,#ff0000,#cc0000) !important;
+}
+
+.callManualJoin{
+  position:absolute;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  z-index:20;
+  width:80%;
+}
+
+.callManualJoin input{
+  width:100%;
+  border-radius:10px;
+  font-size:13px;
+  padding:8px 12px;
+  background:rgba(0,0,0,0.6);
+  border:1px solid #333;
+}
+
+.callManualJoin button{
+  width:auto;
+  padding:8px 20px;
+  font-size:13px;
+  margin:0;
+}
+
+/* ===== INCOMING CALL BANNER ===== */
+.incomingCallBanner{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  background:rgba(10,10,10,0.96);
+  border-bottom:2px solid var(--secondary);
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:99999;
+  box-shadow:0 4px 20px rgba(255,0,85,0.4);
+  animation:slideDown 0.3s ease;
+}
+
+@keyframes slideDown{
+  from{ transform:translateY(-100%); }
+  to{ transform:translateY(0); }
+}
+
+.incomingCallInfo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.incomingCallIcon{
+  font-size:28px;
+}
+
+.incomingCallerName{
+  font-size:16px;
+  font-weight:bold;
+}
+
+.incomingCallType{
+  font-size:12px;
+  opacity:0.7;
+}
+
+.incomingCallBtns{
+  display:flex;
+  gap:8px;
+}
+
+.callAnswerBtn{
+  background:linear-gradient(135deg,#00cc44,#009933) !important;
+  width:auto;
+  padding:10px 14px;
+  font-size:13px;
+  margin:0;
+}
+
+.callDeclineBtn{
+  background:linear-gradient(135deg,#cc0000,#990000) !important;
+  width:auto;
+  padding:10px 14px;
+  font-size:13px;
+  margin:0;
+}
+
+/* ===== KIK-STYLE ADMIN & OWNER BADGES ===== */
+.ownerBadge{
+  position:absolute;
+  bottom:-4px;
+  right:-4px;
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+  border-radius:12px;
+  padding:2px 6px;
+  font-size:9px;
+  font-weight:900;
+  border:2px solid #000;
+  white-space:nowrap;
+  box-shadow:0 0 8px rgba(255,165,0,0.7);
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+.adminBadge{
+  position:absolute;
+  bottom:-4px;
+  right:-4px;
+  background:linear-gradient(135deg,#00c8ff,#0088cc);
+  color:#fff;
+  border-radius:12px;
+  padding:2px 6px;
+  font-size:9px;
+  font-weight:900;
+  border:2px solid #000;
+  white-space:nowrap;
+  box-shadow:0 0 8px rgba(0,200,255,0.5);
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+/* Inline badges in message bubbles */
+.inlineBadge{
+  display:inline-block;
+  border-radius:8px;
+  padding:1px 5px;
+  font-size:9px;
+  font-weight:900;
+  vertical-align:middle;
+  margin-left:4px;
+}
+
+.ownerInline{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+}
+
+.adminInline{
+  background:linear-gradient(135deg,#00c8ff,#0088cc);
+  color:#fff;
+}
+
+/* ===== GROUP INFO BUTTONS ===== */
+.groupInfoBtns{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.groupActionBtn{
+  width:auto;
+  padding:10px 18px;
+  font-size:14px;
+  border-radius:20px;
+  margin:0;
+}
+
+.leaveBtn{
+  background:linear-gradient(135deg,#cc0000,#880000) !important;
+}
+
+/* Member action button */
+.memberActionBtn{
+  width:auto;
+  padding:4px 10px;
+  font-size:11px;
+  border-radius:10px;
+  margin-top:4px;
+  background:rgba(255,255,255,0.12) !important;
+  box-shadow:none !important;
+}
+
+/* ===== ADD PEOPLE MODAL ===== */
+.addPeopleModal{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.85);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+  display:none;
+}
+
+.addPeopleBox{
+  background:#111;
+  border:2px solid var(--secondary);
+  border-radius:20px;
+  padding:20px;
+  width:85%;
+  max-width:360px;
+  max-height:70vh;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  box-shadow:0 0 30px rgba(255,0,85,0.3);
+}
+
+.addPeopleTitle{
+  font-size:20px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.addPeopleList{
+  overflow-y:auto;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.addPeopleRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  background:rgba(255,255,255,0.05);
+  border-radius:12px;
+}
+
+.addPeopleBtn{
+  width:auto;
+  padding:6px 14px;
+  font-size:13px;
+  margin:0;
+  border-radius:12px;
+}
+
+.addPeopleClose{
+  background:rgba(255,255,255,0.1) !important;
+  box-shadow:none !important;
+  font-size:14px;
+  padding:10px;
+  margin:0;
+}
+
+/* ===== PROFILE COVER PHOTO ===== */
+.profileCover{
+  width:100%;
+  height:160px;
+  background:linear-gradient(135deg,#1a1a1a,#2a0a1a);
+  background-size:cover;
+  background-position:center;
+  position:relative;
+  flex-shrink:0;
+}
+
+.coverEditBtn{
+  position:absolute;
+  bottom:10px;
+  right:10px;
+  width:auto;
+  padding:6px 12px;
+  font-size:12px;
+  margin:0;
+  border-radius:12px;
+  background:rgba(0,0,0,0.6) !important;
+  box-shadow:none !important;
+  border:1px solid rgba(255,255,255,0.2) !important;
+}
+
+.profileAvatarWrap{
+  display:flex;
+  justify-content:center;
+  margin-top:-50px;
+  position:relative;
+  z-index:2;
+}
+
+.profileAvatarWrap .avatar{
+  border:4px solid var(--main);
+  box-shadow:0 0 0 3px var(--secondary), 0 0 20px rgba(255,0,85,0.4);
+}
+
+/* Profile action buttons */
+.profileActions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.profileActionBtn{
+  width:auto;
+  padding:10px 18px;
+  font-size:14px;
+  margin:0;
+  border-radius:20px;
+}
+
+.blockBtn{
+  background:linear-gradient(135deg,#cc0000,#880000) !important;
+}
+
+/* Dev badge */
+.devBadge{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+  padding:5px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:bold;
+  margin-top:8px;
+  box-shadow:0 0 12px rgba(255,165,0,0.5);
+}
+
+/* ===== CHAT AVATAR SIZING FIX ===== */
+.chatAvatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#222;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-shrink:0;
+}
+
+.chatAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.msgAvatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#222;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-shrink:0;
+  align-self:flex-end;
+}
+
+.msgAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* ===== PRIVATE CHAT ITEM ===== */
+.privateChatItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+}
+
+.privateChatItem:active{
+  background:rgba(255,255,255,0.04);
+}
+
+/* ===== GROUP ITEM ===== */
+.groupItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+}
+
+.publicGroupItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+}
+
+/* ===== TOPBAR POSITION FIX ===== */
+#chat .topbar{
+  position:relative;
+}
+
+/* ===== MESSAGES AREA ===== */
+#messages{
+  flex:1;
+  overflow-y:auto;
+  padding:10px;
+  padding-bottom:70px;
+}
+
+/* ===== MSG WRAP ===== */
+.msgWrap{
+  display:flex;
+  margin:6px 0;
+  gap:6px;
+  align-items:flex-end;
+}
+
+.msgWrap.me{
+  justify-content:flex-end;
+}
+
+.msg{
+  padding:9px 12px;
+  border-radius:18px;
+  max-width:65%;
+  background:#1a1a1a;
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+.msgWrap.me .msg{
+  background:linear-gradient(135deg,rgba(255,0,51,0.25),rgba(180,0,30,0.2));
+  border-color:rgba(255,0,51,0.2);
+}
+
+/* ===== PREMIUM TEXT ===== */
+.premiumText{
+  font-size:12px;
+  opacity:0.6;
+  margin-top:10px;
+  text-align:center;
+  padding:0 20px;
+}

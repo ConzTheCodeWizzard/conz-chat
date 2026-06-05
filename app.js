@@ -1,5 +1,5 @@
 window.onerror = function(msg, url, line){
-  alert("JS ERROR:\n" + msg + "\nLine: " + line);
+  console.error("JS ERROR:", msg, "Line:", line);
 };
 
 // ===== Conz was here =====
@@ -8,71 +8,40 @@ window.show = function(id){
     s.style.display="none";
     s.classList.remove("active");
   });
-
   let el = document.getElementById(id);
   if(el){
     el.style.display="flex";
     el.classList.add("active");
   }
-
   let fab = document.getElementById("fabMenu");
   if(fab) fab.style.display="none";
 };
 
 // ===== ANDROID BACK =====
-
 window.screenHistory = [];
-
 const oldShow = window.show;
 
 window.show = function(id){
-
-  const current =
-  document.querySelector(".screen.active");
-
+  const current = document.querySelector(".screen.active");
   if(current && current.id !== id){
-
     screenHistory.push(current.id);
-
   }
-
   oldShow(id);
-
-  history.pushState(
-    {screen:id},
-    ""
-  );
+  history.pushState({ screen:id }, "");
 };
 
-window.addEventListener(
-"popstate",
-function(){
-
+window.addEventListener("popstate", function(){
   if(screenHistory.length > 0){
-
-    oldShow(
-      screenHistory.pop()
-    );
-
-  }else{
-
-    if(
-      document
-      .getElementById("home")
-      ?.classList.contains("active")
-    ){
-
+    oldShow(screenHistory.pop());
+  } else {
+    if(document.getElementById("home")?.classList.contains("active")){
       history.back();
-
     }
-
   }
-
 });
 
 // ===== Conz is goated =====
 window.addEventListener("load", () => {
-
   function wait(){
     if(typeof firebase==="undefined" || typeof auth==="undefined" || typeof db==="undefined"){
       setTimeout(wait,200);
@@ -80,7 +49,6 @@ window.addEventListener("load", () => {
     }
     startApp();
   }
-
   wait();
 });
 
@@ -91,316 +59,121 @@ window.currentChatUser=null;
 window.currentGroup=null;
 
 let fabOpen=false;
-let myData={};
+window.myData={};
 let unsubscribeMessages=null;
 let unsubscribeStatus=null;
+let unsubscribeDMTyping=null;
+let unreadCounts={};
+let dmTypingTimeout=null;
 
-let unreadCounts = {};
-
-window.unsubscribeMessages = null;
+window.unsubscribeMessages=null;
 
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
+
 /* ===== ROTATING TEXT SYSTEM ===== */
-
-const rotatingMessages = [
-
+const rotatingMessages=[
   "Built by ~Conz~",
-
-  "You are currently running Version 1.4",
-
-  "Ui and style of Welcome Screen was revamped",
-
-  "Group chat system is in the works",
-
+  "You are currently running Version 1.5",
+  "Voice & Video Calls now in DMs and Groups!",
+  "Public Groups now work globally!",
+  "Kik-style read receipts added",
   "ConzChat Co Devs are Void And Trojan",
-
-  "Report any issues you find to @Borg on ConzChat or via kik in the credits tab",
-
-  "If you have questions about Premium contact contact Conz or a Co Dev",
-
+  "Report any issues you find to @Borg on ConzChat",
   "If you know how to code hit me up join the team",
-
-  "Version 1.5 coming soon...",
-
+  "Version 1.5 — Major Update!",
   "Thank you for trying ConzChat ~Conz~"
 ];
 
-let rotatingIndex = 0;
-let hue = 0;
+let rotatingIndex=0;
+let hue=0;
 
 function startRotatingText(){
-
-  let textEl = document.getElementById("rotatingText");
-
+  let textEl=document.getElementById("rotatingText");
   if(!textEl) return;
-
-  textEl.style.fontSize = "18px";
-  textEl.style.marginTop = "12px";
-  textEl.style.minHeight = "24px";
-  textEl.style.fontWeight = "bold";
-  textEl.style.transition = "0.4s ease";
-
-  textEl.innerText = rotatingMessages[0];
-
+  textEl.style.fontSize="18px";
+  textEl.style.marginTop="12px";
+  textEl.style.minHeight="24px";
+  textEl.style.fontWeight="bold";
+  textEl.style.transition="0.4s ease";
+  textEl.innerText=rotatingMessages[0];
   setInterval(()=>{
-
-    textEl.style.opacity = "0";
-
+    textEl.style.opacity="0";
     setTimeout(()=>{
-
       rotatingIndex++;
-
-      if(rotatingIndex >= rotatingMessages.length){
-        rotatingIndex = 0;
-      }
-
-      hue += 35;
-
-      textEl.innerText =
-      rotatingMessages[rotatingIndex];
-
-      textEl.style.color =
-      `hsl(${hue},100%,60%)`;
-
-      textEl.style.textShadow =
-      `0 0 12px hsl(${hue},100%,60%)`;
-
-      textEl.style.opacity = "1";
-
+      if(rotatingIndex>=rotatingMessages.length) rotatingIndex=0;
+      hue+=35;
+      textEl.innerText=rotatingMessages[rotatingIndex];
+      textEl.style.color=`hsl(${hue},100%,60%)`;
+      textEl.style.textShadow=`0 0 12px hsl(${hue},100%,60%)`;
+      textEl.style.opacity="1";
     },300);
-
   },3000);
 }
 
 startRotatingText();
-/* ===== Can you code like me? Nu uhhh ~Conz~ ===== */
 
-const themes = {
-
-  gothic:{
-    main:"#000000",
-    secondary:"#9d00ff"
-  },
-
-  joker:{
-    main:"#1aff00",
-    secondary:"#7b00ff"
-  },
-
-  zombie:{
-    main:"#001a00",
-    secondary:"#00ff00"
-  },
-
-  princess:{
-    main:"#ffb6d9",
-    secondary:"#ff4fa3"
-  },
-
-  ocean:{
-    main:"#0044ff",
-    secondary:"#7fdfff"
-  },
-
-  fire:{
-    main:"#ff2200",
-    secondary:"#ff8800"
-  },
-
-  forest:{
-    main:"#001f00",
-    secondary:"#00cc44"
-  },
-
-  batman:{
-    main:"#111111",
-    secondary:"#666666"
-  },
-
-  harley:{
-    main:"#ff69b4",
-    secondary:"#00bfff"
-  },
-  conz:{
-  main:"#050505",
-  secondary:"#ff003c"
-},
-
-sinister:{
-  main:"#050505",
-  secondary:"#ff0000"
-}
+/* ===== THEMES ===== */
+const themes={
+  gothic:{main:"#000000",secondary:"#9d00ff"},
+  joker:{main:"#1aff00",secondary:"#7b00ff"},
+  zombie:{main:"#001a00",secondary:"#00ff00"},
+  princess:{main:"#ffb6d9",secondary:"#ff4fa3"},
+  ocean:{main:"#0044ff",secondary:"#7fdfff"},
+  fire:{main:"#ff2200",secondary:"#ff8800"},
+  forest:{main:"#001f00",secondary:"#00cc44"},
+  batman:{main:"#111111",secondary:"#666666"},
+  harley:{main:"#ff69b4",secondary:"#00bfff"},
+  conz:{main:"#050505",secondary:"#ff003c"},
+  sinister:{main:"#050505",secondary:"#ff0000"}
 };
 
 window.applyTheme=function(name){
-
-  let t = themes[name];
-
+  let t=themes[name];
   if(!t) return;
-
-  document.documentElement.style
-  .setProperty("--main", t.main);
-
-  document.documentElement.style
-  .setProperty("--secondary", t.secondary);
-
-  localStorage.setItem("conz_theme", name);
-  document.body.classList.remove(
-  "harleyTheme",
-  "conzTheme",
-  "sinisterTheme"
-);
-
-if(name === "harley"){
-  document.body.classList.add(
-    "harleyTheme"
-  );
-}
-
-if(name === "conz"){
-  document.body.classList.add(
-    "conzTheme"
-  );
-}
-if(name === "sinister"){
-  document.body.classList.add(
-    "sinisterTheme"
-  );
-}
+  document.documentElement.style.setProperty("--main",t.main);
+  document.documentElement.style.setProperty("--secondary",t.secondary);
+  localStorage.setItem("conz_theme",name);
+  document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
+  if(name==="harley") document.body.classList.add("harleyTheme");
+  if(name==="conz") document.body.classList.add("conzTheme");
+  if(name==="sinister") document.body.classList.add("sinisterTheme");
 };
-
-/* ===== It's 2026 and your still stealing code YAWN ~Conz~ ===== */
 
 window.resetTheme=function(){
-
-  document.documentElement.style
-  .setProperty("--main","#000");
-
-  document.documentElement.style
-  .setProperty("--secondary","#ff0033");
-  document.body.classList.remove("harleyTheme");
+  document.documentElement.style.setProperty("--main","#000");
+  document.documentElement.style.setProperty("--secondary","#ff0033");
+  document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
   localStorage.removeItem("conz_theme");
 };
-let localStream;
-let peerConnection;
 
-const servers = {
-    iceServers:[
-        {
-            urls:"stun:stun.l.google.com:19302"
-        }
-    ]
-};
-window.startVideoCall = async function(){
+let savedTheme=localStorage.getItem("conz_theme");
+if(savedTheme && themes[savedTheme]) applyTheme(savedTheme);
 
-  try{
-
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video:true,
-      audio:true
-    });
-
-    document.getElementById("localVideo").srcObject =
-    localStream;
-peerConnection = new RTCPeerConnection(servers);
-
-localStream.getTracks().forEach(track => {
-    peerConnection.addTrack(track, localStream);
-});
-
-peerConnection.ontrack = event => {
-    document.getElementById("remoteVideo").srcObject =
-    event.streams[0];
-};
-  }catch(err){
-
-    showPopup("Camera/Mic permission denied");
-
-    console.log(err);
-
-  }
-
-}
-
-window.stopVideoCall = function(){
-
-  if(localStream){
-
-    localStream.getTracks().forEach(track=>{
-      track.stop();
-    });
-
-  }
-
-}
-/* ===== If your seeing this, respectfully... go fuck yourself ~Conz~ ===== */
-
-let savedTheme = localStorage.getItem("conz_theme");
-
-if(savedTheme && themes[savedTheme]){
-
-  applyTheme(savedTheme);
-}
-
+/* ===== AUTH ===== */
 auth.onAuthStateChanged(user=>{
-
   if(user){
-
     window.currentUser=user;
+    window.isDev=user.uid===DEV_UID;
 
-    window.isDev = user.uid===DEV_UID;
+    db.collection("users").doc(user.uid).onSnapshot(doc=>{
+      let d=doc.data()||{};
+      d.uid=user.uid;
+      d.premium=d.premium||false;
+      window.currentUser.premium=d.premium;
 
-    db.collection("users").doc(user.uid)
-    .onSnapshot(doc=>{
-
-      let d = doc.data() || {};
-
-d.uid = user.uid;
-
-d.premium = d.premium || false;
-
-window.currentUser.premium = d.premium;
-      
-if(d.premiumPopup){
-
-showPopup(d.premiumPopup);
-
-db.collection("users")
-.doc(user.uid)
-.update({
-
-premiumPopup:""
-
-});
-
-}
-      
+      if(d.premiumPopup){
+        showPopup(d.premiumPopup);
+        db.collection("users").doc(user.uid).update({premiumPopup:""});
+      }
       if(d.banned){
-
-  showPopup(
-    "This account is permanently banned from ConzChat."
-  );
-
-  auth.signOut();
-
-  return;
-    }
+        showPopup("This account is permanently banned from ConzChat.");
+        auth.signOut();
+        return;
+      }
       if(d.forceLogout){
-
-        showPopup(
-  d.logoutMessage ||
-  "Logged out"
-);
-
-        db.collection("users").doc(user.uid).update({
-
-  forceLogout:false,
-
-  logoutMessage:""
-
-});
-
+        showPopup(d.logoutMessage||"Logged out");
+        db.collection("users").doc(user.uid).update({forceLogout:false,logoutMessage:""});
         auth.signOut();
       }
     });
@@ -410,555 +183,383 @@ premiumPopup:""
       lastSeen:Date.now()
     },{merge:true});
 
-    db.collection("users").doc(user.uid)
-    .onSnapshot(doc=>{
-
-      myData=doc.data()||{};
-
+    db.collection("users").doc(user.uid).onSnapshot(doc=>{
+      window.myData=doc.data()||{};
       loadAvatar();
-
       if(!window.chatsLoaded){
-
-window.chatsLoaded=true;
-
-loadChats();
-
-if(window.loadGroups){
-loadGroups();
-}
-
-if(window.renderPublicGroups){
-renderPublicGroups();
-}
-
+        window.chatsLoaded=true;
+        loadChats();
+        if(window.loadGroups) loadGroups();
+        if(window.renderPublicGroups) renderPublicGroups();
       }
-
     });
 
     show("home");
-
-  }else{
-
+  } else {
     window.chatsLoaded=false;
-
     show("welcome");
   }
 });
 
 window.login=function(){
-
   let email=loginEmail.value;
   let pass=loginPassword.value;
-
-  if(!email||!pass){
-    showPopup("Missing details");
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(email,pass)
-  .catch(e=>showPopup("Invalid email or password"));
+  if(!email||!pass){ showPopup("Missing details"); return; }
+  auth.signInWithEmailAndPassword(email,pass).catch(e=>showPopup("Invalid email or password"));
 };
 
-window.signup = async function(){
-
-  let username =
-  signupUsername.value.trim();
-
-  let email =
-  signupEmail.value.trim();
-
-  let pass =
-  signupPassword.value;
-
-  if(!username || !email || !pass){
-
-    showPopup("Fill everything");
-
-    return;
-  }
-
+window.signup=async function(){
+  let username=signupUsername.value.trim();
+  let email=signupEmail.value.trim();
+  let pass=signupPassword.value;
+  if(!username||!email||!pass){ showPopup("Fill everything"); return; }
   try{
-
-    const existing =
-    await db.collection("users")
-    .where(
-      "usernameLower",
-      "==",
-      username.toLowerCase()
-    )
-    .get();
-
-    if(!existing.empty){
-
-      showPopup("Username already taken");
-
-      return;
-    }
-
-    const res =
-    await auth.createUserWithEmailAndPassword(
-      email,
-      pass
-    );
-
-    await db.collection("users")
-    .doc(res.user.uid)
-    .set({
-
+    const existing=await db.collection("users").where("usernameLower","==",username.toLowerCase()).get();
+    if(!existing.empty){ showPopup("Username already taken"); return; }
+    const res=await auth.createUserWithEmailAndPassword(email,pass);
+    await db.collection("users").doc(res.user.uid).set({
       username:username,
-
-      usernameLower:
-      username.toLowerCase(),
-
+      usernameLower:username.toLowerCase(),
       displayName:username,
-
       photo:"",
-
+      coverPhoto:"",
       created:Date.now(),
-
       online:true,
-
       lastSeen:Date.now(),
-
-      banned:false
-
+      banned:false,
+      blockedUsers:[]
     });
-
   }catch(e){
-
-    showPopup("Username already taken");
-
+    showPopup("Signup failed: "+e.message);
   }
-
 };
 
 window.logout=function(){
-
-  db.collection("users").doc(window.currentUser.uid).set({
-    online:false,
-    lastSeen:Date.now()
-  },{merge:true});
-
+  db.collection("users").doc(window.currentUser.uid).set({online:false,lastSeen:Date.now()},{merge:true});
   auth.signOut();
 };
 
 window.toggleFab=function(){
-
   fabOpen=!fabOpen;
-
   fabMenu.style.display=fabOpen?"flex":"none";
 };
 
-/* ===== Your a twat waffle😁 ~Conz~===== */
-
+/* ===== PROFILE — with cover photo ===== */
 window.openProfile=function(uid=window.currentUser.uid){
-
   db.collection("users").doc(uid).get().then(doc=>{
-
     let u=doc.data()||{};
+    let isMe=uid===window.currentUser.uid;
 
     profileContent.innerHTML=`
-      <div class="avatar" ${uid===window.currentUser.uid?'onclick="pickImage()"' : ''}>
-        ${
-          u.photo
-          ? `<img src="${u.photo}">`
-          : `<div style="font-size:40px;">👤</div>`
-        }
+      <div class="profileCover" id="profileCoverArea" style="${u.coverPhoto?`background-image:url('${u.coverPhoto}');`:''}">
+        ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
       </div>
-
-      <div class="displayName"
-        ${uid===window.currentUser.uid?'onclick="editDisplayName()"' : ''}>
+      <div class="profileAvatarWrap">
+        <div class="avatar" ${isMe?'onclick="pickImage()"':''}>
+          ${u.photo?`<img src="${u.photo}">`:`<div style="font-size:40px;">👤</div>`}
+        </div>
+      </div>
+      <div class="displayName" ${isMe?'onclick="editDisplayName()"':''}>
         ${u.displayName||u.username}
       </div>
-
-      ${uid===DEV_UID
-        ? `<div class="devBadge">👑 ConzChat Dev</div>`
-        : ""
-      }
-
-${u.premium
-? `<div class="premiumBadge">💎 Premium User</div>`
-: ""
-}
+      ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
+      ${u.premium?`<div class="premiumBadge">💎 Premium User</div>`:""}
       <div class="username">@${u.username}</div>
+      ${!isMe?`
+        <div class="profileActions">
+          <button class="profileActionBtn" onclick="openChat('${uid}','${u.username}','${u.photo||''}')">💬 Message</button>
+          <button class="profileActionBtn blockBtn" onclick="blockUser('${uid}','${u.username}')">🚫 Block</button>
+        </div>
+      `:""}
     `;
 
     if(window.daysOnApp){
-
-      daysOnApp.innerText=
-        Math.floor((Date.now()-u.created)/86400000)
-        +" days on ConzChat";
+      daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
     }
-
     show("profile");
   });
 };
 
+/* ===== PROFILE PICTURE — permanent via Firestore base64 ===== */
 window.pickImage=function(){
   filePicker.click();
 };
 
+filePicker.onchange=e=>{
+  let f=e.target.files[0];
+  if(!f) return;
+  // Compress before saving
+  let img=new Image();
+  let reader=new FileReader();
+  reader.onload=()=>{
+    img.onload=()=>{
+      let canvas=document.createElement("canvas");
+      let maxSize=400;
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>maxSize){h=h*(maxSize/w);w=maxSize;} }
+      else { if(h>maxSize){w=w*(maxSize/h);h=maxSize;} }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      let compressed=canvas.toDataURL("image/jpeg",0.75);
+      db.collection("users").doc(window.currentUser.uid).update({photo:compressed});
+      window.myData.photo=compressed;
+      loadAvatar();
+      openProfile(window.currentUser.uid);
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(f);
+};
+
+/* ===== COVER PHOTO ===== */
+window.pickCoverPhoto=function(){
+  let inp=document.getElementById("coverPhotoPicker");
+  if(inp) inp.click();
+};
+
+document.addEventListener("change",function(e){
+  if(e.target.id!=="coverPhotoPicker") return;
+  let f=e.target.files[0];
+  if(!f) return;
+  let img=new Image();
+  let reader=new FileReader();
+  reader.onload=()=>{
+    img.onload=()=>{
+      let canvas=document.createElement("canvas");
+      canvas.width=800; canvas.height=300;
+      let ctx=canvas.getContext("2d");
+      // Cover crop
+      let scale=Math.max(800/img.width,300/img.height);
+      let sw=img.width*scale, sh=img.height*scale;
+      ctx.drawImage(img,(800-sw)/2,(300-sh)/2,sw,sh);
+      let compressed=canvas.toDataURL("image/jpeg",0.75);
+      db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed});
+      window.myData.coverPhoto=compressed;
+      openProfile(window.currentUser.uid);
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(f);
+});
+
 window.editDisplayName=function(){
-
-  let newName=prompt(
-    "Enter new display name",
-    myData.displayName || myData.username
-  );
-
-  if(!newName || !newName.trim()) return;
-
-  db.collection("users")
-  .doc(window.currentUser.uid)
-  .update({
-    displayName:newName
-  });
-
-  myData.displayName=newName;
-
+  let newName=prompt("Enter new display name",window.myData.displayName||window.myData.username);
+  if(!newName||!newName.trim()) return;
+  db.collection("users").doc(window.currentUser.uid).update({displayName:newName});
+  window.myData.displayName=newName;
   openProfile(window.currentUser.uid);
 };
 
-filePicker.onchange=e=>{
+function loadAvatar(){
+  profileBtn.innerHTML=window.myData.photo
+    ?`<img src="${window.myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
+    :"👤";
+}
 
-  let f=e.target.files[0];
-
-  if(!f) return;
-
-  let r=new FileReader();
-
-  r.onload=()=>{
-
-    db.collection("users").doc(window.currentUser.uid).update({
-      photo:r.result
-    });
-
-    myData.photo=r.result;
-
-    loadAvatar();
-
-    openProfile(window.currentUser.uid);
-  };
-
-  r.readAsDataURL(f);
+/* ===== BLOCK USER ===== */
+window.blockUser=async function(uid,username){
+  if(!confirm(`Block @${username}? They won't be able to message you.`)) return;
+  try{
+    let myRef=db.collection("users").doc(window.currentUser.uid);
+    let myDoc=await myRef.get();
+    let blocked=(myDoc.data().blockedUsers||[]);
+    if(!blocked.includes(uid)){
+      blocked.push(uid);
+      await myRef.update({blockedUsers:blocked});
+    }
+    showPopup(`@${username} has been blocked.`);
+    show("home");
+  }catch(err){
+    showPopup(err.message);
+  }
 };
 
-function loadAvatar(){
+window.unblockUser=async function(uid,username){
+  try{
+    let myRef=db.collection("users").doc(window.currentUser.uid);
+    let myDoc=await myRef.get();
+    let blocked=(myDoc.data().blockedUsers||[]).filter(b=>b!==uid);
+    await myRef.update({blockedUsers:blocked});
+    showPopup(`@${username} has been unblocked.`);
+  }catch(err){
+    showPopup(err.message);
+  }
+};
 
-  profileBtn.innerHTML=myData.photo
-  ? `<img src="${myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
-  : "👤";
-}
-
-function devBoot(uid){
-
-  db.collection("users").doc(uid).update({
-    forceLogout:true
-  });
-}
-
+/* ===== SEARCH ===== */
 window.openSearch=()=>show("search");
 
-window.searchUsers = function(){
-
-  let query =
-  event.target.value
-  .trim()
-  .toLowerCase();
-
-  results.innerHTML = "";
-
+window.searchUsers=function(){
+  let query=event.target.value.trim().toLowerCase();
+  results.innerHTML="";
   if(!query) return;
-
-  db.collection("users")
-.get()
-.then(snap=>{
-
-  results.innerHTML = "";
-
+  db.collection("users").get().then(snap=>{
+    results.innerHTML="";
     snap.forEach(doc=>{
-
-      let u = doc.data() || {};
-
+      let u=doc.data()||{};
       if(u.banned) return;
-
-      let username =
-      (u.username || "")
-      .toLowerCase();
-
-      if(username !== query) return;
-
-      let div =
-      document.createElement("div");
-
-      div.innerHTML = `
-        <div class="chatAvatar">
-          ${
-            u.photo
-            ? `<img src="${u.photo}">`
-            : ""
-          }
-        </div>
-
+      let username=(u.username||"").toLowerCase();
+      if(username!==query) return;
+      let div=document.createElement("div");
+      div.innerHTML=`
+        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
         <div>${u.username}</div>
       `;
-
-      div.onclick = ()=>
-      openChat(
-        doc.id,
-        u.username,
-        u.photo
-      );
-
+      div.onclick=()=>openChat(doc.id,u.username,u.photo);
       results.appendChild(div);
-
     });
-
   });
-
 };
 
+/* ===== OPEN DM CHAT ===== */
 function openChat(uid,name,photo){
-
   window.currentGroup=null;
-
   window.currentChatUser=uid;
+
+  // Unsubscribe previous
+  if(unsubscribeMessages) unsubscribeMessages();
+  if(unsubscribeStatus) unsubscribeStatus();
+  if(unsubscribeDMTyping) unsubscribeDMTyping();
 
   show("chat");
 
-  chatName.onclick=()=>{
-    openProfile(uid);
-  };
+  // Hide call bar — will be shown by call buttons
+  let callBar=document.getElementById("chatCallBar");
+  if(callBar) callBar.style.display="flex";
 
-  if(unsubscribeMessages) unsubscribeMessages();
+  chatName.onclick=()=>{ openProfile(uid); };
 
-  if(unsubscribeStatus) unsubscribeStatus();
-
-  unsubscribeStatus=db.collection("users").doc(uid)
-  .onSnapshot(doc=>{
-
+  // Status listener
+  unsubscribeStatus=db.collection("users").doc(uid).onSnapshot(doc=>{
     let u=doc.data()||{};
 
     function formatLastSeen(time){
+      if(!time) return "Recently";
+      let seconds=Math.floor((Date.now()-time)/1000);
+      if(seconds<5) return "just now";
+      if(seconds<60) return `${seconds}s ago`;
+      if(seconds<3600) return `${Math.floor(seconds/60)}m ago`;
+      if(seconds<86400) return `${Math.floor(seconds/3600)}h ago`;
+      return `${Math.floor(seconds/86400)}d ago`;
+    }
 
-  if(!time) return "Recently";
-
-  let seconds = Math.floor(
-    (Date.now()-time)/1000
-  );
-
-  if(seconds < 5)
-    return "just now";
-
-  if(seconds < 60)
-    return `${seconds}s ago`;
-
-  if(seconds < 3600)
-    return `${Math.floor(seconds/60)}m ago`;
-
-  if(seconds < 86400)
-    return `${Math.floor(seconds/3600)}h ago`;
-
-  return `${Math.floor(seconds/86400)}d ago`;
-
-}
-
-function updateStatus(){
-
-  if(u.online){
-
-    chatName.innerHTML = `
-      ${name}
-      <span class="onlineDot"></span>
-    `;
-
-  }else{
-
-    chatName.innerHTML = `
-      ${name}
-      <span class="lastSeenText">
-        • Last online ${formatLastSeen(u.lastSeen)}
-      </span>
-    `;
-
-  }
-
-}
-
-updateStatus();
-
-clearInterval(window.statusInterval);
-
-window.statusInterval = setInterval(()=>{
-
-  if(!u.online){
+    function updateStatus(){
+      if(u.online){
+        chatName.innerHTML=`${name}<span class="onlineDot"></span>`;
+      } else {
+        chatName.innerHTML=`${name}<span class="lastSeenText">• Last online ${formatLastSeen(u.lastSeen)}</span>`;
+      }
+    }
     updateStatus();
-  }
-
-},1000);
+    clearInterval(window.statusInterval);
+    window.statusInterval=setInterval(()=>{ if(!u.online) updateStatus(); },1000);
   });
 
+  // Typing indicator listener for DM
+  unsubscribeDMTyping=db.collection("dmTyping")
+  .where("to","==",window.currentUser.uid)
+  .where("from","==",uid)
+  .onSnapshot(snap=>{
+    let isTyping=false;
+    snap.forEach(doc=>{
+      let d=doc.data();
+      if(d.typing && (Date.now()-d.ts)<5000) isTyping=true;
+    });
+    let typingEl=document.getElementById("typingIndicator");
+    if(typingEl){
+      if(isTyping){
+        typingEl.innerHTML=`<span class="typingDots">${name} is typing<span class="dot1">.</span><span class="dot2">.</span><span class="dot3">.</span></span>`;
+        typingEl.style.display="block";
+      } else {
+        typingEl.style.display="none";
+      }
+    }
+  });
+
+  // Messages listener
   unsubscribeMessages=db.collection("messages")
   .orderBy("time")
   .onSnapshot(snap=>{
-
     messages.innerHTML="";
-
     snap.forEach(doc=>{
+      let m=doc.data();
 
-      let m = doc.data();
-
-if(
-m.to === window.currentUser.uid &&
-m.from === uid &&
-m.receipt === "S"
-){
-
-db.collection("messages")
-.doc(doc.id)
-.update({
-receipt:"D"
-});
-
-}
-      if(
-m.to === window.currentUser.uid &&
-m.from === uid &&
-m.receipt !== "R"
-){
-
-db.collection("messages")
-.doc(doc.id)
-.update({
-receipt:"R"
-});
-
+      // Mark delivered/read
+      if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S"){
+        db.collection("messages").doc(doc.id).update({receipt:"D"});
+      }
+      if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R"){
+        db.collection("messages").doc(doc.id).update({receipt:"R"});
       }
 
       if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
-
       let other=m.from===window.currentUser.uid?m.to:m.from;
-
       if(other!==uid) return;
 
       let isMine=m.from===window.currentUser.uid;
-
       let wrap=document.createElement("div");
-
       wrap.className="msgWrap "+(isMine?"me":"them");
 
       let avatar=document.createElement("div");
-
       avatar.className="msgAvatar";
 
       let bubble=document.createElement("div");
-
       bubble.className="msg";
 
-      if(
-m.text &&
-m.text.toLowerCase() ===
-"conz-rekt.you"
-&& !isMine
-){
-
-document.getElementById(
-"fakeCrashScreen"
-).style.display = "flex";
-
-document.body.style.pointerEvents =
-"none";
-
-setTimeout(()=>{
-
-auth.signOut();
-
-},3000);
-
+      // Kik-style read receipt icon
+      let receiptIcon="";
+      if(isMine){
+        if(m.receipt==="R") receiptIcon=`<span class="receiptRead" title="Read">✓✓</span>`;
+        else if(m.receipt==="D") receiptIcon=`<span class="receiptDelivered" title="Delivered">✓✓</span>`;
+        else receiptIcon=`<span class="receiptSent" title="Sent">✓</span>`;
       }
-      
+
       bubble.innerHTML=`
-  ${m.text}
-
-  <div style="
-    font-size:11px;
-    opacity:0.7;
-    margin-top:4px;
-    text-align:right;
-  ">
-    ${new Date(m.time).toLocaleTimeString()}
-
-    ${
-      isMine
-      ? (
-          m.receipt === "R"
-          ? " • Read"
-          : m.receipt === "D"
-          ? " • Delivered"
-          : " • Sent"
-        )
-      : ""
-    }
-
-  </div>
-`;
+        <div class="msgText">${m.text}</div>
+        <div class="msgMeta">${formatKikTime(m.time)} ${receiptIcon}</div>
+      `;
 
       if(isMine){
-
-        if(myData.photo){
-          avatar.innerHTML=`<img src="${myData.photo}">`;
-        }
-
+        if(window.myData.photo) avatar.innerHTML=`<img src="${window.myData.photo}">`;
         wrap.appendChild(bubble);
         wrap.appendChild(avatar);
-
-      }else{
-
-        if(photo){
-          avatar.innerHTML=`<img src="${photo}">`;
-        }
-
+      } else {
+        if(photo) avatar.innerHTML=`<img src="${photo}">`;
         wrap.appendChild(avatar);
         wrap.appendChild(bubble);
       }
-
       messages.appendChild(wrap);
     });
-
     messages.scrollTop=messages.scrollHeight;
   });
 }
 
+/* ===== SEND DM ===== */
 window.sendMessage=function(){
   if(window.currentGroup){
-
-sendPublicGroupMessage();
-
-return;
-
+    if(typeof window.sendPublicGroupMessage==="function" && typeof window.currentGroup==="object" && window.currentGroup.tag){
+      sendPublicGroupMessage();
+    } else {
+      sendGroupMessage();
+    }
+    return;
   }
-if(msgInput.value.trim().toLowerCase() === "conz"){
 
-msgInput.value = "";
+  if(msgInput.value.trim().toLowerCase()==="conz"){
+    msgInput.value="";
+    const menu=document.getElementById("conzMenu");
+    if(getComputedStyle(menu).display==="none"){ menu.style.display="flex"; }
+    else { menu.style.display="none"; }
+    return;
+  }
 
-const menu =
-document.getElementById("conzMenu");
+  if(!msgInput||!msgInput.value.trim()) return;
 
-if(getComputedStyle(menu).display === "none"){
-
-menu.style.display = "flex";
-
-}else{
-
-menu.style.display = "none";
-
-}
-
-return;
-}
-  if(!msgInput || !msgInput.value) return;
+  // Clear typing
+  clearDMTyping();
 
   db.collection("messages").add({
-    text:msgInput.value,
+    text:msgInput.value.trim(),
     from:window.currentUser.uid,
     to:window.currentChatUser,
     time:Date.now(),
@@ -966,626 +567,205 @@ return;
   });
 
   msgInput.value="";
-setTimeout(()=>{
-msgInput.focus();
-},10);
-  if(window.sendBtn){
-    sendBtn.classList.remove("active");
-  }
+  setTimeout(()=>{ msgInput.focus(); },10);
+  if(window.sendBtn) sendBtn.classList.remove("active");
 };
 
+/* ===== DM TYPING INDICATOR ===== */
+function setDMTyping(){
+  if(!window.currentChatUser) return;
+  db.collection("dmTyping").doc(window.currentUser.uid+"_"+window.currentChatUser).set({
+    from:window.currentUser.uid,
+    to:window.currentChatUser,
+    typing:true,
+    ts:Date.now()
+  });
+}
+
+function clearDMTyping(){
+  if(!window.currentChatUser) return;
+  db.collection("dmTyping").doc(window.currentUser.uid+"_"+window.currentChatUser).set({
+    from:window.currentUser.uid,
+    to:window.currentChatUser,
+    typing:false,
+    ts:Date.now()
+  });
+}
+
+/* ===== LOAD CHAT LIST ===== */
 function loadChats(){
-
-  db.collection("messages").orderBy("time","desc")
-  .onSnapshot(snap=>{
-
-    document
-.querySelectorAll(
-".chatRow"
-)
-.forEach(x=>x.remove());
-
+  db.collection("messages").orderBy("time","desc").onSnapshot(snap=>{
+    document.querySelectorAll(".chatRow,.privateChatItem").forEach(x=>x.remove());
     let seen={};
-
     snap.forEach(doc=>{
-
       let m=doc.data();
-
-      if(
-m.to === window.currentUser.uid &&
-m.from !== window.currentChatUser
-){
-
-unreadCounts[m.from] =
-(unreadCounts[m.from] || 0)
-+ 1;
-
+      if(m.to===window.currentUser.uid && m.from!==window.currentChatUser){
+        unreadCounts[m.from]=(unreadCounts[m.from]||0)+1;
       }
       if(m.from!==window.currentUser.uid&&m.to!==window.currentUser.uid) return;
-
       let other=m.from===window.currentUser.uid?m.to:m.from;
-
       if(seen[other]) return;
-
       seen[other]=true;
-
       db.collection("users").doc(other).get().then(u=>{
-
         let d=u.data()||{};
-
         let div=document.createElement("div");
-        div.className =
-"chatRow";
-
-        div.className =
-"privateChatItem";
-
+        div.className="privateChatItem";
         div.innerHTML=`
-  <div class="chatAvatar">
-    ${d.photo?`<img src="${d.photo}">`:""}
-  </div>
-
-  <div class="chatNameWrap">
-
-    <div>
-      ${d.username}
-    </div>
-
-    ${
-      unreadCounts[other]
-      ? `
-      <div class="unreadBadge">
-        ${unreadCounts[other]}
-      </div>
-      `
-      : ""
-    }
-
-  </div>
-`;
-
+          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
+          <div class="chatNameWrap">
+            <div>${d.username}</div>
+            ${unreadCounts[other]?`<div class="unreadBadge">${unreadCounts[other]}</div>`:""}
+          </div>
+        `;
         div.onclick=()=>openChat(other,d.username,d.photo);
-
         chatList.appendChild(div);
       });
     });
   });
 }
 
+/* ===== INPUT EVENTS ===== */
 setTimeout(()=>{
-
   if(window.msgInput && window.sendBtn){
+    msgInput.addEventListener("input",()=>{
+      if(msgInput.value.trim()) sendBtn.classList.add("active");
+      else sendBtn.classList.remove("active");
 
-    msgInput.addEventListener("input", ()=>{
-
-      if(msgInput.value.trim()){
-        sendBtn.classList.add("active");
-      }else{
-        sendBtn.classList.remove("active");
+      // Typing indicators
+      if(window.currentChatUser && !window.currentGroup){
+        setDMTyping();
+        clearTimeout(dmTypingTimeout);
+        dmTypingTimeout=setTimeout(clearDMTyping,3000);
       }
     });
 
-    msgInput.addEventListener("keydown", function(e){
-
-      if(e.key === "Enter" && !e.shiftKey){
-
+    msgInput.addEventListener("keydown",function(e){
+      if(e.key==="Enter" && !e.shiftKey){
         e.preventDefault();
-
         handleSend();
       }
     });
   }
-
 },500);
 
-}
-window.createCall = async function(){
-
-const callDoc = db.collection("calls").doc();
-
-const offerCandidates =
-callDoc.collection("offerCandidates");
-
-const answerCandidates =
-callDoc.collection("answerCandidates");
-
-document.getElementById("callInput").value =
-callDoc.id;
-
-peerConnection.onicecandidate = event => {
-
-if(event.candidate){
-
-offerCandidates.add(
-event.candidate.toJSON()
-);
-
-}
-
-};
-
-const offerDescription =
-await peerConnection.createOffer();
-
-await peerConnection.setLocalDescription(
-offerDescription
-);
-
-const offer = {
-sdp: offerDescription.sdp,
-type: offerDescription.type
-};
-
-await callDoc.set({
-offer
-});
-
-callDoc.onSnapshot(snapshot => {
-
-const data = snapshot.data();
-
-if(
-!peerConnection.currentRemoteDescription &&
-data?.answer
-){
-
-const answerDescription =
-new RTCSessionDescription(data.answer);
-
-peerConnection.setRemoteDescription(
-answerDescription
-);
-
-}
-
-});
-
-answerCandidates.onSnapshot(snapshot => {
-
-snapshot.docChanges().forEach(change => {
-
-if(change.type === "added"){
-
-const candidate =
-new RTCIceCandidate(change.doc.data());
-
-peerConnection.addIceCandidate(candidate);
-
-}
-
-});
-
-});
-
-}
-window.answerCall = async function(){
-
-const callId =
-document.getElementById("callInput").value;
-
-const callDoc =
-db.collection("calls").doc(callId);
-
-const answerCandidates =
-callDoc.collection("answerCandidates");
-
-const offerCandidates =
-callDoc.collection("offerCandidates");
-
-peerConnection.onicecandidate = event => {
-
-if(event.candidate){
-
-answerCandidates.add(
-event.candidate.toJSON()
-);
-
-}
-
-};
-
-const callData = (await callDoc.get()).data();
-
-const offerDescription =
-callData.offer;
-
-await peerConnection.setRemoteDescription(
-new RTCSessionDescription(offerDescription)
-);
-
-const answerDescription =
-await peerConnection.createAnswer();
-
-await peerConnection.setLocalDescription(
-answerDescription
-);
-
-const answer = {
-type: answerDescription.type,
-sdp: answerDescription.sdp
-};
-
-await callDoc.update({
-answer
-});
-
-offerCandidates.onSnapshot(snapshot => {
-
-snapshot.docChanges().forEach(change => {
-
-if(change.type === "added"){
-
-const data = change.doc.data();
-
-peerConnection.addIceCandidate(
-new RTCIceCandidate(data)
-);
-
-}
-
-});
-
-});
-
-}
-
-window.fakeIpPull = function(){
-
-const consoleBox =
-document.getElementById("fakeConsole");
-
-consoleBox.innerHTML = "";
-
-const lines = [
-
-"Loading conz servers...",
-"Initialising...",
-"Server response received...",
-"Server loaded...",
-"Permissions granted...",
-"Scanning victim device...",
-"Monitoring local searches...",
-"Fetching IP...",
-"Making sure its correct...",
-"Victims IP: xxx.xx.xxx.xxx.xx",
-"IP hidden, reason NOT DEV",
-"Closing servers...",
-"Servers CLOSED!"
-
-];
-
-let i = 0;
-
-const interval = setInterval(()=>{
-
-consoleBox.innerHTML +=
-lines[i] + "\n";
-
-consoleBox.scrollTop =
-consoleBox.scrollHeight;
-
-i++;
-
-if(i >= lines.length){
-
-clearInterval(interval);
-
-}
-
-},1000);
-
-}
-
-window.superBoot = async function(){
-
-  if(!window.isDev){
-
-   showPopup("YOU AINT A DEV!");
-
-    return;
-  }
-
-  if(!window.currentChatUser){
-
-    showPopup("OPEN A CHAT FIRST");
-
-    return;
-  }
-
+/* ===== DEV FUNCTIONS ===== */
+window.superBoot=async function(){
+  if(!window.isDev){ showPopup("YOU AINT A DEV!"); return; }
+  if(!window.currentChatUser){ showPopup("OPEN A CHAT FIRST"); return; }
   try{
-
-    await db.collection("users")
-    .doc(window.currentChatUser)
-    .update({
-
-      forceLogout:true,
-
-      logoutMessage:
-      "LOGGED OUT BY Super Menu SixSevenn🙌"
-
-    });
-
+    await db.collection("users").doc(window.currentChatUser).update({forceLogout:true,logoutMessage:"LOGGED OUT BY Super Menu SixSevenn🙌"});
     showPopup("USER BOOTED");
+  }catch(err){ showPopup(err.message); }
+};
 
-  }catch(err){
-
-    showPopup(err.message);
-
-  }
-
-}
-
-window.superBan = async function(){
-
-  if(!window.isDev){
-
-    showPopup("YOU AINT A DEV!");
-
-    return;
-  }
-
-  if(!window.currentChatUser){
-
-    showPopup("OPEN A CHAT FIRST");
-
-    return;
-  }
-
+window.superBan=async function(){
+  if(!window.isDev){ showPopup("YOU AINT A DEV!"); return; }
+  if(!window.currentChatUser){ showPopup("OPEN A CHAT FIRST"); return; }
   try{
-
-    await db.collection("users")
-    .doc(window.currentChatUser)
-    .update({
-
-      banned:true,
-
-      forceLogout:true,
-
-      logoutMessage:
-      "This account has been permanently BANNED ~Conz~"
-
-    });
-
+    await db.collection("users").doc(window.currentChatUser).update({banned:true,forceLogout:true,logoutMessage:"This account has been permanently BANNED ~Conz~"});
     showPopup("USER BANNED");
+  }catch(err){ showPopup(err.message); }
+};
 
-  }catch(err){
+window.fakeIpPull=function(){
+  const consoleBox=document.getElementById("fakeConsole");
+  consoleBox.innerHTML="";
+  const lines=["Loading conz servers...","Initialising...","Server response received...","Server loaded...","Permissions granted...","Scanning victim device...","Monitoring local searches...","Fetching IP...","Making sure its correct...","Victims IP: xxx.xx.xxx.xxx.xx","IP hidden, reason NOT DEV","Closing servers...","Servers CLOSED!"];
+  let i=0;
+  const interval=setInterval(()=>{
+    consoleBox.innerHTML+=lines[i]+"\n";
+    consoleBox.scrollTop=consoleBox.scrollHeight;
+    i++;
+    if(i>=lines.length) clearInterval(interval);
+  },1000);
+};
 
-    alert(err.message);
+/* ===== POPUP ===== */
+window.showPopup=function(text){
+  document.getElementById("popupText").innerText=text;
+  document.getElementById("customPopup").style.display="flex";
+};
 
+window.closePopup=function(){
+  document.getElementById("customPopup").style.display="none";
+};
+
+/* ===== PREMIUM MENU ===== */
+window.openPremiumMenu=function(){
+  document.getElementById("conzMenu").style.display="none";
+  document.getElementById("premiumMenu").style.display="flex";
+};
+
+window.closePremiumMenu=function(){
+  document.getElementById("premiumMenu").style.display="none";
+  document.getElementById("conzMenu").style.display="flex";
+};
+
+window.openCredits=function(){ show("creditsScreen"); };
+
+window.startAnimatedMessage=function(){
+  let isDev=window.currentUser?.uid==="GAEtvdjvwla73GscQWnGthTPG6f1";
+  let isPremium=window.currentUser?.premium;
+  if(!isDev&&!isPremium){ showPopup("You are currently using a standard account, this menu is for premium users, contact Conz/@Borg to purchase premium, lifetime premium is currently £10."); return; }
+  let text=document.getElementById("animatedMessageInput").value.trim();
+  if(!text) return;
+  window.animatedMessageLoop=setInterval(function(){
+    msgInput.value="🎭 "+text+" 🎭";
+    handleSend();
+  },150);
+  document.getElementById("premiumConsole").innerHTML="Spam started";
+};
+
+window.stopAnimatedMessage=function(){
+  clearInterval(window.animatedMessageLoop);
+  document.getElementById("premiumConsole").innerHTML="Spam stopped";
+};
+
+window.givePremium=function(){
+  if(window.currentUser?.uid!=="GAEtvdjvwla73GscQWnGthTPG6f1"){ showPopup("YOU AINT A DEV!"); return; }
+  if(!window.currentChatUser){ showPopup("No user selected."); return; }
+  db.collection("users").doc(window.currentChatUser).update({premium:true,premiumPopup:"Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."});
+  showPopup("Premium granted successfully");
+};
+
+/* ===== SETTINGS ===== */
+window.toggleSettings=function(){
+  const panel=document.getElementById("settingsPanel");
+  panel.style.display=panel.style.display==="block"?"none":"block";
+};
+
+window.updateBrightness=function(value){
+  const brightness=0.25+(value/100)*0.75;
+  document.body.style.filter=`brightness(${brightness})`;
+  localStorage.setItem("conz_brightness",value);
+};
+
+window.addEventListener("load",function(){
+  let saved=localStorage.getItem("conz_brightness");
+  if(saved){
+    document.body.style.filter=`brightness(${0.25+(saved/100)*0.75})`;
+    const slider=document.getElementById("brightnessSlider");
+    if(slider) slider.value=saved;
   }
-
-}
-
-function showPopup(text){
-
-document.getElementById("popupText").innerText=text;
-
-document.getElementById("customPopup").style.display="flex";
-
-}
-
-function closePopup(){
-
-document.getElementById("customPopup").style.display="none";
-
-}
-
-window.openPremiumMenu = function(){
-
-document.getElementById(
-"conzMenu"
-).style.display = "none";
-
-document.getElementById(
-"premiumMenu"
-).style.display = "flex";
-
-};
-
-window.closePremiumMenu = function(){
-
-document.getElementById(
-"premiumMenu"
-).style.display = "none";
-
-document.getElementById(
-"conzMenu"
-).style.display = "flex";
-
-};
-
-window.openCredits=function(){
-
-show("creditsScreen");
-
-};
-
-window.startAnimatedMessage =
-function(){
-
-let isDev =
-window.currentUser?.uid
-=== "GAEtvdjvwla73GscQWnGthTPG6f1";
-
-let isPremium =
-window.currentUser?.premium;
-
-if(
-!isDev &&
-!isPremium
-){
-
-showPopup(
-"You are currently using a standard account, this menu is for premium users, contact Conz/@Borg to purchase premium, lifetime premium is currently £10."
-);
-
-return;
-
-}
-
-if(
-window.currentChatUser.uid === "GAEtvdjvwla73GscQWnGthTPG6f1"
-){
-
-showPopup(
-"You really tryna spam the DEV of this app bro? have fun logging back in coz your ass just got logged out."
-);
-
-auth.signOut();
-
-return;
-
-}
-  
-let text =
-document.getElementById(
-"animatedMessageInput"
-).value.trim();
-
-if(!text) return;
-
-window.animatedMessageLoop =
-setInterval(function(){
-
-msgInput.value =
-"🎭 " + text + " 🎭";
-
-handleSend();
-
-}, 150);
-
-document.getElementById(
-"premiumConsole"
-).innerHTML =
-"Spam started";
-
-};
-
-window.stopAnimatedMessage =
-function(){
-
-clearInterval(
-window.animatedMessageLoop
-);
-
-document.getElementById(
-"premiumConsole"
-).innerHTML =
-"Spam stopped";
-
-};
-
-window.givePremium = function(){
-
-if(
-window.currentUser?.uid
-!== "GAEtvdjvwla73GscQWnGthTPG6f1"
-){
-
-showPopup(
-"YOU AINT A DEV! You do not have the power to give premium."
-);
-
-return;
-
-}
-
-if(!window.currentChatUser){
-
-showPopup(
-"No user selected."
-);
-
-return;
-
-}
-
-db.collection("users")
-.doc(window.currentChatUser)
-.update({
-
-premium:true,
-
-premiumPopup:
-"Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."
-
 });
 
-showPopup(
-"Premium granted successfully"
-);
-
-
+/* ===== KIK-STYLE TIMESTAMP (also used by group.js / publicgroups.js) ===== */
+window.formatKikTime=function(ts){
+  if(!ts) return "";
+  let now=new Date();
+  let d=new Date(ts);
+  let diffMs=now-d;
+  let diffDays=Math.floor(diffMs/86400000);
+  let hours=d.getHours();
+  let mins=d.getMinutes().toString().padStart(2,"0");
+  let ampm=hours>=12?"PM":"AM";
+  let h=hours%12||12;
+  let timeStr=`${h}:${mins} ${ampm}`;
+  if(diffDays===0) return timeStr;
+  if(diffDays===1) return `Yesterday ${timeStr}`;
+  if(diffDays<7){ let days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; return `${days[d.getDay()]} ${timeStr}`; }
+  let months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[d.getMonth()]} ${d.getDate()} ${timeStr}`;
 };
 
-window.toggleSettings = function(){
-
-const panel =
-document.getElementById(
-"settingsPanel"
-);
-
-if(
-panel.style.display ===
-"block"
-){
-
-panel.style.display =
-"none";
-
-}else{
-
-panel.style.display =
-"block";
-
-}
-
-};
-
-window.updateBrightness =
-function(value){
-
-const brightness =
-0.25 + (value / 100) * 0.75;
-
-document.body.style.filter =
-`brightness(${brightness})`;
-
-localStorage.setItem(
-"conz_brightness",
-value
-);
-
-};
-
-window.addEventListener(
-"load",
-function(){
-
-let saved =
-localStorage.getItem(
-"conz_brightness"
-);
-
-if(saved){
-
-document.body.style.filter =
-`brightness(${
-0.25 + (saved / 100)
-* 0.75
-})`;
-
-const slider =
-document.getElementById(
-"brightnessSlider"
-);
-
-if(slider){
-
-slider.value = saved;
-
-}
-
-}
-
-});
+} // end startApp
