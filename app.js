@@ -221,9 +221,12 @@ function startSessionGuard(uid){
   mySessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
   // Write it to Firestore
   db.collection("sessions").doc(uid).set({ sessionId: mySessionId, ts: Date.now() });
-  // Watch for changes
+  // Watch for changes — skip the first snapshot (it fires immediately on subscribe
+  // and would falsely trigger the kicked popup on every login)
+  let isFirstSnap = true;
   if(sessionUnsubscribe) sessionUnsubscribe();
   sessionUnsubscribe = db.collection("sessions").doc(uid).onSnapshot(snap=>{
+    if(isFirstSnap){ isFirstSnap = false; return; }
     if(!snap.exists) return;
     let data = snap.data();
     // If the sessionId in Firestore no longer matches ours, someone else logged in
