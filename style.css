@@ -2554,3 +2554,348 @@ box-shadow:
   min-width:0 !important;
   width:0 !important;
 }
+
+
+/* ============================================================
+   v1.6 NEW FEATURES CSS
+   ============================================================ */
+
+/* ---- Topbar actions cluster ---- */
+.topbarActions { display:flex; align-items:center; gap:10px; }
+.topbarIconBtn {
+  background:none !important; border:none !important; font-size:20px; cursor:pointer;
+  position:relative; padding:0 !important; line-height:1; width:auto !important;
+  margin:0 !important; box-shadow:none !important;
+}
+.topbarIconBtn:hover { transform:none !important; box-shadow:none !important; }
+.friendReqBadge {
+  position:absolute; top:-4px; right:-6px;
+  background:#ff0055; color:#fff; font-size:10px; font-weight:700;
+  border-radius:50%; width:16px; height:16px;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+
+/* ---- Stories Rail ---- */
+.storiesRail {
+  display:flex; flex-direction:row; gap:10px;
+  overflow-x:auto; padding:10px 12px 6px;
+  scrollbar-width:none;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  background:rgba(0,0,0,0.3);
+  flex-shrink:0;
+}
+.storiesRail::-webkit-scrollbar { display:none; }
+.storyItem {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; flex-shrink:0; width:60px;
+}
+.storyRing {
+  width:54px; height:54px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+.storyRingUnseen {
+  background: conic-gradient(#ff0055, #ff6600, #ff0055);
+  padding:2px;
+}
+.storyRingSeen {
+  background: rgba(255,255,255,0.2);
+  padding:2px;
+}
+.storyAddRing {
+  background: rgba(255,255,255,0.15);
+  border:2px dashed rgba(255,255,255,0.4);
+  padding:2px;
+}
+.storyAvatar {
+  width:48px; height:48px; border-radius:50%;
+  background:#1a1a1a; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+}
+.storyAvatar img { width:100%; height:100%; object-fit:cover; }
+.storyAddPlus {
+  position:absolute; bottom:0; right:0;
+  width:18px; height:18px; border-radius:50%;
+  background:#ff0055; color:#fff; font-size:13px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid #111;
+}
+.storyName {
+  font-size:10px; color:rgba(255,255,255,0.7);
+  text-align:center; max-width:56px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---- Story Post Menu ---- */
+.storyPostMenu {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:rgba(20,20,20,0.97); border:1px solid rgba(255,0,85,0.4);
+  border-radius:16px; padding:12px; z-index:9000;
+  display:flex; flex-direction:column; gap:8px; width:220px;
+  box-shadow:0 8px 32px rgba(255,0,85,0.3);
+}
+.storyPostBtn {
+  background:rgba(255,255,255,0.08) !important; border:none !important; color:#fff !important;
+  padding:12px 16px !important; border-radius:10px !important; font-size:15px !important;
+  cursor:pointer; text-align:left !important; width:100% !important;
+  margin:0 !important; box-shadow:none !important;
+}
+.storyPostBtn:active { background:rgba(255,0,85,0.3) !important; }
+.storyPostCancel { color:rgba(255,255,255,0.5) !important; }
+
+/* ---- Story Viewer ---- */
+.storyViewer {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#000; z-index:99999;
+  display:flex; flex-direction:column;
+}
+.storyHeader {
+  position:absolute; top:0; left:0; right:0; z-index:2;
+  padding:10px 12px 0;
+}
+.storyProgressBars {
+  display:flex; gap:4px; margin-bottom:8px;
+}
+.storyProgressBar {
+  flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px; overflow:hidden;
+}
+.storyProgressFill {
+  height:100%; background:#fff; width:0%; transition:none;
+}
+.storyUserInfo {
+  display:flex; align-items:center; gap:8px;
+}
+.storyUserAvatar {
+  width:32px; height:32px; border-radius:50%;
+  background:#333; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; font-size:14px;
+}
+.storyUserAvatar img { width:100%; height:100%; object-fit:cover; }
+.storyUserName { color:#fff; font-size:14px; font-weight:600; }
+.storyTime { color:rgba(255,255,255,0.6); font-size:11px; margin-left:4px; }
+.storyCloseBtn {
+  position:absolute; top:12px; right:12px;
+  background:rgba(0,0,0,0.5) !important; border:none !important; color:#fff !important;
+  width:30px !important; height:30px !important; border-radius:50% !important;
+  font-size:16px; cursor:pointer; display:flex !important;
+  align-items:center; justify-content:center;
+  padding:0 !important; margin:0 !important; box-shadow:none !important;
+}
+.storyContent {
+  flex:1; display:flex; align-items:center; justify-content:center;
+}
+.storyImage {
+  max-width:100%; max-height:100%; object-fit:contain;
+}
+.storyTextContent {
+  color:#fff; font-size:24px; font-weight:700;
+  text-align:center; padding:40px 24px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+.storyTapLeft {
+  position:absolute; top:0; left:0; width:40%; height:100%; z-index:1;
+}
+.storyTapRight {
+  position:absolute; top:0; right:0; width:40%; height:100%; z-index:1;
+}
+
+/* ---- Message Animated Entrance ---- */
+@keyframes msgSlideIn {
+  from { opacity:0; transform:translateY(8px) scale(0.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.msgAnim { animation: msgSlideIn 0.18s ease-out both; }
+
+/* ---- Message Reactions ---- */
+.msgReactions {
+  display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;
+}
+.reactionBubble {
+  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
+  border-radius:12px; padding:2px 7px; font-size:13px;
+  cursor:pointer;
+}
+.reactionBubble:active { background:rgba(255,0,85,0.3); }
+
+/* ---- Reply Preview inside bubble ---- */
+.replyPreview {
+  display:flex; align-items:stretch; gap:6px;
+  background:rgba(255,255,255,0.08); border-radius:6px;
+  padding:5px 8px; margin-bottom:5px; overflow:hidden;
+}
+.replyPreview .replyBar {
+  width:3px; background:#ff0055; border-radius:2px; flex-shrink:0;
+}
+.replyPreview .replyText {
+  font-size:12px; color:rgba(255,255,255,0.7);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  max-width:200px;
+}
+
+/* ---- Reply Bar above input ---- */
+#replyBar {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(20,20,20,0.95); border-top:1px solid rgba(255,0,85,0.4);
+  padding:8px 12px; flex-shrink:0;
+}
+#replyBar .replyBarLine {
+  width:3px; height:36px; background:#ff0055; border-radius:2px; flex-shrink:0;
+}
+#replyBar .replyBarContent {
+  flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden;
+}
+#replyBar .replyBarName { font-size:12px; color:#ff0055; font-weight:600; }
+#replyBar .replyBarText {
+  font-size:12px; color:rgba(255,255,255,0.6);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#replyBar .replyBarClose {
+  background:none !important; border:none !important; color:rgba(255,255,255,0.5) !important;
+  font-size:18px; cursor:pointer; padding:0 4px !important;
+  width:auto !important; margin:0 !important; box-shadow:none !important;
+}
+
+/* ---- Message Action Sheet ---- */
+.msgActionSheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:99998;
+  background:rgba(18,18,18,0.98);
+  border-top:1px solid rgba(255,0,85,0.3);
+  border-radius:20px 20px 0 0;
+  padding:16px 16px 32px;
+  box-shadow:0 -8px 32px rgba(0,0,0,0.6);
+  animation:sheetSlideUp 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes sheetSlideUp {
+  from { transform:translateY(100%); opacity:0; }
+  to   { transform:translateY(0); opacity:1; }
+}
+.actionSheetReactions {
+  display:flex; justify-content:space-around; padding:4px 0 12px;
+}
+.reactionEmojiBtn {
+  background:rgba(255,255,255,0.08) !important; border:none !important;
+  font-size:26px; width:46px !important; height:46px !important; border-radius:50% !important;
+  cursor:pointer; display:flex !important; align-items:center; justify-content:center;
+  transition:transform 0.15s; padding:0 !important; margin:0 !important;
+  box-shadow:none !important;
+}
+.reactionEmojiBtn:active { transform:scale(1.3) !important; }
+.actionSheetDivider {
+  height:1px; background:rgba(255,255,255,0.1); margin:4px 0 8px;
+}
+.actionSheetBtn {
+  display:block !important; width:100% !important;
+  background:rgba(255,255,255,0.06) !important;
+  border:none !important; color:#fff !important;
+  padding:14px 16px !important; border-radius:12px !important;
+  font-size:15px !important; text-align:left !important;
+  cursor:pointer; margin-bottom:6px !important;
+  box-shadow:none !important;
+}
+.actionSheetBtn:active { background:rgba(255,255,255,0.12) !important; }
+.actionSheetDelete { color:#ff4444 !important; }
+
+/* ---- Friend Requests Modal ---- */
+.friendRequestsModal {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:88%; max-width:360px; max-height:70vh; overflow-y:auto;
+  background:rgba(18,18,18,0.98); border:1px solid rgba(255,0,85,0.4);
+  border-radius:16px; z-index:9999; padding:0;
+  box-shadow:0 12px 40px rgba(0,0,0,0.7);
+  animation:popIn 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.frModalHeader {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.frModalHeader h3 { margin:0; font-size:16px; color:#fff; }
+.frModalHeader button {
+  background:none !important; border:none !important; color:rgba(255,255,255,0.6) !important;
+  font-size:20px; cursor:pointer; width:auto !important; padding:0 !important;
+  margin:0 !important; box-shadow:none !important;
+}
+.frEmpty { padding:24px; text-align:center; color:rgba(255,255,255,0.4); font-size:14px; }
+.frRow {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.frAvatar {
+  width:42px; height:42px; border-radius:50%;
+  background:#222; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
+}
+.frAvatar img { width:100%; height:100%; object-fit:cover; }
+.frInfo { flex:1; }
+.frName { color:#fff; font-size:14px; font-weight:600; }
+.frActions { display:flex; gap:8px; }
+.frAccept {
+  background:#22c55e !important; border:none !important; color:#fff !important;
+  width:34px !important; height:34px !important; border-radius:50% !important;
+  font-size:16px; cursor:pointer; padding:0 !important; margin:0 !important;
+  box-shadow:none !important;
+}
+.frDecline {
+  background:#ef4444 !important; border:none !important; color:#fff !important;
+  width:34px !important; height:34px !important; border-radius:50% !important;
+  font-size:16px; cursor:pointer; padding:0 !important; margin:0 !important;
+  box-shadow:none !important;
+}
+
+/* ---- In-chat Search Bar ---- */
+.chatSearchBar {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(20,20,20,0.97); padding:8px 12px;
+  border-bottom:1px solid rgba(255,0,85,0.3);
+  flex-shrink:0;
+}
+.chatSearchBar input {
+  flex:1; background:rgba(255,255,255,0.08) !important;
+  border:1px solid rgba(255,255,255,0.15) !important;
+  border-radius:20px; padding:8px 14px; color:#fff; font-size:14px;
+}
+.chatSearchBar button {
+  background:none !important; border:none !important; color:rgba(255,255,255,0.5) !important;
+  font-size:20px; cursor:pointer; width:auto !important; padding:0 !important;
+  margin:0 !important; box-shadow:none !important;
+}
+.searchHighlight {
+  background:rgba(255,200,0,0.3) !important;
+  border-radius:3px;
+}
+
+/* ---- Chat topbar right cluster ---- */
+.chatTopbarRight {
+  display:flex; align-items:center; gap:6px; margin-left:auto;
+}
+.chatBackBtn {
+  background:none !important; border:none !important; color:#fff !important;
+  font-size:20px; cursor:pointer; padding:0 8px 0 0 !important; line-height:1;
+  width:auto !important; margin:0 !important; box-shadow:none !important;
+}
+
+/* ---- Online dot on chat list avatars ---- */
+.onlineDot {
+  position:absolute; bottom:1px; right:1px;
+  width:10px; height:10px; border-radius:50%;
+  background:#22c55e; border:2px solid #111;
+}
+.offlineDot {
+  position:absolute; bottom:1px; right:1px;
+  width:10px; height:10px; border-radius:50%;
+  background:#555; border:2px solid #111;
+}
+.chatAvatar { position:relative; }
+
+/* ---- Deleted message style ---- */
+.msgText em {
+  color:rgba(255,255,255,0.35); font-style:italic; font-size:13px;
+}
+
+/* ---- Call icon buttons in chat topbar ---- */
+.callIconBtn {
+  background:none !important; border:none !important; color:#fff !important;
+  font-size:18px; cursor:pointer; padding:4px !important;
+  width:auto !important; margin:0 !important; box-shadow:none !important;
+}

@@ -180,13 +180,37 @@ auth.onAuthStateChanged(user=>{
       }
     });
 
-    db.collection("users").doc(user.uid).set({online:true,lastSeen:Date.now()},{merge:true});
+    // ===== ACCURATE PRESENCE =====
+    const presenceRef = db.collection("users").doc(user.uid);
+    presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
+
+    // Heartbeat every 30s — if missed for >60s, user is considered offline
+    window._presenceHeartbeat = setInterval(()=>{
+      if(document.visibilityState==="visible"){
+        presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
+      }
+    }, 30000);
+
+    // Go offline when tab/app is hidden or closed
+    function goOffline(){
+      presenceRef.set({online:false, lastSeen:Date.now()},{merge:true});
+    }
+    document.addEventListener("visibilitychange", function(){
+      if(document.visibilityState==="hidden") goOffline();
+      else presenceRef.set({online:true, lastSeen:Date.now()},{merge:true});
+    });
+    window.addEventListener("beforeunload", goOffline);
+    window.addEventListener("pagehide", goOffline);
+    // ===== END PRESENCE =====
 
     db.collection("users").doc(user.uid).onSnapshot(doc=>{
       window.myData=doc.data()||{};
       loadAvatar();
       if(!window.chatsLoaded){
         window.chatsLoaded=true;
+        // Load stories rail and friend request badge
+        if(typeof window.loadStories==="function") setTimeout(window.loadStories,500);
+        if(typeof window.loadFriendRequestBadge==="function") setTimeout(window.loadFriendRequestBadge,600);
         loadChats();
         if(window.loadGroups) loadGroups();
         if(window.renderPublicGroups) renderPublicGroups();
@@ -495,20 +519,36 @@ window.openChat=function(uid,name,photo){
       if(other!==uid) return;
 
       let isMine=m.from===window.currentUser.uid;
+      let msgId=doc.id;
       let wrap=document.createElement("div");
-      wrap.className="msgWrap "+(isMine?"me":"them");
+      wrap.className="msgWrap "+(isMine?"me":"them")+" msgAnim";
 
       let avatar=document.createElement("div");
       avatar.className="msgAvatar";
 
       let bubble=document.createElement("div");
       bubble.className="msg";
+      bubble.dataset.id=msgId;
 
       let receiptIcon="";
       if(isMine){
         if(m.receipt==="R") receiptIcon=`<span class="receiptRead" title="Read">✓✓</span>`;
         else if(m.receipt==="D") receiptIcon=`<span class="receiptDelivered" title="Delivered">✓✓</span>`;
         else receiptIcon=`<span class="receiptSent" title="Sent">✓</span>`;
+      }
+
+      // Reply-to preview
+      let replyHtml="";
+      if(m.replyTo){
+        replyHtml=`<div class="replyPreview"><span class="replyBar"></span><span class="replyText">${m.replyTo.text||"📎 Media"}</span></div>`;
+      }
+
+      // Reactions display
+      let reactionsHtml="";
+      if(m.reactions && Object.keys(m.reactions).length>0){
+        let counts={};
+        Object.values(m.reactions).forEach(e=>{ counts[e]=(counts[e]||0)+1; });
+        reactionsHtml=`<div class="msgReactions">`+Object.entries(counts).map(([e,c])=>`<span class="reactionBubble">${e}${c>1?" "+c:""}</span>`).join("")+`</div>`;
       }
 
       // Handle image/video/voice messages
@@ -526,9 +566,21 @@ window.openChat=function(uid,name,photo){
       }
 
       bubble.innerHTML=`
+        ${replyHtml}
         ${contentHtml}
+        ${reactionsHtml}
         <div class="msgMeta">${formatKikTime(m.time)} ${receiptIcon}</div>
       `;
+
+      // Long-press for action sheet (reactions, reply, delete)
+      let pressTimer;
+      bubble.addEventListener("touchstart",()=>{
+        pressTimer=setTimeout(()=>{ showMsgActions(msgId, m, isMine, name, photo); },500);
+      });
+      bubble.addEventListener("touchend",()=>clearTimeout(pressTimer));
+      bubble.addEventListener("touchmove",()=>clearTimeout(pressTimer));
+      // Desktop right-click
+      bubble.addEventListener("contextmenu",(e)=>{ e.preventDefault(); showMsgActions(msgId, m, isMine, name, photo); });
 
       if(isMine){
         if(window.myData.photo) avatar.innerHTML=`<img src="${window.myData.photo}">`;
@@ -543,6 +595,83 @@ window.openChat=function(uid,name,photo){
     });
     messages.scrollTop=messages.scrollHeight;
   });
+};
+
+/* ===== MESSAGE ACTION SHEET (long-press) ===== */
+window._replyTo = null;
+
+function showMsgActions(msgId, m, isMine, senderName, senderPhoto){
+  // Remove any existing sheet
+  let old=document.getElementById("msgActionSheet");
+  if(old) old.remove();
+
+  let sheet=document.createElement("div");
+  sheet.id="msgActionSheet";
+  sheet.className="msgActionSheet";
+
+  const emojis=["❤️","😂","😮","😢","👍","🔥"];
+  let emojiRow=emojis.map(e=>`<button class="reactionEmojiBtn" onclick="addReaction('${msgId}','${e}')">${e}</button>`).join("");
+
+  sheet.innerHTML=`
+    <div class="actionSheetReactions">${emojiRow}</div>
+    <div class="actionSheetDivider"></div>
+    <button class="actionSheetBtn" onclick="startReply('${msgId}','${(m.text||'📎 Media').replace(/'/g,"\'")}','${senderName}')">↩️ Reply</button>
+    ${isMine?`<button class="actionSheetBtn actionSheetDelete" onclick="deleteMsg('${msgId}')">🗑️ Delete</button>`:""}
+    <button class="actionSheetBtn" onclick="document.getElementById('msgActionSheet').remove()">Cancel</button>
+  `;
+
+  document.body.appendChild(sheet);
+  // Dismiss on backdrop tap
+  setTimeout(()=>{
+    document.addEventListener("touchstart", function dismissSheet(e){
+      if(!sheet.contains(e.target)){ sheet.remove(); document.removeEventListener("touchstart",dismissSheet); }
+    });
+  },100);
+}
+window.showMsgActions=showMsgActions;
+
+window.addReaction=function(msgId, emoji){
+  let old=document.getElementById("msgActionSheet");
+  if(old) old.remove();
+  let uid=window.currentUser.uid;
+  // Determine collection
+  let col = window.currentGroup ? (window.currentGroup.tag ? "publicGroupMessages" : "groupMessages") : "messages";
+  db.collection(col).doc(msgId).update({
+    [`reactions.${uid}`]: emoji
+  }).catch(e=>console.warn("reaction err",e));
+  if(navigator.vibrate) navigator.vibrate(30);
+};
+
+window.startReply=function(msgId, text, senderName){
+  let old=document.getElementById("msgActionSheet");
+  if(old) old.remove();
+  window._replyTo={ id:msgId, text:text, sender:senderName };
+  let bar=document.getElementById("replyBar");
+  if(!bar){
+    bar=document.createElement("div");
+    bar.id="replyBar";
+    bar.className="replyBar";
+    let inputWrap=document.querySelector(".chatInputBar");
+    if(inputWrap) inputWrap.parentNode.insertBefore(bar, inputWrap);
+  }
+  bar.innerHTML=`<span class="replyBarLine"></span><div class="replyBarContent"><span class="replyBarName">${senderName}</span><span class="replyBarText">${text.substring(0,60)}${text.length>60?"...":""}</span></div><button class="replyBarClose" onclick="cancelReply()">✕</button>`;
+  bar.style.display="flex";
+  if(window.msgInput) window.msgInput.focus();
+};
+
+window.cancelReply=function(){
+  window._replyTo=null;
+  let bar=document.getElementById("replyBar");
+  if(bar) bar.style.display="none";
+};
+
+window.deleteMsg=function(msgId){
+  let old=document.getElementById("msgActionSheet");
+  if(old) old.remove();
+  let col = window.currentGroup ? (window.currentGroup.tag ? "publicGroupMessages" : "groupMessages") : "messages";
+  db.collection(col).doc(msgId).update({ deleted:true, text:"This message was deleted", type:"text" })
+    .catch(e=>console.warn("delete err",e));
+  if(navigator.vibrate) navigator.vibrate([30,20,30]);
 };
 
 /* ===== TYPING INDICATOR — bottom above input ===== */
@@ -586,14 +715,23 @@ window.handleSend=function(){
 
   clearDMTyping();
 
-  db.collection("messages").add({
+  let msgData={
     text:val,
     from:window.currentUser.uid,
     to:window.currentChatUser,
     time:Date.now(),
     receipt:"S",
     type:"text"
-  });
+  };
+  if(window._replyTo) msgData.replyTo = window._replyTo;
+
+  db.collection("messages").add(msgData);
+
+  // Haptic feedback
+  if(navigator.vibrate) navigator.vibrate(20);
+
+  // Clear reply
+  window.cancelReply();
 
   msgInput.value="";
   sendBtn.classList.remove("active");

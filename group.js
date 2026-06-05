@@ -117,8 +117,9 @@ window.openGroup = function(groupId){
       msgList.forEach(m=>{
         let u = userCache[m.from] || {};
         let isMine = m.from === window.currentUser.uid;
+        let msgId = m.id;
         let wrap = document.createElement("div");
-        wrap.className = "msgWrap " + (isMine ? "me" : "them");
+        wrap.className = "msgWrap " + (isMine ? "me" : "them") + " msgAnim";
 
         let avatar = document.createElement("div");
         avatar.className = "msgAvatar";
@@ -126,6 +127,7 @@ window.openGroup = function(groupId){
 
         let bubble = document.createElement("div");
         bubble.className = "msg";
+        bubble.dataset.id = msgId;
 
         let roleBadge = "";
         if(m.from === g.owner){
@@ -134,11 +136,46 @@ window.openGroup = function(groupId){
           roleBadge = `<span class="inlineBadge adminInline">Admin</span>`;
         }
 
+        // Reply preview
+        let replyHtml = "";
+        if(m.replyTo){
+          replyHtml = `<div class="replyPreview"><span class="replyBar"></span><span class="replyText">${m.replyTo.text||"\uD83D\uDCCE Media"}</span></div>`;
+        }
+
+        // Reactions
+        let reactionsHtml = "";
+        if(m.reactions && Object.keys(m.reactions).length>0){
+          let counts={};
+          Object.values(m.reactions).forEach(e=>{ counts[e]=(counts[e]||0)+1; });
+          reactionsHtml = `<div class="msgReactions">`+Object.entries(counts).map(([e,c])=>`<span class="reactionBubble">${e}${c>1?" "+c:""}</span>`).join("")+`</div>`;
+        }
+
+        // Content
+        let contentHtml = "";
+        if(m.type==="image"){
+          contentHtml = `<img src="${m.url}" class="msgImage" onclick="viewFullImage('${m.url}')">`;
+        } else if(m.type==="video"){
+          contentHtml = `<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
+        } else if(m.type==="voice"){
+          contentHtml = `<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div></div>`;
+        } else {
+          contentHtml = `<div class="msgText">${m.deleted?"<em>This message was deleted</em>":m.text}</div>`;
+        }
+
         bubble.innerHTML = `
           ${!isMine ? `<div class="msgSenderName">${u.displayName||u.username||"Unknown"} ${roleBadge}</div>` : ""}
-          <div class="msgText">${m.text}</div>
+          ${replyHtml}
+          ${contentHtml}
+          ${reactionsHtml}
           <div class="msgMeta">${formatKikTime(m.time)}</div>
         `;
+
+        // Long-press action sheet
+        let pressTimer;
+        bubble.addEventListener("touchstart",()=>{ pressTimer=setTimeout(()=>{ if(window.showMsgActions) showMsgActions(msgId,m,isMine,u.displayName||u.username,u.photo); },500); });
+        bubble.addEventListener("touchend",()=>clearTimeout(pressTimer));
+        bubble.addEventListener("touchmove",()=>clearTimeout(pressTimer));
+        bubble.addEventListener("contextmenu",(e)=>{ e.preventDefault(); if(window.showMsgActions) showMsgActions(msgId,m,isMine,u.displayName||u.username,u.photo); });
 
         if(isMine){
           wrap.appendChild(bubble);
@@ -191,13 +228,20 @@ window.sendGroupMessage = async function(){
   // Clear typing
   clearGroupTyping();
 
+  // Haptic
+  if(navigator.vibrate) navigator.vibrate(20);
+
+  let msgData = {
+    groupId: window.currentGroup.id || window.currentGroup,
+    from: window.currentUser.uid,
+    text: text,
+    time: Date.now()
+  };
+  if(window._replyTo) msgData.replyTo = window._replyTo;
+  if(window.cancelReply) window.cancelReply();
+
   try{
-    await db.collection("groupMessages").add({
-      groupId: window.currentGroup.id || window.currentGroup,
-      from: window.currentUser.uid,
-      text: text,
-      time: Date.now()
-    });
+    await db.collection("groupMessages").add(msgData);
 
     let gId = window.currentGroup.id || window.currentGroup;
     await db.collection("groups").doc(gId).update({
