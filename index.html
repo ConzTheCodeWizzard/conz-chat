@@ -117,7 +117,6 @@
 <!-- ===== CHAT SCREEN ===== -->
 <div id="chat" class="screen">
   <div class="topbar chatTopbarMain">
-    <button class="chatBackBtn" onclick="history.back ? history.back() : show('home')" title="Back">←</button>
     <span id="chatName"></span>
     <div id="chatTopbarRight" class="chatTopbarRight">
       <button class="callIconBtn" id="voiceCallBtn" onclick="startVoiceCall()" title="Voice Call" style="display:none;">🎙️</button>
@@ -186,7 +185,6 @@
 <!-- ===== VIDEO / VOICE CALL SCREEN ===== -->
 <div id="videoCall" class="screen">
   <div class="topbar callTopbar">
-    <button class="callBackBtn" onclick="endCall()">←</button>
     <div id="callScreenTitle">ConzCall</div>
     <div id="callStatus" class="callStatus">Connecting...</div>
   </div>
@@ -308,7 +306,6 @@
 <!-- ConzChat Mods Screen -->
 <div id="conzMods" class="screen">
   <div class="topbar">
-    <button class="backBtn" onclick="show('home')">←</button>
     <span>Conz Mods</span>
   </div>
   <div class="modsContainer">
