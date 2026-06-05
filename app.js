@@ -194,8 +194,7 @@ auth.onAuthStateChanged(user=>{
         loadChats();
         if(window.loadGroups) loadGroups();
         if(window.renderPublicGroups) renderPublicGroups();
-        // Inject Conz AI bot row at top of chat list
-        setTimeout(()=>{ if(window.injectConzAIRow) window.injectConzAIRow(); }, 600);
+        // Conz AI row is injected automatically by the MutationObserver in conzai.js
       }
     });
 

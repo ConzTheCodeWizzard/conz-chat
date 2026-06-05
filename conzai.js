@@ -50,6 +50,26 @@ window.injectConzAIRow = function(){
   chatList.insertBefore(div, chatList.firstChild);
 };
 
+// Watch chatList for DOM changes and always keep bot row at top
+(function watchChatList(){
+  let chatList = document.getElementById('chatList');
+  if(!chatList){
+    // chatList not ready yet — wait for DOM
+    document.addEventListener('DOMContentLoaded', watchChatList);
+    return;
+  }
+  let observer = new MutationObserver(()=>{
+    let existing = document.getElementById('conzAIRow');
+    // If bot row is missing or not first child, re-inject
+    if(!existing || chatList.firstChild !== existing){
+      window.injectConzAIRow();
+    }
+  });
+  observer.observe(chatList, { childList: true });
+  // Inject immediately
+  window.injectConzAIRow();
+})();
+
 // ===== OPEN THE CONZ AI CHAT SCREEN =====
 window.openConzAIChat = function(){
   // Reuse the existing #chat screen but set up for bot
@@ -139,7 +159,7 @@ function renderConzAIWelcome(){
   div.innerHTML = `
     <div class="bubble receivedBubble conzAIWelcomeBubble">
       <img src="${BOT_AVATAR}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle;">
-      <span class="bubbleText">Hey 👋 I'm <strong>Conz AI</strong> — your built-in assistant on ConzChat.<br><br>Ask me anything. I'm always here. 🤖</span>
+      <span class="bubbleText">Hey! I'm <strong>Conz AI</strong>, I'm not configured yet... but when I am, I will be your virtual AI assistant for ConzChat. 🤖</span>
     </div>
   `;
   messages.appendChild(div);
