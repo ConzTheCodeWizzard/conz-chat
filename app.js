@@ -840,47 +840,22 @@ function loadChats(){
     Object.keys(convMap).forEach(other=>{
       if(seen[other]) return;
       seen[other]=true;
-      let { latest, unread }=convMap[other];
+      let { unread }=convMap[other];
       db.collection("users").doc(other).get().then(u=>{
         let d=u.data()||{};
         let div=document.createElement("div");
         div.className="privateChatItem";
-        // Build avatar: photo or gradient letter avatar
-        let avatarHtml;
-        if(d.photo){
-          avatarHtml=`<div class="chatAvatar"><img src="${d.photo}"></div>`;
-        } else {
-          let letter=(d.username||"?")[0].toUpperCase();
-          let colors=[
-            ['#ff0055','#cc0033'],['#7c4dff','#4a00e0'],['#00b4d8','#0077b6'],
-            ['#f77f00','#d62828'],['#2dc653','#007f5f'],['#e040fb','#9c27b0']
-          ];
-          let ci=(d.username||"a").charCodeAt(0)%colors.length;
-          avatarHtml=`<div class="defaultAvatar" style="background:linear-gradient(135deg,${colors[ci][0]},${colors[ci][1]})">${letter}</div>`;
-        }
-        // Build last message preview
-        let preview="";
-        if(latest){
-          if(latest.mediaType==="image") preview="📷 Photo";
-          else if(latest.mediaType==="video") preview="🎥 Video";
-          else if(latest.mediaType==="voice") preview="🎤 Voice note";
-          else if(latest.viewOnce) preview="🔥 View once";
-          else preview=latest.text||"";
-          if(preview.length>38) preview=preview.slice(0,38)+"...";
-        }
         div.innerHTML=`
-          ${avatarHtml}
-          <div class="chatInfo">
-            <div class="chatName">${d.username||"Unknown"}</div>
-            <div class="chatPreview">${preview||"No messages yet"}</div>
-          </div>
-          <div class="chatMeta">
+          <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}  </div>
+          <div class="chatNameWrap">
+            <div class="chatItemName">${d.username}</div>
             ${unread>0?`<div class="unreadBadge">${unread>99?"99+":unread}</div>`:""}
           </div>
         `;
         div.onclick=()=>{
           lastSeenTimes[other]=Date.now();
           saveLastSeen();
+          // Remove badge immediately on tap
           let badge=div.querySelector(".unreadBadge");
           if(badge) badge.remove();
           openChat(other,d.username,d.photo||"");
