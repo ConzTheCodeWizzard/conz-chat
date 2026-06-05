@@ -240,8 +240,10 @@ window.openProfile=function(uid=window.currentUser.uid){
     let u=doc.data()||{};
     let isMe=uid===window.currentUser.uid;
 
+    // Build full profile HTML first
     profileContent.innerHTML=`
-      <div class="profileCover" id="profileCoverArea" style="${u.coverPhoto?`background-image:url('${u.coverPhoto}');background-size:cover;background-position:center;`:''}">        ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
+      <div class="profileCover" id="profileCoverArea">
+        ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
       </div>
       <div class="profileAvatarWrap">
         <div class="avatar" ${isMe?'onclick="pickImage()"':''}>
@@ -269,6 +271,15 @@ window.openProfile=function(uid=window.currentUser.uid){
         </div>
       `:""}
     `;
+    // Apply cover photo AFTER innerHTML is set, using JS (avoids base64 escaping in template literals)
+    if(u.coverPhoto){
+      let coverEl = document.getElementById("profileCoverArea");
+      if(coverEl){
+        coverEl.style.backgroundImage = "url('" + u.coverPhoto + "')";
+        coverEl.style.backgroundSize = "cover";
+        coverEl.style.backgroundPosition = "center top";
+      }
+    }
 
     // Restore brightness slider value if on own profile
     if(isMe){
@@ -335,7 +346,18 @@ document.addEventListener("change",function(e){
       ctx.drawImage(img, ox, oy, sw, sh);
       let compressed=canvas.toDataURL("image/jpeg",0.65);
       db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed})
-        .then(()=>{ window.myData.coverPhoto=compressed; openProfile(window.currentUser.uid); })
+        .then(()=>{
+          window.myData.coverPhoto=compressed;
+          // Apply immediately to DOM without re-opening profile
+          let coverEl=document.getElementById("profileCoverArea");
+          if(coverEl){
+            coverEl.style.backgroundImage="url('"+compressed+"')";
+            coverEl.style.backgroundSize="cover";
+            coverEl.style.backgroundPosition="center top";
+          } else {
+            openProfile(window.currentUser.uid);
+          }
+        })
         .catch(err=>{ showPopup("Cover photo too large, try a smaller image."); });
     };
     img.src=reader.result;

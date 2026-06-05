@@ -660,64 +660,77 @@ backdrop-filter:blur(6px);
 }
 
 #popupBox{
+  width:88%;
+  max-width:340px;
+  background:linear-gradient(145deg,rgba(15,0,10,0.97),rgba(25,0,20,0.97));
+  border:1px solid rgba(255,0,85,0.6);
+  border-radius:24px;
+  padding:30px 24px 22px;
+  text-align:center;
+  box-shadow:
+    0 0 0 1px rgba(255,0,85,0.15),
+    0 0 30px rgba(255,0,85,0.35),
+    0 0 60px rgba(255,0,85,0.15),
+    0 20px 60px rgba(0,0,0,0.8);
+  animation:popupFade 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter:blur(20px);
+  position:relative;
+  overflow:hidden;
+}
 
-width:85%;
-max-width:320px;
+#popupBox::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,#ff0055,#ff6699,#ff0055,transparent);
+  animation:shimmer 2s linear infinite;
+}
 
-background:#0a0a0a;
-
-border:2px solid #ff0055;
-
-border-radius:20px;
-
-padding:25px;
-
-text-align:center;
-
-box-shadow:
-0 0 20px #ff0055,
-0 0 40px rgba(255,0,85,0.5);
-
-animation:popupFade 0.25s ease;
-
+@keyframes shimmer{
+  0%{background-position:-200% center;}
+  100%{background-position:200% center;}
 }
 
 #popupText{
-
-font-size:18px;
-margin-bottom:20px;
-
-color:white;
-
+  font-size:16px;
+  line-height:1.55;
+  margin-bottom:22px;
+  color:rgba(255,255,255,0.92);
+  font-weight:400;
+  letter-spacing:0.01em;
 }
 
 #popupBox button{
+  background:linear-gradient(135deg,#ff0044,#cc0033);
+  color:white;
+  border:none;
+  padding:13px 0;
+  width:100%;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  box-shadow:0 4px 20px rgba(255,0,68,0.45);
+  transition:transform 0.1s,box-shadow 0.1s;
+  cursor:pointer;
+}
 
-background:#ff0055;
-color:white;
-
-border:none;
-
-padding:12px 24px;
-
-border-radius:12px;
-
-font-size:16px;
-font-weight:bold;
-
+#popupBox button:active{
+  transform:scale(0.97);
+  box-shadow:0 2px 10px rgba(255,0,68,0.3);
 }
 
 @keyframes popupFade{
-
-from{
-opacity:0;
-transform:scale(0.8);
-}
-
-to{
-opacity:1;
-transform:scale(1);
-}
+  from{
+    opacity:0;
+    transform:scale(0.82) translateY(12px);
+  }
+  to{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
 
 }
 
