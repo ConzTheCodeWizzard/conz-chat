@@ -2421,49 +2421,51 @@ box-shadow:
    ConzChat v1.5.3 — Layout Fixes
    ============================================= */
 
-/* ===== CHAT SCREEN — flex column, input bar always visible ===== */
-#chat{
+/* ===== CHAT SCREEN — flex column, NO position:fixed (was leaking onto home) ===== */
+#chat.active{
   display:flex !important;
   flex-direction:column !important;
-  height:100% !important;
-  height:100dvh !important;
+  height:100vh !important;
   overflow:hidden !important;
-  position:fixed !important;
-  top:0; left:0; right:0; bottom:0;
+  position:relative !important;
 }
 
 /* ===== MESSAGES AREA — scrollable, never clips last message ===== */
-#chat #messages{
+#chat.active #messages{
   flex:1 1 auto !important;
   overflow-y:auto !important;
   -webkit-overflow-scrolling:touch !important;
   padding:10px 10px 16px 10px !important;
-  padding-bottom:16px !important;
-  /* NOT fixed position — part of flex flow */
   position:static !important;
 }
 
 /* ===== CHAT INPUT BAR — always at bottom, never collapses ===== */
-#chat .chatInputBar{
+#chat.active .chatInputBar{
   flex:0 0 auto !important;
   position:static !important;
   bottom:auto !important;
   width:100% !important;
   box-sizing:border-box !important;
-  /* Ensure it stays above virtual keyboard on mobile */
-  padding-bottom:max(8px, env(safe-area-inset-bottom)) !important;
 }
 
 /* ===== MEDIA BAR — part of flex flow, above input bar ===== */
-#chat .mediaBar{
+#chat.active .mediaBar{
   flex:0 0 auto !important;
   position:static !important;
 }
 
 /* ===== TYPING INDICATOR — part of flex flow ===== */
-#chat .typingIndicator{
+#chat.active .typingIndicator{
   flex:0 0 auto !important;
   position:static !important;
+}
+
+/* ===== HIDE CHAT INPUT BAR when not in chat screen ===== */
+.chatInputBar{
+  display:none;
+}
+#chat.active .chatInputBar{
+  display:flex !important;
 }
 
 /* ===== PROFILE SCREEN — cover flush with topbar ===== */
