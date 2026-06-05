@@ -2115,159 +2115,193 @@ box-shadow:
   align-items:center;
 }
 
-/* ===== MEDIA BAR ===== */
+/* ===== MEDIA BAR — popup style above input ===== */
 .mediaBar{
   display:none;
   flex-direction:row;
-  gap:0;
-  background:#0d0d0d;
-  border-top:1px solid rgba(255,255,255,0.07);
-  padding:10px 6px;
+  gap:6px;
+  background:#141414;
+  border-top:1px solid rgba(255,255,255,0.09);
+  border-bottom:none;
+  padding:12px 10px;
   flex-shrink:0;
   overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
+
+.mediaBar::-webkit-scrollbar{ display:none; }
 
 .mediaBarItem{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
-  padding:6px 14px;
+  gap:6px;
+  padding:10px 18px;
   cursor:pointer;
-  border-radius:12px;
-  transition:0.2s;
+  border-radius:16px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  transition:0.15s;
   flex-shrink:0;
+  min-width:70px;
 }
 
 .mediaBarItem:active{
-  background:rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.14);
+  transform:scale(0.96);
 }
 
 .mediaBarIcon{
-  font-size:26px;
+  font-size:28px;
+  line-height:1;
 }
 
 .mediaBarLabel{
-  font-size:11px;
-  opacity:0.7;
-  font-weight:500;
+  font-size:12px;
+  opacity:0.8;
+  font-weight:600;
+  white-space:nowrap;
 }
 
-/* ===== CHAT INPUT BAR ===== */
+/* ===== CHAT INPUT BAR — complete override ===== */
 .chatInputBar{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
   padding:8px 10px;
-  background:#0a0a0a;
-  border-top:1px solid rgba(255,255,255,0.06);
+  background:#0d0d0d;
+  border-top:1px solid rgba(255,255,255,0.07);
   flex-shrink:0;
+  min-height:56px;
+  box-sizing:border-box;
 }
 
-.chatInputBar input{
+.chatInputBar #msgInput{
   flex:1;
-  background:#1a1a1a;
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:22px;
-  padding:10px 14px;
+  min-width:0;
+  background:#1c1c1c;
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:24px;
+  padding:10px 16px;
   color:white;
   font-size:15px;
   outline:none;
   margin:0;
-  width:auto;
+  width:0;
+  box-sizing:border-box;
+  font-family:inherit;
 }
 
-.chatInputBar input:focus{
-  border-color:rgba(255,0,51,0.4);
+.chatInputBar #msgInput:focus{
+  border-color:rgba(255,0,51,0.5);
+  background:#222;
 }
 
+/* ===== MEDIA TOGGLE BUTTON ===== */
 .mediaToggleBtn{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.1);
-  border:none;
-  font-size:18px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  padding:0;
-  margin:0;
-  flex-shrink:0;
-  box-shadow:none;
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,0.1) !important;
+  border:none !important;
+  font-size:20px !important;
+  display:flex !important;
+  justify-content:center !important;
+  align-items:center !important;
+  cursor:pointer !important;
+  padding:0 !important;
+  margin:0 !important;
+  flex-shrink:0 !important;
+  box-shadow:none !important;
+  transform:none !important;
+  letter-spacing:0 !important;
+  font-weight:normal !important;
+  transition:background 0.2s !important;
 }
 
-.mediaToggleBtn:hover{
-  background:rgba(255,255,255,0.18);
-  transform:scale(1.08);
-  box-shadow:none;
+.mediaToggleBtn:hover,
+.mediaToggleBtn:active{
+  background:rgba(255,255,255,0.2) !important;
+  transform:none !important;
+  box-shadow:none !important;
 }
 
 /* ===== VOICE NOTE BUTTON ===== */
 .voiceNoteBtn{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.1);
-  border:none;
-  font-size:18px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  padding:0;
-  margin:0;
-  flex-shrink:0;
-  box-shadow:none;
-  position:relative;
-  transition:0.2s;
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,0.1) !important;
+  border:none !important;
+  font-size:18px !important;
+  display:flex !important;
+  justify-content:center !important;
+  align-items:center !important;
+  cursor:pointer !important;
+  padding:0 !important;
+  margin:0 !important;
+  flex-shrink:0 !important;
+  box-shadow:none !important;
+  position:relative !important;
+  transition:background 0.2s !important;
+  letter-spacing:0 !important;
+  font-weight:normal !important;
 }
 
 .voiceNoteBtn.recording{
-  background:rgba(255,0,51,0.35) !important;
-  box-shadow:0 0 12px rgba(255,0,51,0.6) !important;
-  animation:voicePulse 1s infinite;
+  background:rgba(255,0,51,0.4) !important;
+  box-shadow:0 0 14px rgba(255,0,51,0.7) !important;
+  animation:voicePulse 1s infinite !important;
 }
 
 .voiceNoteBtn[data-time]::after{
   content:attr(data-time);
   position:absolute;
-  top:-22px;
+  top:-24px;
   left:50%;
   transform:translateX(-50%);
   font-size:11px;
-  background:rgba(255,0,51,0.8);
+  background:rgba(255,0,51,0.85);
   color:white;
-  padding:2px 6px;
+  padding:2px 7px;
   border-radius:8px;
   white-space:nowrap;
+  pointer-events:none;
 }
 
 @keyframes voicePulse{
   0%{ transform:scale(1); }
-  50%{ transform:scale(1.12); }
+  50%{ transform:scale(1.14); }
   100%{ transform:scale(1); }
 }
 
 /* ===== SEND BUTTON ===== */
 .sendText{
-  padding:9px 16px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.08);
-  color:rgba(255,255,255,0.4);
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-  flex-shrink:0;
-  transition:0.2s;
+  padding:9px 18px !important;
+  border-radius:22px !important;
+  background:rgba(255,255,255,0.07) !important;
+  color:rgba(255,255,255,0.35) !important;
+  font-size:15px !important;
+  font-weight:700 !important;
+  cursor:pointer !important;
+  flex-shrink:0 !important;
+  transition:all 0.2s !important;
   user-select:none;
+  white-space:nowrap;
+  box-shadow:none !important;
+  border:none !important;
+  letter-spacing:0.3px;
+  display:flex;
+  align-items:center;
 }
 
 .sendText.active{
-  background:linear-gradient(135deg,#ff0055,#ff2277);
-  color:white;
-  box-shadow:0 0 14px rgba(255,0,51,0.5);
+  background:linear-gradient(135deg,#ff0055,#ff2277) !important;
+  color:white !important;
+  box-shadow:0 0 16px rgba(255,0,51,0.55) !important;
 }
 
 /* ===== MESSAGE IMAGES ===== */
