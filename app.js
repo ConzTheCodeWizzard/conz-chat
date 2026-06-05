@@ -1103,156 +1103,136 @@ window.formatKikTime=function(ts){
   return `${months[d.getMonth()]} ${d.getDate()} ${timeStr}`;
 };
 
-} // end startApp
+  // Opens the dev (Conz/@Borg) profile inside ConzChat from the credits screen
+  window.openDevProfile = function(){
+    db.collection("users").doc(DEV_UID).get().then(doc=>{
+      if(!doc.exists){ showPopup("Could not load profile."); return; }
+      let u = doc.data();
+      u.uid = DEV_UID;
+      if(window.openUserProfile) window.openUserProfile(u);
+      else showPopup("Profile viewer not ready yet.");
+    }).catch(()=>showPopup("Could not load profile."));
+  };
 
-// Opens the dev (Conz/@Borg) profile inside ConzChat from the credits screen
-window.openDevProfile = function(){
-  if(!window.db){ return; }
-  db.collection("users").doc(DEV_UID).get().then(doc=>{
-    if(!doc.exists){ showPopup("Could not load profile."); return; }
-    let u = doc.data();
-    u.uid = DEV_UID;
-    if(window.openUserProfile) window.openUserProfile(u);
-    else showPopup("Profile viewer not ready yet.");
-  }).catch(()=>showPopup("Could not load profile."));
-};
+  /* ===== SUGGESTIONS SYSTEM ===== */
 
-/* ===== SUGGESTIONS SYSTEM ===== */
-
-// Show/hide dev Suggestions button in FAB based on uid
-function updateSuggestionsDevBtn(){
-  let btn = document.getElementById('devSuggestionsBtn');
-  if(!btn) return;
-  btn.style.display = (window.currentUser && window.currentUser.uid === DEV_UID) ? 'block' : 'none';
-}
-
-// Open Leave Suggestions screen (all users)
-window.openLeaveSuggestions = function(){
-  closeFab();
-  show('leaveSuggestionsScreen');
-  loadMyReplies();
-};
-
-// Open dev inbox screen (dev only)
-window.openDevSuggestions = function(){
-  closeFab();
-  show('devSuggestionsScreen');
-  loadDevSuggestions();
-};
-
-// Submit a suggestion
-window.submitSuggestion = function(){
-  let input = document.getElementById('suggestionInput');
-  let text = (input ? input.value : '').trim();
-  if(!text){ showPopup('Please write a suggestion first.'); return; }
-  if(!window.currentUser){ showPopup('You must be logged in.'); return; }
-  let uid = window.currentUser.uid;
-  let name = window.currentUser.displayName || window.currentUser.username || uid;
-  db.collection('suggestions').add({
-    uid: uid,
-    name: name,
-    text: text,
-    ts: Date.now(),
-    replied: false
-  }).then(()=>{
-    input.value = '';
-    showPopup('Your suggestion has been sent to Conz! 💡');
-  }).catch(()=>showPopup('Failed to send suggestion. Try again.'));
-};
-
-// Load replies sent back to the current user (shown in their Leave Suggestions screen)
-function loadMyReplies(){
-  let uid = window.currentUser && window.currentUser.uid;
-  if(!uid) return;
-  let list = document.getElementById('myRepliesList');
-  if(!list) return;
-  list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">Loading replies...</div>';
-  db.collection('suggestions').where('uid','==',uid).orderBy('ts','asc').get().then(snap=>{
-    if(snap.empty){ list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">No replies yet.</div>'; return; }
-    list.innerHTML = '';
-    snap.forEach(doc=>{
-      let d = doc.data();
-      if(!d.reply) return; // only show items that have a reply
-      let div = document.createElement('div');
-      div.className = 'suggestionReplyItem';
-      div.innerHTML = `
-        <div class="suggestionReplyYou"><strong>Your suggestion:</strong> ${escapeHtml(d.text)}</div>
-        <div class="suggestionReplyFrom">Reply from Conz</div>
-        <div class="suggestionReplyText">${escapeHtml(d.reply)}</div>
-      `;
-      list.appendChild(div);
-    });
-    if(!list.innerHTML) list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">No replies yet.</div>';
-  }).catch(()=>{ list.innerHTML = '<div style="color:#f66;text-align:center;padding:12px;font-size:13px;">Failed to load replies.</div>'; });
-}
-
-// Load all suggestions in dev inbox
-function loadDevSuggestions(){
-  if(!window.currentUser || window.currentUser.uid !== DEV_UID) return;
-  let list = document.getElementById('devSuggestionsList');
-  if(!list) return;
-  list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">Loading...</div>';
-  db.collection('suggestions').orderBy('ts','desc').get().then(snap=>{
-    if(snap.empty){ list.innerHTML = '<div style="color:#888;text-align:center;padding:16px;">No suggestions yet.</div>'; return; }
-    list.innerHTML = '';
-    snap.forEach(doc=>{
-      let d = doc.data();
-      let id = doc.id;
-      let date = new Date(d.ts).toLocaleString();
-      let repliedBadge = d.replied ? '<span class="suggRepliedBadge">Replied</span>' : '';
-      let replySection = d.reply
-        ? `<div class="suggDevReplyShown"><strong>Your reply:</strong> ${escapeHtml(d.reply)}</div>`
-        : `<div class="suggDevReplyRow">
-             <input type="text" id="replyInput_${id}" placeholder="Type your reply..." maxlength="500">
-             <button onclick="sendSuggestionReply('${id}','${d.uid}')">Reply</button>
-           </div>`;
-      let div = document.createElement('div');
-      div.className = 'devSuggestionCard';
-      div.id = 'suggCard_' + id;
-      div.innerHTML = `
-        <div class="devSuggMeta"><strong>${escapeHtml(d.name||d.uid)}</strong> ${repliedBadge} <span class="devSuggDate">${date}</span></div>
-        <div class="devSuggText">${escapeHtml(d.text)}</div>
-        ${replySection}
-      `;
-      list.appendChild(div);
-    });
-  }).catch(()=>{ list.innerHTML = '<div style="color:#f66;text-align:center;padding:12px;">Failed to load.</div>'; });
-}
-
-// Dev replies to a specific suggestion
-window.sendSuggestionReply = function(docId, toUid){
-  let input = document.getElementById('replyInput_' + docId);
-  let replyText = (input ? input.value : '').trim();
-  if(!replyText){ showPopup('Type a reply first.'); return; }
-  if(!window.currentUser || window.currentUser.uid !== DEV_UID){ showPopup('Not authorised.'); return; }
-  db.collection('suggestions').doc(docId).update({
-    reply: replyText,
-    replied: true,
-    replyTs: Date.now()
-  }).then(()=>{
-    showPopup('Reply sent! ✅');
-    // Refresh the dev inbox
-    loadDevSuggestions();
-  }).catch(()=>showPopup('Failed to send reply.'));
-};
-
-// Simple HTML escape helper (reuse if already defined)
-if(!window._escHtml){
-  window._escHtml = true;
-  window.escapeHtml = function(str){
+  // Simple HTML escape helper
+  function escapeHtml(str){
     if(!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  };
-}
+  }
 
-// Hook into auth state to show/hide dev button
-(function(){
-  let _origOnAuth = window._onAuthReady;
-  // Patch: after auth resolves, update the dev button visibility
-  let checkInterval = setInterval(()=>{
-    if(window.currentUser){
-      clearInterval(checkInterval);
-      updateSuggestionsDevBtn();
-    }
-  }, 500);
-})();
+  // Show/hide dev Suggestions button in FAB based on uid
+  function updateSuggestionsDevBtn(){
+    let btn = document.getElementById('devSuggestionsBtn');
+    if(!btn) return;
+    btn.style.display = (window.currentUser && window.currentUser.uid === DEV_UID) ? 'block' : 'none';
+  }
+  window.updateSuggestionsDevBtn = updateSuggestionsDevBtn;
+
+  // Open Leave Suggestions screen (all users)
+  window.openLeaveSuggestions = function(){
+    fabOpen=false;
+    let fm=document.getElementById('fabMenu');
+    if(fm) fm.style.display='none';
+    show('leaveSuggestionsScreen');
+    loadMyReplies();
+  };
+
+  // Open dev inbox screen (dev only)
+  window.openDevSuggestions = function(){
+    fabOpen=false;
+    let fm=document.getElementById('fabMenu');
+    if(fm) fm.style.display='none';
+    show('devSuggestionsScreen');
+    loadDevSuggestions();
+  };
+
+  // Submit a suggestion
+  window.submitSuggestion = function(){
+    let input = document.getElementById('suggestionInput');
+    let text = (input ? input.value : '').trim();
+    if(!text){ showPopup('Please write a suggestion first.'); return; }
+    if(!window.currentUser){ showPopup('You must be logged in.'); return; }
+    let uid = window.currentUser.uid;
+    let name = window.myData.displayName || window.myData.username || uid;
+    db.collection('suggestions').add({
+      uid: uid,
+      name: name,
+      text: text,
+      ts: Date.now(),
+      replied: false
+    }).then(()=>{
+      input.value = '';
+      showPopup('Your suggestion has been sent to Conz! 💡');
+    }).catch(()=>showPopup('Failed to send suggestion. Try again.'));
+  };
+
+  // Load replies sent back to the current user
+  function loadMyReplies(){
+    let uid = window.currentUser && window.currentUser.uid;
+    if(!uid) return;
+    let list = document.getElementById('myRepliesList');
+    if(!list) return;
+    list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">Loading replies...</div>';
+    db.collection('suggestions').where('uid','==',uid).get().then(snap=>{
+      if(snap.empty){ list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">No replies yet.</div>'; return; }
+      let items = [];
+      snap.forEach(doc=>{ let d=doc.data(); if(d.reply) items.push(d); });
+      if(!items.length){ list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">No replies yet.</div>'; return; }
+      items.sort((a,b)=>a.ts-b.ts);
+      list.innerHTML = '';
+      items.forEach(d=>{
+        let div = document.createElement('div');
+        div.className = 'suggestionReplyItem';
+        div.innerHTML = `<div class="suggestionReplyYou"><strong>Your suggestion:</strong> ${escapeHtml(d.text)}</div><div class="suggestionReplyFrom">Reply from Conz</div><div class="suggestionReplyText">${escapeHtml(d.reply)}</div>`;
+        list.appendChild(div);
+      });
+    }).catch(()=>{ list.innerHTML = '<div style="color:#f66;text-align:center;padding:12px;font-size:13px;">Failed to load replies.</div>'; });
+  }
+
+  // Load all suggestions in dev inbox
+  function loadDevSuggestions(){
+    if(!window.currentUser || window.currentUser.uid !== DEV_UID) return;
+    let list = document.getElementById('devSuggestionsList');
+    if(!list) return;
+    list.innerHTML = '<div style="color:#888;text-align:center;padding:12px;font-size:13px;">Loading...</div>';
+    db.collection('suggestions').get().then(snap=>{
+      if(snap.empty){ list.innerHTML = '<div style="color:#888;text-align:center;padding:16px;">No suggestions yet.</div>'; return; }
+      let items = [];
+      snap.forEach(doc=>{ items.push({id:doc.id,...doc.data()}); });
+      items.sort((a,b)=>b.ts-a.ts);
+      list.innerHTML = '';
+      items.forEach(d=>{
+        let id = d.id;
+        let date = new Date(d.ts).toLocaleString();
+        let repliedBadge = d.replied ? '<span class="suggRepliedBadge">Replied</span>' : '';
+        let replySection = d.reply
+          ? `<div class="suggDevReplyShown"><strong>Your reply:</strong> ${escapeHtml(d.reply)}</div>`
+          : `<div class="suggDevReplyRow"><input type="text" id="replyInput_${id}" placeholder="Type your reply..." maxlength="500"><button onclick="sendSuggestionReply('${id}')">Reply</button></div>`;
+        let div = document.createElement('div');
+        div.className = 'devSuggestionCard';
+        div.id = 'suggCard_' + id;
+        div.innerHTML = `<div class="devSuggMeta"><strong>${escapeHtml(d.name||d.uid)}</strong> ${repliedBadge} <span class="devSuggDate">${date}</span></div><div class="devSuggText">${escapeHtml(d.text)}</div>${replySection}`;
+        list.appendChild(div);
+      });
+    }).catch(()=>{ list.innerHTML = '<div style="color:#f66;text-align:center;padding:12px;">Failed to load.</div>'; });
+  }
+
+  // Dev replies to a specific suggestion
+  window.sendSuggestionReply = function(docId){
+    let input = document.getElementById('replyInput_' + docId);
+    let replyText = (input ? input.value : '').trim();
+    if(!replyText){ showPopup('Type a reply first.'); return; }
+    if(!window.currentUser || window.currentUser.uid !== DEV_UID){ showPopup('Not authorised.'); return; }
+    db.collection('suggestions').doc(docId).update({
+      reply: replyText,
+      replied: true,
+      replyTs: Date.now()
+    }).then(()=>{
+      showPopup('Reply sent! ✅');
+      loadDevSuggestions();
+    }).catch(()=>showPopup('Failed to send reply.'));
+  };
+
+} // end startApp
