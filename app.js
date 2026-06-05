@@ -150,7 +150,10 @@ window.resetTheme=function(){
 let savedTheme=localStorage.getItem("conz_theme");
 if(savedTheme && themes[savedTheme]) applyTheme(savedTheme);
 
-/* ===== AUTH ===== */
+/* ===== AUTH — hide all screens until auth resolves (no login flash) ===== */
+// Hide everything immediately so nothing flashes before auth resolves
+document.querySelectorAll(".screen").forEach(s=>{ s.style.display="none"; s.classList.remove("active"); });
+
 auth.onAuthStateChanged(user=>{
   if(user){
     window.currentUser=user;
@@ -236,9 +239,9 @@ window.openProfile=function(uid=window.currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data()||{};
     let isMe=uid===window.currentUser.uid;
+
     profileContent.innerHTML=`
-      <div class="profileCover" id="profileCoverArea" style="${u.coverPhoto?`background-image:url('${u.coverPhoto}');`:''}">
-        ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
+      <div class="profileCover" id="profileCoverArea" style="${u.coverPhoto?`background-image:url('${u.coverPhoto}');background-size:cover;background-position:center;`:''}">        ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
       </div>
       <div class="profileAvatarWrap">
         <div class="avatar" ${isMe?'onclick="pickImage()"':''}>
@@ -249,6 +252,16 @@ window.openProfile=function(uid=window.currentUser.uid){
       ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
       ${u.premium?`<div class="premiumBadge">💎 Premium User</div>`:""}
       <div class="username">@${u.username}</div>
+      ${isMe?`
+        <div class="profileActions">
+          <button class="profileActionBtn" onclick="logout()">🚪 Logout</button>
+          <button class="profileActionBtn" onclick="toggleSettings()">⚙ Settings</button>
+        </div>
+        <div id="settingsPanel" style="display:none;width:90%;margin-top:10px;">
+          <div class="settingTitle">Brightness</div>
+          <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness(this.value)" style="width:100%;">
+        </div>
+      `:''}
       ${!isMe?`
         <div class="profileActions">
           <button class="profileActionBtn" onclick="openChat('${uid}','${u.username}','${u.photo||''}')">💬 Message</button>
@@ -256,6 +269,14 @@ window.openProfile=function(uid=window.currentUser.uid){
         </div>
       `:""}
     `;
+
+    // Restore brightness slider value if on own profile
+    if(isMe){
+      let saved=localStorage.getItem("conz_brightness");
+      let slider=document.getElementById("brightnessSlider");
+      if(saved && slider) slider.value=saved;
+    }
+
     if(window.daysOnApp) daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
     show("profile");
   });

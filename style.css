@@ -417,8 +417,9 @@ border-radius:8px;
 display:flex;
 flex-direction:column;
 align-items:center;
-padding-top:30px;
+padding-top:0;
 text-align:center;
+width:100%;
 }
 
 .avatar{
@@ -2413,4 +2414,127 @@ box-shadow:
   opacity:0.55;
   margin-left:6px;
   font-weight:normal;
+}
+
+
+/* =============================================
+   ConzChat v1.5.3 — Layout Fixes
+   ============================================= */
+
+/* ===== CHAT SCREEN — flex column, input bar always visible ===== */
+#chat{
+  display:flex !important;
+  flex-direction:column !important;
+  height:100% !important;
+  height:100dvh !important;
+  overflow:hidden !important;
+  position:fixed !important;
+  top:0; left:0; right:0; bottom:0;
+}
+
+/* ===== MESSAGES AREA — scrollable, never clips last message ===== */
+#chat #messages{
+  flex:1 1 auto !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  padding:10px 10px 16px 10px !important;
+  padding-bottom:16px !important;
+  /* NOT fixed position — part of flex flow */
+  position:static !important;
+}
+
+/* ===== CHAT INPUT BAR — always at bottom, never collapses ===== */
+#chat .chatInputBar{
+  flex:0 0 auto !important;
+  position:static !important;
+  bottom:auto !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  /* Ensure it stays above virtual keyboard on mobile */
+  padding-bottom:max(8px, env(safe-area-inset-bottom)) !important;
+}
+
+/* ===== MEDIA BAR — part of flex flow, above input bar ===== */
+#chat .mediaBar{
+  flex:0 0 auto !important;
+  position:static !important;
+}
+
+/* ===== TYPING INDICATOR — part of flex flow ===== */
+#chat .typingIndicator{
+  flex:0 0 auto !important;
+  position:static !important;
+}
+
+/* ===== PROFILE SCREEN — cover flush with topbar ===== */
+#profile{
+  overflow-y:auto !important;
+  padding:0 !important;
+}
+
+#profile #profileContent{
+  padding-top:0 !important;
+}
+
+.profileCover{
+  width:100% !important;
+  height:160px !important;
+  background:linear-gradient(135deg,#1a1a1a,#2a0a1a) !important;
+  background-size:cover !important;
+  background-position:center !important;
+  position:relative !important;
+  flex-shrink:0 !important;
+  margin-top:0 !important;
+  /* Sits immediately below the topbar */
+}
+
+/* ===== PROFILE SCREEN TOPBAR — no margin below ===== */
+#profile .topbar{
+  margin-bottom:0 !important;
+  flex-shrink:0 !important;
+}
+
+/* ===== LOGOUT AND SETTINGS BUTTONS — only on own profile ===== */
+.logoutBtn,
+.settingsBtn{
+  display:none !important;
+}
+
+/* ===== PROFILE ACTIONS (own profile buttons inside profileContent) ===== */
+.profileActions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.profileActionBtn{
+  width:auto !important;
+  padding:10px 20px !important;
+  font-size:14px !important;
+  margin:0 !important;
+  border-radius:22px !important;
+  min-width:100px;
+}
+
+/* ===== SEND BUTTON — always visible, never pushed off screen ===== */
+#chat .sendText{
+  display:flex !important;
+  align-items:center !important;
+  flex-shrink:0 !important;
+  white-space:nowrap !important;
+}
+
+/* ===== MEDIA TOGGLE AND VOICE BUTTONS ===== */
+#chat .mediaToggleBtn,
+#chat .voiceNoteBtn{
+  flex-shrink:0 !important;
+}
+
+/* ===== CHAT INPUT — takes remaining space ===== */
+#chat .chatInputBar #msgInput{
+  flex:1 1 0 !important;
+  min-width:0 !important;
+  width:0 !important;
 }
