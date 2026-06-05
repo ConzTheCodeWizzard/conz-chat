@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 </head>
@@ -72,10 +72,7 @@
 
 <!-- Create Public Group -->
 <div id="publicGroupCreate" class="screen">
-  <div class="topbar">
-    <span>Create Public Group</span>
-    <div></div>
-  </div>
+  <div class="topbar"><span>Create Public Group</span></div>
   <div class="groupCreateWrap">
     <div id="groupPhotoPreview" class="groupPhotoPreview" onclick="pickGroupPhoto()">+</div>
     <input type="file" id="groupPhotoInput" accept="image/*" style="display:none;">
@@ -96,9 +93,7 @@
       <button class="groupActionBtn" onclick="openAddPeople()">➕ Add People</button>
       <button class="groupActionBtn leaveBtn" onclick="leaveCurrentGroup()">🚪 Leave Group</button>
     </div>
-    <div id="ownerControls" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-top:10px;width:100%;">
-      <div style="font-size:12px;opacity:0.6;">Owner Controls</div>
-    </div>
+    <div id="ownerControls" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-top:10px;width:100%;"></div>
     <div id="groupMembersGrid" class="groupMembersGrid"></div>
   </div>
 </div>
@@ -112,19 +107,15 @@
   </div>
 </div>
 
-<!-- Chat Screen -->
+<!-- ===== CHAT SCREEN ===== -->
 <div id="chat" class="screen">
-  <div class="topbar">
-    <span id="chatName" onclick="openProfile(currentChatUser)"></span>
-    <!-- Call buttons in chat topbar -->
+  <div class="topbar chatTopbarMain">
+    <span id="chatName"></span>
     <div id="chatCallBar" class="chatCallBar" style="display:none;">
       <button class="callIconBtn" onclick="startVoiceCall()" title="Voice Call">🎙️</button>
       <button class="callIconBtn" onclick="startVideoCall()" title="Video Call">📹</button>
     </div>
   </div>
-
-  <!-- Typing indicator -->
-  <div id="typingIndicator" class="typingIndicator" style="display:none;"></div>
 
   <div id="messages"></div>
 
@@ -151,13 +142,35 @@
     <div id="premiumConsole"></div>
   </div>
 
+  <!-- Media Bar (hidden by default) -->
+  <div id="mediaBar" class="mediaBar" style="display:none;">
+    <div class="mediaBarItem" onclick="openCamera()">
+      <div class="mediaBarIcon">📷</div>
+      <div class="mediaBarLabel">Camera</div>
+    </div>
+    <div class="mediaBarItem" onclick="openGallery()">
+      <div class="mediaBarIcon">🖼️</div>
+      <div class="mediaBarLabel">Gallery</div>
+    </div>
+    <div class="mediaBarItem" onclick="openVideoPicker()">
+      <div class="mediaBarIcon">🎥</div>
+      <div class="mediaBarLabel">Video</div>
+    </div>
+  </div>
+
+  <!-- Typing indicator — BOTTOM, above input bar -->
+  <div id="typingIndicator" class="typingIndicator" style="display:none;"></div>
+
+  <!-- Input Bar -->
   <div class="chatInputBar">
-    <input id="msgInput" placeholder="Type a Conz...">
+    <button class="mediaToggleBtn" onclick="toggleMediaBar()" title="Media">➕</button>
+    <input id="msgInput" placeholder="Type a message...">
+    <button id="voiceNoteBtn" class="voiceNoteBtn" onclick="startVoiceNote()" title="Voice Note">🎙️</button>
     <div id="sendBtn" class="sendText" onclick="handleSend()">Send</div>
   </div>
 </div>
 
-<!-- Video / Voice Call Screen -->
+<!-- ===== VIDEO / VOICE CALL SCREEN ===== -->
 <div id="videoCall" class="screen">
   <div class="topbar callTopbar">
     <button class="callBackBtn" onclick="endCall()">←</button>
@@ -172,13 +185,6 @@
     <button id="muteBtn" class="callCtrlBtn" onclick="toggleMute()">🎙️ Mute</button>
     <button id="cameraBtn" class="callCtrlBtn" onclick="toggleCamera()">📹 Cam Off</button>
     <button class="callCtrlBtn endCallBtn" onclick="endCall()">📵 End</button>
-  </div>
-
-  <!-- Legacy manual join (kept for compatibility) -->
-  <div class="callManualJoin">
-    <div id="callIdDisplay" style="font-size:11px;opacity:0.5;margin-bottom:6px;"></div>
-    <input id="callInput" placeholder="Enter Call ID to join">
-    <button onclick="joinCallById()">Join by ID</button>
   </div>
 </div>
 
@@ -227,15 +233,16 @@
   <p>🕐 Modern Kik-style timestamps</p>
   <p>📸 Profile pictures save permanently</p>
   <p>🖼️ Kik-style profile background/cover image</p>
-  <p>😁 Upgraded and Revamped Welcome Screen</p>
-  <p>➕️ Added new themes</p>
-  <p>➕️ Added a dev menu — type conz in chat</p>
-  <p>➕️ Added ConzChat Premium</p>
+  <p>📷 Camera, Gallery, Video sending in chats</p>
+  <p>🎙️ Voice note recording and sending</p>
 </div>
 
 <!-- Hidden file pickers -->
 <input type="file" id="filePicker" style="display:none" accept="image/*">
 <input type="file" id="coverPhotoPicker" style="display:none" accept="image/*">
+<input type="file" id="cameraInput" style="display:none" accept="image/*" capture="environment">
+<input type="file" id="galleryInput" style="display:none" accept="image/*">
+<input type="file" id="videoInput" style="display:none" accept="video/*">
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -251,6 +258,7 @@
 <script src="groupmembers.js"></script>
 <script src="group.js"></script>
 <script src="calls.js"></script>
+<script src="mediabar.js"></script>
 
 <!-- Credits Screen -->
 <div id="creditsScreen" class="screen">

@@ -63,7 +63,9 @@ window.myData={};
 let unsubscribeMessages=null;
 let unsubscribeStatus=null;
 let unsubscribeDMTyping=null;
-let unreadCounts={};
+
+// Accurate unread: track per-conversation last-seen timestamp
+let lastSeenTimes={};
 let dmTypingTimeout=null;
 
 window.unsubscribeMessages=null;
@@ -71,7 +73,7 @@ window.unsubscribeMessages=null;
 const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
-/* ===== ROTATING TEXT SYSTEM ===== */
+/* ===== ROTATING TEXT ===== */
 const rotatingMessages=[
   "Built by ~Conz~",
   "You are currently running Version 1.5",
@@ -84,7 +86,6 @@ const rotatingMessages=[
   "Version 1.5 — Major Update!",
   "Thank you for trying ConzChat ~Conz~"
 ];
-
 let rotatingIndex=0;
 let hue=0;
 
@@ -110,7 +111,6 @@ function startRotatingText(){
     },300);
   },3000);
 }
-
 startRotatingText();
 
 /* ===== THEMES ===== */
@@ -161,7 +161,6 @@ auth.onAuthStateChanged(user=>{
       d.uid=user.uid;
       d.premium=d.premium||false;
       window.currentUser.premium=d.premium;
-
       if(d.premiumPopup){
         showPopup(d.premiumPopup);
         db.collection("users").doc(user.uid).update({premiumPopup:""});
@@ -178,10 +177,7 @@ auth.onAuthStateChanged(user=>{
       }
     });
 
-    db.collection("users").doc(user.uid).set({
-      online:true,
-      lastSeen:Date.now()
-    },{merge:true});
+    db.collection("users").doc(user.uid).set({online:true,lastSeen:Date.now()},{merge:true});
 
     db.collection("users").doc(user.uid).onSnapshot(doc=>{
       window.myData=doc.data()||{};
@@ -218,20 +214,11 @@ window.signup=async function(){
     if(!existing.empty){ showPopup("Username already taken"); return; }
     const res=await auth.createUserWithEmailAndPassword(email,pass);
     await db.collection("users").doc(res.user.uid).set({
-      username:username,
-      usernameLower:username.toLowerCase(),
-      displayName:username,
-      photo:"",
-      coverPhoto:"",
-      created:Date.now(),
-      online:true,
-      lastSeen:Date.now(),
-      banned:false,
-      blockedUsers:[]
+      username,usernameLower:username.toLowerCase(),displayName:username,
+      photo:"",coverPhoto:"",created:Date.now(),online:true,
+      lastSeen:Date.now(),banned:false,blockedUsers:[]
     });
-  }catch(e){
-    showPopup("Signup failed: "+e.message);
-  }
+  }catch(e){ showPopup("Signup failed: "+e.message); }
 };
 
 window.logout=function(){
@@ -244,12 +231,11 @@ window.toggleFab=function(){
   fabMenu.style.display=fabOpen?"flex":"none";
 };
 
-/* ===== PROFILE — with cover photo ===== */
+/* ===== PROFILE ===== */
 window.openProfile=function(uid=window.currentUser.uid){
   db.collection("users").doc(uid).get().then(doc=>{
     let u=doc.data()||{};
     let isMe=uid===window.currentUser.uid;
-
     profileContent.innerHTML=`
       <div class="profileCover" id="profileCoverArea" style="${u.coverPhoto?`background-image:url('${u.coverPhoto}');`:''}">
         ${isMe?`<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>`:''}
@@ -259,9 +245,7 @@ window.openProfile=function(uid=window.currentUser.uid){
           ${u.photo?`<img src="${u.photo}">`:`<div style="font-size:40px;">👤</div>`}
         </div>
       </div>
-      <div class="displayName" ${isMe?'onclick="editDisplayName()"':''}>
-        ${u.displayName||u.username}
-      </div>
+      <div class="displayName" ${isMe?'onclick="editDisplayName()"':''}>${u.displayName||u.username}</div>
       ${uid===DEV_UID?`<div class="devBadge">👑 ConzChat Dev</div>`:""}
       ${u.premium?`<div class="premiumBadge">💎 Premium User</div>`:""}
       <div class="username">@${u.username}</div>
@@ -272,33 +256,27 @@ window.openProfile=function(uid=window.currentUser.uid){
         </div>
       `:""}
     `;
-
-    if(window.daysOnApp){
-      daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
-    }
+    if(window.daysOnApp) daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
     show("profile");
   });
 };
 
-/* ===== PROFILE PICTURE — permanent via Firestore base64 ===== */
-window.pickImage=function(){
-  filePicker.click();
-};
+/* ===== PROFILE PICTURE ===== */
+window.pickImage=function(){ filePicker.click(); };
 
 filePicker.onchange=e=>{
   let f=e.target.files[0];
   if(!f) return;
-  // Compress before saving
   let img=new Image();
   let reader=new FileReader();
   reader.onload=()=>{
     img.onload=()=>{
       let canvas=document.createElement("canvas");
       let maxSize=400;
-      let w=img.width, h=img.height;
-      if(w>h){ if(w>maxSize){h=h*(maxSize/w);w=maxSize;} }
-      else { if(h>maxSize){w=w*(maxSize/h);h=maxSize;} }
-      canvas.width=w; canvas.height=h;
+      let w=img.width,h=img.height;
+      if(w>h){if(w>maxSize){h=h*(maxSize/w);w=maxSize;}}
+      else{if(h>maxSize){w=w*(maxSize/h);h=maxSize;}}
+      canvas.width=w;canvas.height=h;
       canvas.getContext("2d").drawImage(img,0,0,w,h);
       let compressed=canvas.toDataURL("image/jpeg",0.75);
       db.collection("users").doc(window.currentUser.uid).update({photo:compressed});
@@ -326,11 +304,10 @@ document.addEventListener("change",function(e){
   reader.onload=()=>{
     img.onload=()=>{
       let canvas=document.createElement("canvas");
-      canvas.width=800; canvas.height=300;
+      canvas.width=800;canvas.height=300;
       let ctx=canvas.getContext("2d");
-      // Cover crop
       let scale=Math.max(800/img.width,300/img.height);
-      let sw=img.width*scale, sh=img.height*scale;
+      let sw=img.width*scale,sh=img.height*scale;
       ctx.drawImage(img,(800-sw)/2,(300-sh)/2,sw,sh);
       let compressed=canvas.toDataURL("image/jpeg",0.75);
       db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed});
@@ -363,15 +340,10 @@ window.blockUser=async function(uid,username){
     let myRef=db.collection("users").doc(window.currentUser.uid);
     let myDoc=await myRef.get();
     let blocked=(myDoc.data().blockedUsers||[]);
-    if(!blocked.includes(uid)){
-      blocked.push(uid);
-      await myRef.update({blockedUsers:blocked});
-    }
+    if(!blocked.includes(uid)){ blocked.push(uid); await myRef.update({blockedUsers:blocked}); }
     showPopup(`@${username} has been blocked.`);
     show("home");
-  }catch(err){
-    showPopup(err.message);
-  }
+  }catch(err){ showPopup(err.message); }
 };
 
 window.unblockUser=async function(uid,username){
@@ -381,9 +353,7 @@ window.unblockUser=async function(uid,username){
     let blocked=(myDoc.data().blockedUsers||[]).filter(b=>b!==uid);
     await myRef.update({blockedUsers:blocked});
     showPopup(`@${username} has been unblocked.`);
-  }catch(err){
-    showPopup(err.message);
-  }
+  }catch(err){ showPopup(err.message); }
 };
 
 /* ===== SEARCH ===== */
@@ -398,9 +368,9 @@ window.searchUsers=function(){
     snap.forEach(doc=>{
       let u=doc.data()||{};
       if(u.banned) return;
-      let username=(u.username||"").toLowerCase();
-      if(username!==query) return;
+      if((u.username||"").toLowerCase()!==query) return;
       let div=document.createElement("div");
+      div.className="privateChatItem";
       div.innerHTML=`
         <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:""}</div>
         <div>${u.username}</div>
@@ -412,18 +382,22 @@ window.searchUsers=function(){
 };
 
 /* ===== OPEN DM CHAT ===== */
-function openChat(uid,name,photo){
+window.openChat=function(uid,name,photo){
   window.currentGroup=null;
   window.currentChatUser=uid;
 
-  // Unsubscribe previous
   if(unsubscribeMessages) unsubscribeMessages();
   if(unsubscribeStatus) unsubscribeStatus();
   if(unsubscribeDMTyping) unsubscribeDMTyping();
+  if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages=null; }
+  if(window.unsubscribePublicGroupMessages){ window.unsubscribePublicGroupMessages(); window.unsubscribePublicGroupMessages=null; }
+
+  // Mark this conversation as seen now
+  lastSeenTimes[uid]=Date.now();
+  saveLastSeen();
 
   show("chat");
 
-  // Hide call bar — will be shown by call buttons
   let callBar=document.getElementById("chatCallBar");
   if(callBar) callBar.style.display="flex";
 
@@ -432,30 +406,25 @@ function openChat(uid,name,photo){
   // Status listener
   unsubscribeStatus=db.collection("users").doc(uid).onSnapshot(doc=>{
     let u=doc.data()||{};
-
     function formatLastSeen(time){
       if(!time) return "Recently";
-      let seconds=Math.floor((Date.now()-time)/1000);
-      if(seconds<5) return "just now";
-      if(seconds<60) return `${seconds}s ago`;
-      if(seconds<3600) return `${Math.floor(seconds/60)}m ago`;
-      if(seconds<86400) return `${Math.floor(seconds/3600)}h ago`;
-      return `${Math.floor(seconds/86400)}d ago`;
+      let s=Math.floor((Date.now()-time)/1000);
+      if(s<5) return "just now";
+      if(s<60) return `${s}s ago`;
+      if(s<3600) return `${Math.floor(s/60)}m ago`;
+      if(s<86400) return `${Math.floor(s/3600)}h ago`;
+      return `${Math.floor(s/86400)}d ago`;
     }
-
     function updateStatus(){
-      if(u.online){
-        chatName.innerHTML=`${name}<span class="onlineDot"></span>`;
-      } else {
-        chatName.innerHTML=`${name}<span class="lastSeenText">• Last online ${formatLastSeen(u.lastSeen)}</span>`;
-      }
+      if(u.online) chatName.innerHTML=`${name}<span class="onlineDot"></span>`;
+      else chatName.innerHTML=`${name}<span class="lastSeenText">• Last online ${formatLastSeen(u.lastSeen)}</span>`;
     }
     updateStatus();
     clearInterval(window.statusInterval);
     window.statusInterval=setInterval(()=>{ if(!u.online) updateStatus(); },1000);
   });
 
-  // Typing indicator listener for DM
+  // DM typing listener
   unsubscribeDMTyping=db.collection("dmTyping")
   .where("to","==",window.currentUser.uid)
   .where("from","==",uid)
@@ -465,15 +434,7 @@ function openChat(uid,name,photo){
       let d=doc.data();
       if(d.typing && (Date.now()-d.ts)<5000) isTyping=true;
     });
-    let typingEl=document.getElementById("typingIndicator");
-    if(typingEl){
-      if(isTyping){
-        typingEl.innerHTML=`<span class="typingDots">${name} is typing<span class="dot1">.</span><span class="dot2">.</span><span class="dot3">.</span></span>`;
-        typingEl.style.display="block";
-      } else {
-        typingEl.style.display="none";
-      }
-    }
+    showTypingIndicator(isTyping, name);
   });
 
   // Messages listener
@@ -483,14 +444,10 @@ function openChat(uid,name,photo){
     messages.innerHTML="";
     snap.forEach(doc=>{
       let m=doc.data();
-
-      // Mark delivered/read
-      if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S"){
+      if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S")
         db.collection("messages").doc(doc.id).update({receipt:"D"});
-      }
-      if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R"){
+      if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R")
         db.collection("messages").doc(doc.id).update({receipt:"R"});
-      }
 
       if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
       let other=m.from===window.currentUser.uid?m.to:m.from;
@@ -506,7 +463,6 @@ function openChat(uid,name,photo){
       let bubble=document.createElement("div");
       bubble.className="msg";
 
-      // Kik-style read receipt icon
       let receiptIcon="";
       if(isMine){
         if(m.receipt==="R") receiptIcon=`<span class="receiptRead" title="Read">✓✓</span>`;
@@ -514,8 +470,22 @@ function openChat(uid,name,photo){
         else receiptIcon=`<span class="receiptSent" title="Sent">✓</span>`;
       }
 
+      // Handle image/video/voice messages
+      let contentHtml="";
+      if(m.type==="image"){
+        contentHtml=`<img src="${m.url}" class="msgImage" onclick="viewFullImage('${m.url}')">`;
+        if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+      } else if(m.type==="video"){
+        contentHtml=`<video src="${m.url}" class="msgVideo" controls playsinline></video>`;
+        if(m.isCamera) contentHtml+=`<div class="msgCameraLabel">📷 Camera</div>`;
+      } else if(m.type==="voice"){
+        contentHtml=`<div class="voiceNoteWrap"><audio src="${m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎙️ Voice Note</div></div>`;
+      } else {
+        contentHtml=`<div class="msgText">${m.text||""}</div>`;
+      }
+
       bubble.innerHTML=`
-        <div class="msgText">${m.text}</div>
+        ${contentHtml}
         <div class="msgMeta">${formatKikTime(m.time)} ${receiptIcon}</div>
       `;
 
@@ -532,80 +502,122 @@ function openChat(uid,name,photo){
     });
     messages.scrollTop=messages.scrollHeight;
   });
-}
+};
 
-/* ===== SEND DM ===== */
-window.sendMessage=function(){
+/* ===== TYPING INDICATOR — bottom above input ===== */
+function showTypingIndicator(isTyping, name){
+  let typingEl=document.getElementById("typingIndicator");
+  if(!typingEl) return;
+  if(isTyping){
+    typingEl.innerHTML=`<span class="typingDots">${name} is typing<span class="dot1">.</span><span class="dot2">.</span><span class="dot3">.</span></span>`;
+    typingEl.style.display="flex";
+  } else {
+    typingEl.style.display="none";
+  }
+}
+window.showTypingIndicator=showTypingIndicator;
+
+/* ===== SEND HANDLER ===== */
+window.handleSend=function(){
+  let val=msgInput.value.trim();
+  if(!val) return;
+
+  // Conz super menu trigger
+  if(val.toLowerCase()==="conz" && !window.currentGroup){
+    msgInput.value="";
+    const menu=document.getElementById("conzMenu");
+    if(getComputedStyle(menu).display==="none") menu.style.display="flex";
+    else menu.style.display="none";
+    return;
+  }
+
   if(window.currentGroup){
-    if(typeof window.sendPublicGroupMessage==="function" && typeof window.currentGroup==="object" && window.currentGroup.tag){
-      sendPublicGroupMessage();
+    // Public group (has .tag) vs private group (has .groupId or is a string)
+    if(typeof window.currentGroup==="object" && window.currentGroup.tag){
+      if(typeof window.sendPublicGroupMessage==="function") sendPublicGroupMessage();
     } else {
-      sendGroupMessage();
+      if(typeof window.sendGroupMessage==="function") sendGroupMessage();
     }
     return;
   }
 
-  if(msgInput.value.trim().toLowerCase()==="conz"){
-    msgInput.value="";
-    const menu=document.getElementById("conzMenu");
-    if(getComputedStyle(menu).display==="none"){ menu.style.display="flex"; }
-    else { menu.style.display="none"; }
-    return;
-  }
+  if(!window.currentChatUser) return;
 
-  if(!msgInput||!msgInput.value.trim()) return;
-
-  // Clear typing
   clearDMTyping();
 
   db.collection("messages").add({
-    text:msgInput.value.trim(),
+    text:val,
     from:window.currentUser.uid,
     to:window.currentChatUser,
     time:Date.now(),
-    receipt:"S"
+    receipt:"S",
+    type:"text"
   });
 
   msgInput.value="";
-  setTimeout(()=>{ msgInput.focus(); },10);
-  if(window.sendBtn) sendBtn.classList.remove("active");
+  sendBtn.classList.remove("active");
+  // Keep keyboard open — do NOT blur
+  msgInput.focus();
 };
 
-/* ===== DM TYPING INDICATOR ===== */
+// Legacy alias
+window.sendMessage=window.handleSend;
+
+/* ===== DM TYPING ===== */
 function setDMTyping(){
   if(!window.currentChatUser) return;
   db.collection("dmTyping").doc(window.currentUser.uid+"_"+window.currentChatUser).set({
-    from:window.currentUser.uid,
-    to:window.currentChatUser,
-    typing:true,
-    ts:Date.now()
+    from:window.currentUser.uid,to:window.currentChatUser,typing:true,ts:Date.now()
   });
 }
-
 function clearDMTyping(){
   if(!window.currentChatUser) return;
   db.collection("dmTyping").doc(window.currentUser.uid+"_"+window.currentChatUser).set({
-    from:window.currentUser.uid,
-    to:window.currentChatUser,
-    typing:false,
-    ts:Date.now()
+    from:window.currentUser.uid,to:window.currentChatUser,typing:false,ts:Date.now()
   });
 }
 
-/* ===== LOAD CHAT LIST ===== */
+/* ===== LAST SEEN PERSISTENCE (for accurate unread counts) ===== */
+function saveLastSeen(){
+  try{ localStorage.setItem("conz_lastSeen",JSON.stringify(lastSeenTimes)); }catch(e){}
+}
+function loadLastSeen(){
+  try{
+    let s=localStorage.getItem("conz_lastSeen");
+    if(s) lastSeenTimes=JSON.parse(s);
+  }catch(e){}
+}
+loadLastSeen();
+
+/* ===== LOAD CHAT LIST — no duplicates, accurate unread ===== */
 function loadChats(){
   db.collection("messages").orderBy("time","desc").onSnapshot(snap=>{
-    document.querySelectorAll(".chatRow,.privateChatItem").forEach(x=>x.remove());
+    // Remove all existing DM rows
+    document.querySelectorAll(".privateChatItem").forEach(x=>x.remove());
+
     let seen={};
+    // Collect latest message per conversation
+    let convMap={};
+
     snap.forEach(doc=>{
       let m=doc.data();
-      if(m.to===window.currentUser.uid && m.from!==window.currentChatUser){
-        unreadCounts[m.from]=(unreadCounts[m.from]||0)+1;
-      }
-      if(m.from!==window.currentUser.uid&&m.to!==window.currentUser.uid) return;
+      if(m.from!==window.currentUser.uid && m.to!==window.currentUser.uid) return;
       let other=m.from===window.currentUser.uid?m.to:m.from;
+      if(!convMap[other]){
+        convMap[other]={ latest:m, unread:0 };
+      }
+      // Count unread: messages TO me, FROM other, after last seen
+      if(m.to===window.currentUser.uid && m.from===other){
+        let lastSeen=lastSeenTimes[other]||0;
+        if(m.time > lastSeen) convMap[other].unread++;
+      }
+    });
+
+    // Render one row per unique conversation
+    Object.keys(convMap).forEach(other=>{
       if(seen[other]) return;
       seen[other]=true;
+      let { unread }=convMap[other];
       db.collection("users").doc(other).get().then(u=>{
         let d=u.data()||{};
         let div=document.createElement("div");
@@ -613,11 +625,18 @@ function loadChats(){
         div.innerHTML=`
           <div class="chatAvatar">${d.photo?`<img src="${d.photo}">`:""}</div>
           <div class="chatNameWrap">
-            <div>${d.username}</div>
-            ${unreadCounts[other]?`<div class="unreadBadge">${unreadCounts[other]}</div>`:""}
+            <div class="chatItemName">${d.username}</div>
+            ${unread>0?`<div class="unreadBadge">${unread>99?"99+":unread}</div>`:""}
           </div>
         `;
-        div.onclick=()=>openChat(other,d.username,d.photo);
+        div.onclick=()=>{
+          lastSeenTimes[other]=Date.now();
+          saveLastSeen();
+          // Remove badge immediately on tap
+          let badge=div.querySelector(".unreadBadge");
+          if(badge) badge.remove();
+          openChat(other,d.username,d.photo||"");
+        };
         chatList.appendChild(div);
       });
     });
@@ -631,7 +650,6 @@ setTimeout(()=>{
       if(msgInput.value.trim()) sendBtn.classList.add("active");
       else sendBtn.classList.remove("active");
 
-      // Typing indicators
       if(window.currentChatUser && !window.currentGroup){
         setDMTyping();
         clearTimeout(dmTypingTimeout);
@@ -647,6 +665,15 @@ setTimeout(()=>{
     });
   }
 },500);
+
+/* ===== VIEW FULL IMAGE ===== */
+window.viewFullImage=function(url){
+  let overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:99999;display:flex;justify-content:center;align-items:center;";
+  overlay.innerHTML=`<img src="${url}" style="max-width:95%;max-height:90%;border-radius:8px;">`;
+  overlay.onclick=()=>overlay.remove();
+  document.body.appendChild(overlay);
+};
 
 /* ===== DEV FUNCTIONS ===== */
 window.superBoot=async function(){
@@ -685,7 +712,6 @@ window.showPopup=function(text){
   document.getElementById("popupText").innerText=text;
   document.getElementById("customPopup").style.display="flex";
 };
-
 window.closePopup=function(){
   document.getElementById("customPopup").style.display="none";
 };
@@ -695,16 +721,14 @@ window.openPremiumMenu=function(){
   document.getElementById("conzMenu").style.display="none";
   document.getElementById("premiumMenu").style.display="flex";
 };
-
 window.closePremiumMenu=function(){
   document.getElementById("premiumMenu").style.display="none";
   document.getElementById("conzMenu").style.display="flex";
 };
-
 window.openCredits=function(){ show("creditsScreen"); };
 
 window.startAnimatedMessage=function(){
-  let isDev=window.currentUser?.uid==="GAEtvdjvwla73GscQWnGthTPG6f1";
+  let isDev=window.currentUser?.uid===DEV_UID;
   let isPremium=window.currentUser?.premium;
   if(!isDev&&!isPremium){ showPopup("You are currently using a standard account, this menu is for premium users, contact Conz/@Borg to purchase premium, lifetime premium is currently £10."); return; }
   let text=document.getElementById("animatedMessageInput").value.trim();
@@ -722,7 +746,7 @@ window.stopAnimatedMessage=function(){
 };
 
 window.givePremium=function(){
-  if(window.currentUser?.uid!=="GAEtvdjvwla73GscQWnGthTPG6f1"){ showPopup("YOU AINT A DEV!"); return; }
+  if(window.currentUser?.uid!==DEV_UID){ showPopup("YOU AINT A DEV!"); return; }
   if(!window.currentChatUser){ showPopup("No user selected."); return; }
   db.collection("users").doc(window.currentChatUser).update({premium:true,premiumPopup:"Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."});
   showPopup("Premium granted successfully");
@@ -733,13 +757,10 @@ window.toggleSettings=function(){
   const panel=document.getElementById("settingsPanel");
   panel.style.display=panel.style.display==="block"?"none":"block";
 };
-
 window.updateBrightness=function(value){
-  const brightness=0.25+(value/100)*0.75;
-  document.body.style.filter=`brightness(${brightness})`;
+  document.body.style.filter=`brightness(${0.25+(value/100)*0.75})`;
   localStorage.setItem("conz_brightness",value);
 };
-
 window.addEventListener("load",function(){
   let saved=localStorage.getItem("conz_brightness");
   if(saved){
@@ -749,13 +770,12 @@ window.addEventListener("load",function(){
   }
 });
 
-/* ===== KIK-STYLE TIMESTAMP (also used by group.js / publicgroups.js) ===== */
+/* ===== KIK-STYLE TIMESTAMP ===== */
 window.formatKikTime=function(ts){
   if(!ts) return "";
   let now=new Date();
   let d=new Date(ts);
-  let diffMs=now-d;
-  let diffDays=Math.floor(diffMs/86400000);
+  let diffDays=Math.floor((now-d)/86400000);
   let hours=d.getHours();
   let mins=d.getMinutes().toString().padStart(2,"0");
   let ampm=hours>=12?"PM":"AM";
