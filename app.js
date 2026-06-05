@@ -207,11 +207,24 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-window.login=function(){
-  let email=loginEmail.value;
+window.login=async function(){
+  let username=(loginUsername.value||'').trim();
   let pass=loginPassword.value;
-  if(!email||!pass){ showPopup("Missing details"); return; }
-  auth.signInWithEmailAndPassword(email,pass).catch(e=>showPopup("Invalid email or password"));
+  if(!username||!pass){ showPopup("Missing details"); return; }
+  // Look up the email address stored against this username in Firestore
+  try{
+    let snap = await db.collection("users").where("username","==",username).limit(1).get();
+    if(snap.empty){ showPopup("No account found with that username"); return; }
+    let email = snap.docs[0].data().email;
+    if(!email){ showPopup("Account error — please contact @Borg"); return; }
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e){
+    if(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential"){
+      showPopup("Incorrect password");
+    } else {
+      showPopup("Login failed — check your details and try again");
+    }
+  }
 };
 
 /* ===== SESSION GUARD ===== */
@@ -271,6 +284,7 @@ window.signup=async function(){
     const res=await auth.createUserWithEmailAndPassword(email,pass);
     await db.collection("users").doc(res.user.uid).set({
       username,usernameLower:username.toLowerCase(),displayName:username,
+      email:email,
       photo:"",coverPhoto:"",created:Date.now(),
       banned:false,blockedUsers:[]
     });
