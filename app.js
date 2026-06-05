@@ -187,9 +187,8 @@ auth.onAuthStateChanged(user=>{
       loadAvatar();
       if(!window.chatsLoaded){
         window.chatsLoaded=true;
-        // Load stories rail and friend request badge
+        // Load stories rail
         if(typeof window.loadStories==="function") setTimeout(window.loadStories,500);
-        if(typeof window.loadFriendRequestBadge==="function") setTimeout(window.loadFriendRequestBadge,600);
         loadChats();
         if(window.loadGroups) loadGroups();
         if(window.renderPublicGroups) renderPublicGroups();
