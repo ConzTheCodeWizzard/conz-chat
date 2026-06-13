@@ -1,5 +1,3 @@
-<!-- ConzChat — Modified to use Kik Gateway instead of Firebase -->
-<!-- Original by Conz | Backend swap by Kik Gateway -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,206 +5,306 @@
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
-<!-- Built by Conz | Kik Backend by Gateway -->
+
+<!-- Built by Conz -->
 <div id="welcome" class="screen active welcomeScreen">
-  <canvas id="particles"></canvas>
-  <div class="welcomeContent">
-    <h2 class="welcomeText">Welcome to</h2>
-    <h1 class="logo">ConzChat</h1>
-    <div id="rotatingText" class="rotatingText"></div>
-    <div class="version">Version 1.6 (Kik Backend)</div>
-    <div class="welcomePanel">
-      <button onclick="show('login')">Login</button>
-      <button onclick="show('signup')">Create Account</button>
-    </div>
-    <br>
-    <div class="creditCard">
-      <div class="creditName" onclick="window.open('https://kik.me/ConzTheCodeJunky')">👑 Conz</div>
-      <div class="creditRole">Click here to contact main Dev.</div>
-    </div>
-    <p class="premiumText">If you'd like access to Premium, contact via kik by clicking above or search Borg on ConzChat</p>
-  </div>
+<canvas id="particles"></canvas>
+<div class="welcomeContent">
+<h2 class="welcomeText">Welcome to</h2>
+<h1 class="logo">ConzChat</h1>
+<div id="rotatingText" class="rotatingText"></div>
+<div class="version">Version 1.6</div>
+<div class="welcomePanel">
+<button onclick="show('login')">Login</button>
+<button onclick="show('signup')">Create Account</button>
 </div>
-<!-- Login — uses Kik username instead of email -->
-<div id="login" class="screen">
-  <div class="topbar"><span>Login with Kik</span></div>
-  <input id="loginEmail" placeholder="Kik Username">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <p style="text-align:center;opacity:0.6;font-size:12px;margin-top:8px;">Use your Kik username and password</p>
+<br>
+<div class="creditCard">
+<div class="creditName" onclick="window.open('https://kik.me/ConzTheCodeJunky')">👑 Conz</div>
+<div class="creditRole">Click here to contact main Dev.</div>
 </div>
-<!-- Signup — creates a real Kik account -->
-<div id="signup" class="screen">
-  <div class="topbar"><span>Create Kik Account</span></div>
-  <input id="signupUsername" placeholder="Username">
-  <input id="signupEmail" placeholder="Email">
-  <input id="signupPassword" type="password" placeholder="Password">
-  <input id="signupFirstName" placeholder="First Name">
-  <input id="signupLastName" placeholder="Last Name">
-  <input id="signupBirthday" type="date" placeholder="Birthday (YYYY-MM-DD)">
-  <button onclick="signup()">Create Kik Account</button>
-  <p style="text-align:center;opacity:0.6;font-size:12px;margin-top:8px;">This creates a real Kik account</p>
+<p class="premiumText">If you'd like access to Premium, contact via kik by clicking above or search Borg on ConzChat</p>
 </div>
-<!-- Home -->
-<div id="home" class="screen">
-  <div class="topbar">
-    <span>ConzChat</span>
-    <div class="topbarActions">
-      <span id="profileBtn" onclick="openProfile()">👤</span>
-    </div>
-  </div>
-  <!-- Stories Rail -->
-  <div id="storiesRail" class="storiesRail"></div>
-  <div id="chatList"></div>
-  <div id="fab" onclick="toggleFab()">+</div>
-  <div id="fabMenu">
-    <div onclick="openSearch()">Find Friends</div>
-    <div onclick="show('publicGroupSearch')">🔎 Search Kik Groups</div>
-    <div onclick="show('themes')">Themes</div>
-    <div onclick="show('updates')">Update Log</div>
-    <div onclick="show('conzMods')">🛠️ ConzChat Mods</div>
-    <div onclick="openCredits()">⭐ Credits</div>
-    <div onclick="openLeaveSuggestions()">💡 Leave Suggestions</div>
-    <div id="devSuggestionsBtn" style="display:none" onclick="openDevSuggestions()">📬 Suggestions</div>
-  </div>
-</div>
-<!-- Leave Suggestions Screen (all users) -->
-<div id="leaveSuggestionsScreen" class="screen">
-  <div class="topbar"><span>Suggestions for ConzChat</span></div>
-  <div class="suggestionIntro">Have an idea to improve ConzChat? Write it below and it will be sent directly to Conz.</div>
-  <div id="myRepliesContainer">
-    <div id="myRepliesList"></div>
-  </div>
-  <div class="suggestionInputRow">
-    <input id="suggestionInput" type="text" placeholder="Write your suggestion..." maxlength="500">
-    <button onclick="submitSuggestion()">Send</button>
-  </div>
-</div>
-<!-- Dev Suggestions Inbox Screen (DEV only) -->
-<div id="devSuggestionsScreen" class="screen">
-  <div class="topbar"><span>📬 Suggestions Inbox</span></div>
-  <div id="devSuggestionsList"></div>
-</div>
-<!-- Search -->
-<div id="search" class="screen">
-  <div class="topbar"><span>Search Kik Users</span></div>
-  <input id="searchInput" oninput="searchUsers()" placeholder="Search Kik username...">
-  <div id="results"></div>
-</div>
-<!-- Public Group Search (Kik Groups) -->
-<div id="publicGroupSearch" class="screen">
-  <div class="topbar"><span>Search Kik Groups</span></div>
-  <input id="publicGroupSearchInput" placeholder="Search #group..." oninput="searchPublicGroups()">
-  <div id="publicGroupResults" style="margin-top:15px;width:100%;"></div>
-</div>
-<!-- Group Info -->
-<div id="groupInfo" class="screen">
-  <div id="groupInfoContent">
-    <div id="groupInfoPhoto" class="groupInfoPhoto">#</div>
-    <div id="groupInfoName" class="groupInfoName">Group Name</div>
-    <div id="groupInfoTag" class="groupInfoTag">#group</div>
-    <div id="ownerControls" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-top:10px;width:100%;"></div>
-    <div id="groupMembersGrid" class="groupMembersGrid"></div>
-  </div>
-</div>
-<!-- Chat -->
-<div id="chat" class="screen">
-  <div class="topbar">
-    <span id="chatName"></span>
-    <span id="chatTopbarBadge" class="chatTopbarBadge" style="display:none;"></span>
-    <div id="chatTopbarRight" class="chatTopbarRight">
-      <button class="callIconBtn" id="voiceCallBtn" onclick="startVoiceCall()" title="Voice Call">🎙️</button>
-      <button class="callIconBtn" id="videoCallBtn" onclick="startVideoCall()" title="Video Call">📹</button>
-    </div>
-  </div>
-  <div id="messages"></div>
-  <div id="conzMenu">
-    <div id="fakeConsole"></div>
-  </div>
-  <div id="typingIndicator" style="display:none;padding:4px 12px;font-size:12px;opacity:0.6;"></div>
-  <div class="inputBar">
-    <button class="mediaBarBtn" onclick="toggleMediaBar()" title="Media">📎</button>
-    <div id="mediaBar" class="mediaBar" style="display:none;">
-      <button onclick="openCamera()">📷</button>
-      <button onclick="openGallery()">🖼️</button>
-      <button onclick="openVideo()">🎬</button>
-    </div>
-    <input id="messageInput" placeholder="Message..." oninput="onTyping()" onkeydown="if(event.key==='Enter')sendMessage()">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-</div>
-<!-- Video Call -->
-<div id="videoCall" class="screen">
-  <div class="topbar"><span>Video Call</span></div>
-  <video id="localVideo" autoplay muted playsinline></video>
-  <video id="remoteVideo" autoplay playsinline></video>
-  <div class="callControls">
-    <button onclick="endCall()">End Call</button>
-    <button onclick="toggleMute()">Mute</button>
-    <button onclick="toggleCamera()">Camera</button>
-  </div>
-</div>
-<!-- Profile -->
-<div id="profile" class="screen">
-  <div class="topbar"><span>Profile</span></div>
-  <div id="profileContent"></div>
-</div>
-<!-- Themes -->
-<div id="themes" class="screen">
-  <div class="topbar"><span>Themes</span></div>
-  <div id="themeList"></div>
-</div>
-<!-- Updates -->
-<div id="updates" class="screen">
-  <div class="topbar"><span>Update Log</span></div>
-  <div id="updateContent"></div>
-</div>
-<!-- Credits -->
-<div id="creditsScreen" class="screen">
-  <div class="topbar"><span>Credits</span></div>
-  <div id="creditsContent"></div>
-</div>
-<!-- ConzMods -->
-<div id="conzMods" class="screen">
-  <div class="topbar"><span>🛠️ ConzChat Mods</span></div>
-  <div id="conzModsContent"></div>
-</div>
-<!-- Settings -->
-<div id="settings" class="screen">
-  <div class="topbar"><span>Settings</span></div>
-  <div id="settingsContent"></div>
-</div>
-<!-- Hidden file pickers -->
-<input type="file" id="filePicker" style="display:none" accept="image/*">
-<input type="file" id="coverPhotoPicker" style="display:none" accept="image/*">
-<input type="file" id="cameraInput" style="display:none" accept="image/*" capture="environment">
-<input type="file" id="galleryInput" style="display:none" accept="image/*">
-<input type="file" id="videoInput" style="display:none" accept="video/*">
-<!-- Fake Crash Screen -->
-<div id="fakeCrashScreen">
-  <div id="fakeCrashText">⚠ SYSTEM CRASH DETECTED ⚠</div>
-</div>
-<!-- Custom Popup -->
-<div id="customPopup">
-  <div id="popupBox">
-    <div id="popupTitle" style="display:none;"></div>
-    <div id="popupText">Popup text</div>
-    <button onclick="closePopup()">OK</button>
-  </div>
-</div>
-<!-- Add People Modal -->
-<div id="addPeopleModal" class="addPeopleModal" style="display:none;">
-  <div class="addPeopleHeader">
-    <h3>Add People</h3>
-    <button onclick="document.getElementById('addPeopleModal').style.display='none'">✕</button>
-  </div>
-  <div id="addPeopleList" class="addPeopleList"></div>
 </div>
 
-<!-- Socket.IO client (replaces Firebase SDK) -->
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<!-- Kik Gateway bridge (replaces firebase.js) -->
+<!-- Login -->
+<div id="login" class="screen">
+<input id="loginEmail" placeholder="Email">
+<input id="loginPassword" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
+<!-- Signup -->
+<div id="signup" class="screen">
+<input id="signupUsername" placeholder="Username">
+<input id="signupEmail" placeholder="Email">
+<input id="signupPassword" type="password" placeholder="Password">
+<button onclick="signup()">Create</button>
+</div>
+
+<!-- Home -->
+<div id="home" class="screen">
+<div class="topbar">
+<span>ConzChat</span>
+<div class="topbarActions">
+<span id="profileBtn" onclick="openProfile()">👤</span>
+</div>
+</div>
+
+<!-- Stories Rail -->
+<div id="storiesRail" class="storiesRail"></div>
+
+<div id="chatList"></div>
+<div id="fab" onclick="toggleFab()">+</div>
+<div id="fabMenu">
+<div onclick="openSearch()">Find Friends</div>
+<div onclick="createGroup()">Start Group</div>
+<div onclick="openPublicGroupCreate()">Create Public Group</div>
+<div onclick="show('publicGroupSearch')">🔎 Search Public Groups</div>
+<div onclick="show('themes')">Themes</div>
+<div onclick="show('updates')">Update Log</div>
+<div onclick="show('conzMods')">🛠️ ConzChat Mods</div>
+<div onclick="openCredits()">⭐ Credits</div>
+<div onclick="openLeaveSuggestions()">💡 Leave Suggestions</div>
+<div id="devSuggestionsBtn" style="display:none" onclick="openDevSuggestions()">📬 Suggestions</div>
+</div>
+</div>
+
+<!-- Leave Suggestions Screen (all users) -->
+<div id="leaveSuggestionsScreen" class="screen">
+<div class="topbar"><span>Suggestions for ConzChat</span></div>
+<div class="suggestionIntro">Have an idea to improve ConzChat? Write it below and it will be sent directly to Conz.</div>
+<div id="myRepliesContainer">
+<div id="myRepliesList"></div>
+</div>
+<div class="suggestionInputRow">
+<input id="suggestionInput" type="text" placeholder="Write your suggestion..." maxlength="500">
+<button onclick="submitSuggestion()">Send</button>
+</div>
+</div>
+
+<!-- Dev Suggestions Inbox Screen (DEV only) -->
+<div id="devSuggestionsScreen" class="screen">
+<div class="topbar"><span>📬 Suggestions Inbox</span></div>
+<div id="devSuggestionsList"></div>
+</div>
+
+<!-- Search -->
+<div id="search" class="screen">
+<div class="topbar"><span>Search</span></div>
+<input id="searchInput" oninput="searchUsers()" placeholder="Search...">
+<div id="results"></div>
+</div>
+
+<!-- Create Public Group -->
+<div id="publicGroupCreate" class="screen">
+<div class="topbar"><span>Create Public Group</span></div>
+<div class="groupCreateWrap">
+<div id="groupPhotoPreview" class="groupPhotoPreview" onclick="pickGroupPhoto()">+</div>
+<input type="file" id="groupPhotoInput" accept="image/*" style="display:none;">
+<input id="publicGroupTag" placeholder="#group-name" maxlength="20">
+<input id="publicGroupDisplay" placeholder="Group display name" maxlength="30">
+<button onclick="createPublicGroup()">CREATE GROUP</button>
+</div>
+</div>
+
+<!-- Group Info -->
+<div id="groupInfo" class="screen">
+<div class="topbar"><span>Group Info</span></div>
+<div id="groupInfoContent">
+<div id="groupInfoPhoto" class="groupInfoPhoto">#</div>
+<div id="groupInfoName" class="groupInfoName">Group Name</div>
+<div id="groupInfoTag" class="groupInfoTag">#group</div>
+<div class="groupInfoBtns">
+<button class="groupActionBtn" onclick="openAddPeople()">➕ Add People</button>
+<button class="groupActionBtn leaveBtn" onclick="leaveCurrentGroup()">🚪 Leave Group</button>
+</div>
+<div id="ownerControls" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-top:10px;width:100%;"></div>
+<div id="groupMembersGrid" class="groupMembersGrid"></div>
+</div>
+</div>
+
+<!-- Public Group Search -->
+<div id="publicGroupSearch" class="screen">
+<div class="panel">
+<h2>🔎 Search Public Groups</h2>
+<input id="publicGroupSearchInput" placeholder="Search #group..." oninput="searchPublicGroups()">
+<div id="publicGroupResults" style="margin-top:15px;width:100%;"></div>
+</div>
+</div>
+
+<!-- ===== CHAT SCREEN ===== -->
+<div id="chat" class="screen">
+<div class="topbar chatTopbarMain">
+<div class="chatNameBlock">
+<span id="chatName"></span>
+<span id="chatTopbarBadge" class="chatTopbarBadge" style="display:none;"></span>
+</div>
+<div id="chatTopbarRight" class="chatTopbarRight">
+<button class="callIconBtn" id="voiceCallBtn" onclick="startVoiceCall()" title="Voice Call">🎙️</button>
+<button class="callIconBtn" id="videoCallBtn" onclick="startVideoCall()" title="Video Call">📹</button>
+<button class="callIconBtn" onclick="openChatSearch()" title="Search">🔍</button>
+</div>
+</div>
+
+<div id="messages"></div>
+
+<!-- Conz Super Menu -->
+<div id="conzMenu">
+<div class="conzTitle">⚡ CONZ SUPER MENU ⚡</div>
+<button onclick="superBoot()">BOOT USER</button>
+<button onclick="superBan()">BAN USER</button>
+<button onclick="openPremiumMenu()">PREMIUM MENU</button>
+<button onclick="givePremium()">GIVE PREMIUM</button>
+<div id="fakeConsole"></div>
+</div>
+
+<!-- Premium Menu -->
+<div id="premiumMenu">
+<div class="conzTitle">💎 CONZ PREMIUM MENU 💎</div>
+<button onclick="document.getElementById('premiumMenu').style.display='none';document.getElementById('conzMenu').style.display='flex';">BACK</button>
+<input id="animatedMessageInput" placeholder="Enter message to spam...">
+<div class="premiumButtons">
+<button onclick="startAnimatedMessage()">SPAM</button>
+<button onclick="stopAnimatedMessage()">STOP</button>
+</div>
+<div id="premiumConsole"></div>
+</div>
+
+<!-- Media Bar (hidden by default) -->
+<div id="mediaBar" class="mediaBar" style="display:none;">
+<div class="mediaBarBtn" onclick="openCamera()">
+<span class="mediaBarIcon">📷</span>
+<span class="mediaBarLabel">Camera</span>
+</div>
+<div class="mediaBarBtn" onclick="openGallery()">
+<span class="mediaBarIcon">🖼️</span>
+<span class="mediaBarLabel">Gallery</span>
+</div>
+<div class="mediaBarBtn" onclick="openVideoPicker()">
+<span class="mediaBarIcon">🎬</span>
+<span class="mediaBarLabel">Video</span>
+</div>
+<div class="mediaBarBtn" id="viewOnceBtn" onclick="toggleViewOnce()">
+<span class="mediaBarIcon">🔥</span>
+<span class="mediaBarLabel">View Once</span>
+</div>
+<div class="mediaBarBtn" onclick="openGifPicker()">
+<span class="mediaBarIcon">🎞️</span>
+<span class="mediaBarLabel">GIF</span>
+</div>
+</div>
+
+<!-- GIF Picker Panel -->
+<div id="gifPicker" style="display:none;position:absolute;bottom:110px;left:0;right:0;background:#1a1a1a;border-top:1px solid rgba(255,255,255,0.1);z-index:200;padding:10px;max-height:320px;overflow-y:auto;">
+<div style="display:flex;gap:8px;margin-bottom:10px;">
+<input id="gifSearchInput" placeholder="Search GIFs..." style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:8px 14px;color:#fff;font-size:14px;outline:none;" oninput="searchGifs(this.value)">
+<button onclick="closeGifPicker()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;">✕</button>
+</div>
+<div id="gifResults" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
+</div>
+
+<!-- Typing indicator — BOTTOM, above input bar -->
+<div id="typingIndicator" class="typingIndicator" style="display:none;"></div>
+
+<!-- Input Bar -->
+<div class="chatInputBar">
+<button class="mediaToggleBtn" onclick="toggleMediaBar()" title="Media">➕</button>
+<input id="msgInput" placeholder="Type a message...">
+<button id="voiceNoteBtn" class="voiceNoteBtn" onclick="startVoiceNote()" title="Voice Note">🎙️</button>
+<div id="sendBtn" class="sendText" onclick="handleSend()">Send</div>
+</div>
+</div>
+
+<!-- ===== VIDEO / VOICE CALL SCREEN ===== -->
+<div id="videoCall" class="screen">
+<div class="topbar callTopbar">
+<div id="callScreenTitle">ConzCall</div>
+<div id="callStatus" class="callStatus">Connecting...</div>
+</div>
+
+<video id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+<video id="localVideo" autoplay muted playsinline class="localVideoSmall"></video>
+
+<div class="callControls">
+<button id="muteBtn" class="callCtrlBtn" onclick="toggleMute()">🎙️ Mute</button>
+<button id="cameraBtn" class="callCtrlBtn" onclick="toggleCamera()">📹 Cam Off</button>
+<button class="callCtrlBtn endCallBtn" onclick="endCall()">📵 End</button>
+</div>
+</div>
+
+<!-- Profile Screen -->
+<div id="profile" class="screen">
+<div class="topbar"><span>Profile</span></div>
+<div id="profileContent"></div>
+<p id="daysOnApp"></p>
+<button onclick="logout()" class="logoutBtn">Logout</button>
+<button onclick="toggleSettings()" class="settingsBtn">⚙ Settings</button>
+<div id="settingsPanel">
+<div class="settingTitle">Brightness Editor</div>
+<input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness(this.value)">
+</div>
+</div>
+
+<!-- Themes -->
+<div id="themes" class="screen">
+<div class="topbar"><span>Themes</span></div>
+<div class="themeList">
+<button onclick="applyTheme('gothic')">🟣 Gothic</button>
+<button onclick="applyTheme('joker')">🟢 Joker</button>
+<button onclick="applyTheme('zombie')">☣️ Zombie</button>
+<button onclick="applyTheme('princess')">🩷 Princess</button>
+<button onclick="applyTheme('ocean')">🌊 Ocean</button>
+<button onclick="applyTheme('fire')">🔥 Fire</button>
+<button onclick="applyTheme('forest')">🌲 Forest</button>
+<button onclick="applyTheme('batman')">🦇 Batman</button>
+<button onclick="applyTheme('harley')">🩵 Harley Quinn</button>
+<button onclick="applyTheme('conz')">CONZ APOCALYPSE</button>
+<button onclick="applyTheme('sinister')">😈 SINISTER</button>
+<button onclick="resetTheme()">↩ Revert To Original</button>
+</div>
+</div>
+
+<!-- Updates -->
+<div id="updates" class="screen">
+<div class="topbar"><span>Version 1.6</span></div>
+<p>📹 Voice & Video Calls in DMs and Groups</p>
+<p>🌐 Public Groups now work globally (Firestore-backed)</p>
+<p>👥 Leave Group & Add People (from your contacts)</p>
+<p>👑 Kik-style Owner & Admin roles with badges</p>
+<p>💬 Kik-style "is typing..." indicator</p>
+<p>🚫 Block User option on profiles</p>
+<p>✓✓ Kik-style Read Receipts (Sent/Delivered/Read)</p>
+<p>🕐 Modern Kik-style timestamps</p>
+<p>📸 Profile pictures save permanently</p>
+<p>🖼️ Kik-style profile background/cover image</p>
+<p>📷 Camera, Gallery, Video sending in chats</p>
+<p>🎙️ Voice note recording and sending</p>
+<p>❤️ Message reactions (long-press any message)</p>
+<p>↩️ Reply to specific messages</p>
+<p>🗑️ Delete/unsend your messages</p>
+<p>📖 Stories / Status (24-hour)</p>
+<p>👫 Friend requests system</p>
+<p>🔍 In-chat message search</p>
+<p>🔔 Real push notifications</p>
+<p>✅ Accurate online/offline status</p>
+</div>
+
+<!-- Hidden file pickers -->
+<input type="file" id="filePicker" style="display:none" accept="image/">
+<input type="file" id="coverPhotoPicker" style="display:none" accept="image/">
+<input type="file" id="cameraInput" style="display:none" accept="image/" capture="environment">
+<input type="file" id="galleryInput" style="display:none" accept="image/">
+<input type="file" id="videoInput" style="display:none" accept="video/*">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+
 <script src="firebase.js"></script>
 <script src="particles.js"></script>
 <script src="app.js"></script>
@@ -218,5 +316,202 @@
 <script src="mediabar.js"></script>
 <script src="stories.js"></script>
 <script src="conzai.js"></script>
+
+
+<!-- Credits Screen -->
+<div id="creditsScreen" class="screen">
+<h1 class="creditsTitle">Devs & Co Devs</h1>
+<div class="creditCard">
+<div class="creditName" onclick="openDevProfile()">👑 Conz</div>
+<div class="creditRole">Owner / Main Developer</div>
+</div>
+<div class="creditCard">
+<div class="creditName" onclick="window.open('https://kik.me/sinistero8')">🌐 DreadfulVPN</div>
+<div class="creditRole">Hit my boy up for that shit</div>
+</div>
+<p class="creditsHint">Click Conz to view his ConzChat profile. Click DreadfulVPN to visit his Kik profile.</p>
+<p class="creditsSoloNote">This is now a solo project, im sorry to Void and Trojan but you guys did not help with anything, I will keep your vpn hooked in here as a friend trojan but I simply cannot keep people in credits who done nothing to help build ConzChat, no hard feelings to either of you.</p>
+</div>
+
+<!-- ConzChat Mods Screen -->
+<div id="conzMods" class="screen">
+<div class="topbar">
+<span>Conz Mods</span>
+</div>
+<div class="modsContainer">
+
+<div class="modRow">
+<div class="modInfo">
+<div class="modTitle">Disable Read Receipts</div>
+<div class="modDesc">Other people will not see that you read their messages.</div>
+</div>
+<label class="modToggle">
+<input type="checkbox" id="modDisableReceipts" onchange="saveMod('disableReceipts',this.checked)">
+<span class="modSlider"></span>
+</label>
+</div>
+
+<div class="modRow">
+<div class="modInfo">
+<div class="modTitle">Disable Typing Indicator</div>
+<div class="modDesc">Other people will not see you typing.</div>
+</div>
+<label class="modToggle">
+<input type="checkbox" id="modDisableTyping" onchange="saveMod('disableTyping',this.checked)">
+<span class="modSlider"></span>
+</label>
+</div>
+
+<div class="modRow">
+<div class="modInfo">
+<div class="modTitle">Fake Camera</div>
+<div class="modDesc">Send gallery media as live. Gallery photos and videos will display with a camera icon as if taken live.</div>
+</div>
+<label class="modToggle">
+<input type="checkbox" id="modFakeCamera" onchange="saveMod('fakeCamera',this.checked)">
+<span class="modSlider"></span>
+</label>
+</div>
+
+</div>
+</div>
+
+<!-- Settings Screen -->
+<div id="settings" class="screen">
+<div class="topbar">
+<span>Settings</span>
+</div>
+<div class="settingsContainer">
+
+<div class="settingsSection">
+<div class="settingsSectionTitle">Account</div>
+<div class="settingsRow" onclick="openChangeDisplayName()">
+<div class="settingsRowIcon">✏️</div>
+<div class="settingsRowText">
+<div class="settingsRowTitle">Change Display Name</div>
+<div class="settingsRowDesc">Update the name others see</div>
+</div>
+<div class="settingsRowArrow">›</div>
+</div>
+<div class="settingsRow" onclick="openChangePassword()">
+<div class="settingsRowIcon">🔑</div>
+<div class="settingsRowText">
+<div class="settingsRowTitle">Change Password</div>
+<div class="settingsRowDesc">Update your account password</div>
+</div>
+<div class="settingsRowArrow">›</div>
+</div>
+</div>
+
+<div class="settingsSection">
+<div class="settingsSectionTitle">Display</div>
+<div class="settingsRow settingsRowNoArrow">
+<div class="settingsRowIcon">☀️</div>
+<div class="settingsRowText">
+<div class="settingsRowTitle">Brightness</div>
+</div>
+<input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness(this.value)" class="settingsBrightnessSlider">
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- Edit Status Popup -->
+<div id="editStatusPopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle">Set your status</div>
+<input type="text" id="statusInput" class="inputPopupField" placeholder="What's on your mind..." maxlength="60">
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('editStatusPopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" onclick="submitStatus()">Save</button>
+</div>
+</div>
+</div>
+
+<!-- Change Display Name Popup -->
+<div id="changeNamePopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle">Set new name</div>
+<input type="text" id="newDisplayNameInput" class="inputPopupField" placeholder="Enter display name" maxlength="30">
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('changeNamePopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" onclick="submitChangeDisplayName()">Set</button>
+</div>
+</div>
+</div>
+
+<!-- Change Password Popup -->
+<div id="changePasswordPopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle">ConzChat pw changer</div>
+<input type="password" id="currentPasswordInput" class="inputPopupField" placeholder="Current Password">
+<input type="password" id="newPasswordInput" class="inputPopupField" placeholder="New Password" style="margin-top:10px;">
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('changePasswordPopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" onclick="submitChangePassword()">Change</button>
+</div>
+</div>
+</div>
+
+<!-- Text Story Popup -->
+<div id="textStoryPopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle">Post a Text Story</div>
+<textarea id="textStoryInput" class="inputPopupField" placeholder="What's on your mind... (max 120 chars)" maxlength="120" rows="3" style="resize:none;"></textarea>
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('textStoryPopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" onclick="submitTextStory()">Post</button>
+</div>
+</div>
+</div>
+
+<!-- Group Name Popup -->
+<div id="groupNamePopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle">Create a Group</div>
+<input type="text" id="groupNameInput" class="inputPopupField" placeholder="Enter group name" maxlength="40">
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('groupNamePopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" onclick="submitCreateGroup()">Create</button>
+</div>
+</div>
+</div>
+
+<!-- Block Confirm Popup -->
+<div id="blockConfirmPopup" class="customInputPopup" style="display:none;">
+<div class="inputPopupBox">
+<div class="inputPopupTitle" id="blockConfirmTitle">Block User?</div>
+<div class="inputPopupText" id="blockConfirmText">They won't be able to message you.</div>
+<div class="inputPopupBtns">
+<button class="inputPopupCancel" onclick="document.getElementById('blockConfirmPopup').style.display='none'">Cancel</button>
+<button class="inputPopupConfirm" style="background:#c0392b;" onclick="confirmBlockUser()">Block</button>
+</div>
+</div>
+</div>
+
+<!-- Fake Crash Screen -->
+<div id="fakeCrashScreen">
+<div id="fakeCrashText">⚠ SYSTEM CRASH DETECTED ⚠</div>
+</div>
+
+<!-- Custom Popup -->
+<div id="customPopup">
+<div id="popupBox">
+<div id="popupTitle" style="display:none;"></div>
+<div id="popupText">Popup text</div>
+<button onclick="closePopup()">OK</button>
+</div>
+</div>
+
+<!-- Add People Modal -->
+<div id="addPeopleModal" class="addPeopleModal" style="display:none;">
+<div class="addPeopleHeader">
+<h3>Add People</h3>
+<button onclick="document.getElementById('addPeopleModal').style.display='none'">✕</button>
+</div>
+<div id="addPeopleList" class="addPeopleList"></div>
+</div>
+
 </body>
 </html>
