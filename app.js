@@ -1,680 +1,1102 @@
-// ConzChat app.js — Modified for Kik Gateway Backend
-// Original by Conz | Backend swap by Kik Gateway
-// All db.collection() and auth.* calls now route through firebase.js (Kik bridge)
+window.onerror = function(msg, url, line){
+console.error("JS ERROR:", msg, "Line:", line);
+};
+
+// ===== Conz was here =====
+window.show = function(id){
+document.querySelectorAll(".screen").forEach(s=>{
+s.style.display="none";
+s.classList.remove("active");
+});
+let el = document.getElementById(id);
+if(el){
+el.style.display="flex";
+el.classList.add("active");
+}
+let fab = document.getElementById("fabMenu");
+if(fab) fab.style.display="none";
+};
+
+// ===== ANDROID BACK =====
+window.screenHistory = [];
+const oldShow = window.show;
+
+window.show = function(id){
+const current = document.querySelector(".screen.active");
+if(current && current.id !== id){
+screenHistory.push(current.id);
+}
+oldShow(id);
+history.pushState({ screen:id }, "");
+};
+
+window.addEventListener("popstate", function(){
+if(screenHistory.length > 0){
+oldShow(screenHistory.pop());
+} else {
+if(document.getElementById("home")?.classList.contains("active")){
+history.back();
+}
+}
+});
+
+// ===== Conz is goated =====
+window.addEventListener("load", () => {
+function wait(){
+if(typeof firebase==="undefined" || typeof auth==="undefined" || typeof db==="undefined"){
+setTimeout(wait,200);
+return;
+}
+startApp();
+}
+wait();
+});
+
+function startApp(){
 
 window.currentUser=null;
 window.currentChatUser=null;
 window.currentGroup=null;
+
 let fabOpen=false;
 window.myData={};
 let unsubscribeMessages=null;
+// unsubscribeStatus removed — online status feature removed
 let unsubscribeDMTyping=null;
+
+// Accurate unread: track per-conversation last-seen timestamp
 let lastSeenTimes={};
 let dmTypingTimeout=null;
+
 window.unsubscribeMessages=null;
-const DEV_UID="ConzTheCodeJunky"; // Kik username of dev
+
+const DEV_UID="GAEtvdjvwla73GscQWnGthTPG6f1";
 window.isDev=false;
 
 /* ===== ROTATING TEXT ===== */
 const rotatingMessages=[
-  "Built by ~Conz~",
-  "Now powered by Kik's network!",
-  "Voice & Video Calls now in DMs and Groups!",
-  "Search and join real Kik public groups!",
-  "Kik-style read receipts added",
-  "ConzChat Co Devs are Void And Trojan",
-  "Report any issues you find to @Borg on ConzChat",
-  "If you know how to code hit me up join the team",
-  "Version 1.6 — Kik Backend!",
-  "Thank you for trying ConzChat ~Conz~"
+"Built by ~Conz~",
+"You are currently running Version 1.5",
+"Voice & Video Calls now in DMs and Groups!",
+"Public Groups now work globally!",
+"Kik-style read receipts added",
+"ConzChat Co Devs are Void And Trojan",
+"Report any issues you find to @Borg on ConzChat",
+"If you know how to code hit me up join the team",
+"Version 1.5 — Major Update!",
+"Thank you for trying ConzChat ~Conz~"
 ];
 let rotatingIndex=0;
 let hue=0;
+
 function startRotatingText(){
-  let textEl=document.getElementById("rotatingText");
-  if(!textEl) return;
-  textEl.style.fontSize="18px";
-  textEl.style.marginTop="12px";
-  textEl.style.minHeight="24px";
-  textEl.style.fontWeight="bold";
-  textEl.style.transition="0.4s ease";
-  textEl.innerText=rotatingMessages[0];
-  setInterval(()=>{
-    textEl.style.opacity="0";
-    setTimeout(()=>{
-      rotatingIndex++;
-      if(rotatingIndex>=rotatingMessages.length) rotatingIndex=0;
-      hue+=35;
-      textEl.innerText=rotatingMessages[rotatingIndex];
-      textEl.style.color=`hsl(${hue},100%,60%)`;
-      textEl.style.textShadow=`0 0 12px hsl(${hue},100%,60%)`;
-      textEl.style.opacity="1";
-    },300);
-  },3000);
+let textEl=document.getElementById("rotatingText");
+if(!textEl) return;
+textEl.style.fontSize="18px";
+textEl.style.marginTop="12px";
+textEl.style.minHeight="24px";
+textEl.style.fontWeight="bold";
+textEl.style.transition="0.4s ease";
+textEl.innerText=rotatingMessages[0];
+setInterval(()=>{
+textEl.style.opacity="0";
+setTimeout(()=>{
+rotatingIndex++;
+if(rotatingIndex>=rotatingMessages.length) rotatingIndex=0;
+hue+=35;
+textEl.innerText=rotatingMessages[rotatingIndex];
+textEl.style.color=hsl(${hue},100%,60%); textEl.style.textShadow=0 0 12px hsl(${hue},100%,60%);
+textEl.style.opacity="1";
+},300);
+},3000);
 }
 startRotatingText();
 
 /* ===== THEMES ===== */
 const themes={
-  gothic:{main:"#000000",secondary:"#9d00ff"},
-  joker:{main:"#1aff00",secondary:"#7b00ff"},
-  zombie:{main:"#001a00",secondary:"#00ff00"},
-  princess:{main:"#ffb6d9",secondary:"#ff4fa3"},
-  ocean:{main:"#0044ff",secondary:"#7fdfff"},
-  fire:{main:"#ff2200",secondary:"#ff8800"},
-  forest:{main:"#001f00",secondary:"#00cc44"},
-  batman:{main:"#111111",secondary:"#666666"},
-  harley:{main:"#ff69b4",secondary:"#00bfff"},
-  conz:{main:"#050505",secondary:"#ff003c"},
-  sinister:{main:"#050505",secondary:"#ff0000"}
+gothic:{main:"#000000",secondary:"#9d00ff"},
+joker:{main:"#1aff00",secondary:"#7b00ff"},
+zombie:{main:"#001a00",secondary:"#00ff00"},
+princess:{main:"#ffb6d9",secondary:"#ff4fa3"},
+ocean:{main:"#0044ff",secondary:"#7fdfff"},
+fire:{main:"#ff2200",secondary:"#ff8800"},
+forest:{main:"#001f00",secondary:"#00cc44"},
+batman:{main:"#111111",secondary:"#666666"},
+harley:{main:"#ff69b4",secondary:"#00bfff"},
+conz:{main:"#050505",secondary:"#ff003c"},
+sinister:{main:"#050505",secondary:"#ff0000"}
 };
+
 window.applyTheme=function(name){
-  let t=themes[name];
-  if(!t) return;
-  document.documentElement.style.setProperty("--main",t.main);
-  document.documentElement.style.setProperty("--secondary",t.secondary);
-  localStorage.setItem("conz_theme",name);
-  document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
-  if(name==="harley") document.body.classList.add("harleyTheme");
-  if(name==="conz") document.body.classList.add("conzTheme");
-  if(name==="sinister") document.body.classList.add("sinisterTheme");
+let t=themes[name];
+if(!t) return;
+document.documentElement.style.setProperty("--main",t.main);
+document.documentElement.style.setProperty("--secondary",t.secondary);
+localStorage.setItem("conz_theme",name);
+document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
+if(name==="harley") document.body.classList.add("harleyTheme");
+if(name==="conz") document.body.classList.add("conzTheme");
+if(name==="sinister") document.body.classList.add("sinisterTheme");
 };
+
 window.resetTheme=function(){
-  document.documentElement.style.setProperty("--main","#000");
-  document.documentElement.style.setProperty("--secondary","#ff0033");
-  document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
-  localStorage.removeItem("conz_theme");
+document.documentElement.style.setProperty("--main","#000");
+document.documentElement.style.setProperty("--secondary","#ff0033");
+document.body.classList.remove("harleyTheme","conzTheme","sinisterTheme");
+localStorage.removeItem("conz_theme");
 };
+
 let savedTheme=localStorage.getItem("conz_theme");
 if(savedTheme && themes[savedTheme]) applyTheme(savedTheme);
 
-/* ===== AUTH — hide all screens until auth resolves ===== */
+/* ===== AUTH — hide all screens until auth resolves (no login flash) ===== */
+// Hide everything immediately so nothing flashes before auth resolves
 document.querySelectorAll(".screen").forEach(s=>{ s.style.display="none"; s.classList.remove("active"); });
 
 auth.onAuthStateChanged(user=>{
-  if(user){
-    window.currentUser=user;
-    window.isDev=(user.username===DEV_UID || user.uid===DEV_UID);
-    updateSuggestionsDevBtn();
-    startApp(user);
-  } else {
-    show("welcome");
-  }
+if(user){
+window.currentUser=user;
+window.isDev=user.uid===DEV_UID;
+// Show dev Suggestions inbox button in FAB if this is the dev account
+updateSuggestionsDevBtn();
+// Start session guard — kicks this device if another login happens
+startSessionGuard(user.uid);
+
+db.collection("users").doc(user.uid).onSnapshot(doc=>{
+let d=doc.data()||{};
+d.uid=user.uid;
+d.premium=d.premium||false;
+window.currentUser.premium=d.premium;
+if(d.premiumPopup){
+showPopup(d.premiumPopup);
+db.collection("users").doc(user.uid).update({premiumPopup:""});
+}
+if(d.banned){
+showPopup("This account is permanently banned from ConzChat.");
+auth.signOut();
+return;
+}
+if(d.forceLogout){
+showPopup(d.logoutMessage||"Logged out");
+db.collection("users").doc(user.uid).update({forceLogout:false,logoutMessage:""});
+auth.signOut();
+}
 });
 
-/* ===== SHOW SCREEN ===== */
-window.show=function(id){
-  document.querySelectorAll(".screen").forEach(s=>{
-    s.style.display="none";
-    s.classList.remove("active");
-  });
-  let el=document.getElementById(id);
-  if(el){ el.style.display="flex"; el.classList.add("active"); }
+// Online status feature removed by user request
+
+db.collection("users").doc(user.uid).onSnapshot(doc=>{
+window.myData=doc.data()||{};
+loadAvatar();
+if(!window.chatsLoaded){
+window.chatsLoaded=true;
+// Load stories rail
+if(typeof window.loadStories==="function") setTimeout(window.loadStories,500);
+loadChats();
+if(window.loadGroups) loadGroups();
+if(window.renderPublicGroups) renderPublicGroups();
+// Conz AI row is injected automatically by the MutationObserver in conzai.js
+}
+});
+
+show("home");
+} else {
+window.chatsLoaded=false;
+show("welcome");
+}
+});
+
+window.login=function(){
+let email=loginEmail.value;
+let pass=loginPassword.value;
+if(!email||!pass){ showPopup("Missing details"); return; }
+auth.signInWithEmailAndPassword(email,pass).catch(e=>showPopup("Invalid email or password"));
 };
 
-/* ===== POPUP ===== */
-window.showPopup=function(msg,title){
-  let popup=document.getElementById("customPopup");
-  let text=document.getElementById("popupText");
-  let titleEl=document.getElementById("popupTitle");
-  if(text) text.innerText=msg;
-  if(titleEl){ if(title){ titleEl.innerText=title; titleEl.style.display="block"; } else { titleEl.style.display="none"; } }
-  if(popup) popup.style.display="flex";
-};
-window.closePopup=function(){
-  let popup=document.getElementById("customPopup");
-  if(popup) popup.style.display="none";
-};
+/* ===== SESSION GUARD ===== */
+let mySessionId=null;
+let sessionUnsubscribe=null;
 
-/* ===== LOGIN ===== */
-window.login=async function(){
-  let username=document.getElementById("loginEmail").value.trim();
-  let pass=document.getElementById("loginPassword").value;
-  if(!username||!pass){ showPopup("Enter your Kik username and password"); return; }
-  try{
-    showPopup("Connecting to Kik...");
-    await auth.signInWithEmailAndPassword(username, pass);
-    closePopup();
-  }catch(e){
-    if(e.message !== "captcha_required"){
-      showPopup(e.message||"Login failed");
-    }
-  }
-};
-
-/* ===== SIGNUP ===== */
-window.signup=async function(){
-  let username=(document.getElementById("signupUsername")||{}).value||"";
-  let email=(document.getElementById("signupEmail")||{}).value||"";
-  let pass=(document.getElementById("signupPassword")||{}).value||"";
-  let firstName=(document.getElementById("signupFirstName")||{}).value||username;
-  let lastName=(document.getElementById("signupLastName")||{}).value||"User";
-  let birthday=(document.getElementById("signupBirthday")||{}).value||"2000-01-01";
-
-  if(!username||!email||!pass){ showPopup("Fill in all fields"); return; }
-  if(username.length<2||username.length>15){ showPopup("Username must be 2-15 characters"); return; }
-
-  try{
-    showPopup("Creating your Kik account...");
-    // firebase.js bridge handles the actual Kik registration
-    await auth.createUserWithEmailAndPassword(email, pass);
-    closePopup();
-  }catch(e){
-    showPopup(e.message||"Signup failed");
-  }
-};
-
-/* ===== AVATAR ===== */
-window.loadAvatar=function(){
-  let btn=document.getElementById("profileBtn");
-  if(!btn) return;
-  let photo=window.myData&&window.myData.photo;
-  if(photo){
-    btn.innerHTML=`<img src="${photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`;
-  } else {
-    btn.innerHTML="👤";
-  }
-};
-
-/* ===== SEARCH USERS ===== */
-window.openSearch=function(){
-  fabOpen=false;
-  let fm=document.getElementById("fabMenu");
-  if(fm) fm.style.display="none";
-  show("search");
-};
-
-window.searchUsers=function(){
-  let q=(document.getElementById("searchInput")||{}).value||"";
-  let results=document.getElementById("results");
-  if(!results) return;
-  if(q.length<2){ results.innerHTML=""; return; }
-
-  // Search on Kik network
-  window.searchUsersOnKik(q);
-
-  // Show results from local store as they come in
-  setTimeout(()=>{
-    let users=Object.values(window._store&&window._store.users||{});
-    let filtered=users.filter(u=>(u.username||"").toLowerCase().includes(q.toLowerCase())||(u.displayName||"").toLowerCase().includes(q.toLowerCase()));
-    results.innerHTML="";
-    if(!filtered.length){ results.innerHTML='<div style="opacity:0.5;text-align:center;padding:16px;">No results yet. Try again in a moment.</div>'; return; }
-    filtered.forEach(u=>{
-      let div=document.createElement("div");
-      div.className="searchResult";
-      div.innerHTML=`
-        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:(u.displayName||u.username||"?")[0].toUpperCase()}</div>
-        <div class="chatNameWrap">
-          <div>${escapeHtml(u.displayName||u.username||u.uid)}</div>
-          <div style="font-size:12px;opacity:0.6;">@${escapeHtml(u.username||u.uid)}</div>
-        </div>
-      `;
-      div.onclick=()=>{ openChat(u.uid||u.jid); };
-      results.appendChild(div);
-    });
-  }, 1500);
-};
-
-/* ===== OPEN DM CHAT ===== */
-window.openChat=function(uid){
-  if(!window.currentUser) return;
-  if(unsubscribeMessages){ unsubscribeMessages(); unsubscribeMessages=null; }
-  if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages=null; }
-
-  window.currentChatUser=uid;
-  window.currentGroup=null;
-
-  // Set chat header
-  let chatName=document.getElementById("chatName");
-  let userData=window._store&&window._store.users&&(window._store.users[uid]||Object.values(window._store.users).find(u=>u.uid===uid||u.username===uid));
-  if(chatName) chatName.innerText=(userData&&(userData.displayName||userData.username))||uid;
-
-  show("chat");
-
-  // Load messages from store
-  let messagesEl=document.getElementById("messages");
-  if(messagesEl) messagesEl.innerHTML="";
-
-  // Subscribe to incoming messages
-  unsubscribeMessages=db.collection("messages")
-    .where("from","==",uid)
-    .onSnapshot(snap=>{
-      if(!messagesEl) return;
-      messagesEl.innerHTML="";
-      let msgs=[];
-      snap.forEach(doc=>{ msgs.push({id:doc.id,...doc.data()}); });
-      msgs.sort((a,b)=>(a.time||0)-(b.time||0));
-      msgs.forEach(m=>renderMessage(m, messagesEl));
-      messagesEl.scrollTop=messagesEl.scrollHeight;
-    });
-
-  // Subscribe to typing
-  if(unsubscribeDMTyping){ unsubscribeDMTyping(); unsubscribeDMTyping=null; }
-  unsubscribeDMTyping=db.collection("dmTyping")
-    .where("from","==",uid)
-    .onSnapshot(snap=>{
-      let typingEl=document.getElementById("typingIndicator");
-      if(!typingEl) return;
-      let isTyping=false;
-      snap.forEach(doc=>{ if(doc.data().typing) isTyping=true; });
-      typingEl.style.display=isTyping?"block":"none";
-      typingEl.innerText=isTyping?`${uid} is typing...`:"";
-    });
-};
-
-/* ===== RENDER MESSAGE ===== */
-function renderMessage(m, container){
-  let isMine=(m.from===window.currentUser.uid||m.from===window.currentUser.username);
-  let div=document.createElement("div");
-  div.className="message "+(isMine?"mine":"theirs");
-  div.dataset.id=m.id;
-  let text=m.deleted?"<em style='opacity:0.5'>This message was deleted</em>":escapeHtml(m.text||m.body||"");
-  div.innerHTML=`<div class="bubble">${text}</div>`;
-  container.appendChild(div);
+function startSessionGuard(uid){
+// Generate a unique ID for this session
+mySessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+// Unsubscribe any previous listener first
+if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
+// Write our sessionId, then wait 2 seconds before subscribing so the
+// initial onSnapshot fire (which always fires immediately) is safely past
+// the write and won't be mistaken for a foreign login.
+db.collection("sessions").doc(uid).set({ sessionId: mySessionId, ts: Date.now() }).then(()=>{
+setTimeout(()=>{
+// Double-check we haven't already been unsubscribed (e.g. user logged out)
+if(!auth.currentUser || auth.currentUser.uid !== uid) return;
+sessionUnsubscribe = db.collection("sessions").doc(uid).onSnapshot(snap=>{
+if(!snap.exists) return;
+let data = snap.data();
+// If the sessionId in Firestore no longer matches ours, someone else logged in
+if(data.sessionId && data.sessionId !== mySessionId){
+if(sessionUnsubscribe){ sessionUnsubscribe(); sessionUnsubscribe=null; }
+showSessionKickedPopup();
+}
+});
+}, 2000);
+});
 }
 
-/* ===== SEND MESSAGE ===== */
-window.sendMessage=async function(){
-  let input=document.getElementById("messageInput");
-  let text=(input?input.value:"").trim();
-  if(!text||!window.currentUser) return;
-  if(input) input.value="";
+function showSessionKickedPopup(){
+// Create a full-screen overlay that can't be dismissed
+let overlay = document.createElement('div');
+overlay.id = 'sessionKickedOverlay';
+overlay.innerHTML = &lt;div class="sessionKickedBox"&gt; &lt;div class="sessionKickedIcon"&gt;⚠️&lt;/div&gt; &lt;div class="sessionKickedTitle"&gt;Account Logged In Elsewhere&lt;/div&gt; &lt;div class="sessionKickedText"&gt;Your account has been logged into on another device. You have been signed out for security.&lt;/div&gt; &lt;button class="sessionKickedBtn" onclick="document.getElementById('sessionKickedOverlay').remove(); auth.signOut();"&gt;OK&lt;/button&gt; &lt;/div&gt;;
+document.body.appendChild(overlay);
+// Auto sign out after 4 seconds even if they don't tap OK
+setTimeout(()=>{ auth.signOut(); }, 4000);
+}
 
-  let msgData={
-    from: window.currentUser.uid||window.currentUser.username,
-    text: text,
-    time: Date.now(),
-    type: "text"
-  };
-
-  if(window.currentGroup){
-    let groupId=typeof window.currentGroup==="string"?window.currentGroup:window.currentGroup.id||window.currentGroup.jid;
-    msgData.groupId=groupId;
-    // Determine if public or private group
-    let isPublic=window.currentGroup.isPublic||window.currentGroup.tag;
-    db.collection(isPublic?"publicGroupMessages":"groupMessages").add(msgData);
-  } else if(window.currentChatUser){
-    msgData.to=window.currentChatUser;
-    db.collection("messages").add(msgData);
-  }
-
-  // Render own message immediately
-  let messagesEl=document.getElementById("messages");
-  if(messagesEl){
-    renderMessage({...msgData, id:"local_"+Date.now()}, messagesEl);
-    messagesEl.scrollTop=messagesEl.scrollHeight;
-  }
+window.signup=async function(){
+let username=signupUsername.value.trim();
+let email=signupEmail.value.trim();
+let pass=signupPassword.value;
+if(!username||!email||!pass){ showPopup("Fill everything"); return; }
+try{
+const existing=await db.collection("users").where("usernameLower","==",username.toLowerCase()).get();
+if(!existing.empty){ showPopup("Username already taken"); return; }
+const res=await auth.createUserWithEmailAndPassword(email,pass);
+await db.collection("users").doc(res.user.uid).set({
+username,usernameLower:username.toLowerCase(),displayName:username,
+email:email,
+photo:"",coverPhoto:"",created:Date.now(),
+banned:false,blockedUsers:[]
+});
+}catch(e){ showPopup("Signup failed: "+e.message); }
 };
 
-/* ===== TYPING INDICATOR ===== */
-window.onTyping=function(){
-  if(!window.currentChatUser||!window.currentUser) return;
-  let peerJid=window.currentChatUser;
-  window.sendKikTyping(peerJid, true);
-  clearTimeout(dmTypingTimeout);
-  dmTypingTimeout=setTimeout(()=>{ window.sendKikTyping(peerJid, false); }, 3000);
+window.logout=function(){
+auth.signOut();
 };
 
-/* ===== LOAD CHATS (from roster) ===== */
-window.loadChats=function(){
-  if(!window.currentUser) return;
-  let chatList=document.getElementById("chatList");
-  if(!chatList) return;
-
-  db.collection("users").onSnapshot(snap=>{
-    // Clear existing DM items (not group items)
-    document.querySelectorAll(".dmItem").forEach(el=>el.remove());
-    let users=[];
-    snap.forEach(doc=>{ users.push({id:doc.id,...doc.data()}); });
-    users.forEach(u=>{
-      if(u.uid===window.currentUser.uid||u.username===window.currentUser.username) return;
-      let div=document.createElement("div");
-      div.className="chatItem dmItem";
-      div.innerHTML=`
-        <div class="chatAvatar">${u.photo?`<img src="${u.photo}">`:(u.displayName||u.username||"?")[0].toUpperCase()}</div>
-        <div class="chatNameWrap">
-          <div>${escapeHtml(u.displayName||u.username||u.uid)}</div>
-          <div style="font-size:12px;opacity:0.6;">@${escapeHtml(u.username||u.uid)}</div>
-        </div>
-      `;
-      div.onclick=()=>{ openChat(u.uid||u.jid||u.id); };
-      chatList.appendChild(div);
-    });
-  });
-};
-
-/* ===== LOAD GROUPS (from Kik roster groups) ===== */
-window.loadGroups=function(){
-  // Groups come via roster_update socket event — they're in _store.groups
-  // We listen for updates
-  db.collection("groups").onSnapshot(snap=>{
-    document.querySelectorAll(".groupItem").forEach(el=>el.remove());
-    let chatList=document.getElementById("chatList");
-    if(!chatList) return;
-    let groups=[];
-    snap.forEach(doc=>{ groups.push({id:doc.id,...doc.data()}); });
-    groups.forEach(g=>{
-      let div=document.createElement("div");
-      div.className="groupItem";
-      div.innerHTML=`
-        <div class="chatAvatar">${g.photo?`<img src="${g.photo}">`:"👥"}</div>
-        <div class="chatNameWrap">
-          <div>${escapeHtml(g.name||g.displayName||"Group")}</div>
-          <div style="font-size:12px;opacity:0.6;">${g.lastMessage||"No messages yet"}</div>
-        </div>
-      `;
-      div.onclick=()=>{ openGroup(g.id||g.jid); };
-      chatList.prepend(div);
-    });
-  });
-};
-
-/* ===== OPEN GROUP ===== */
-window.openGroup=function(groupId){
-  if(!window.currentUser) return;
-  if(unsubscribeMessages){ unsubscribeMessages(); unsubscribeMessages=null; }
-  if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages=null; }
-
-  window.currentChatUser=null;
-
-  // Find group data
-  let g=window._store&&window._store.groups&&window._store.groups[groupId];
-  if(!g) g=window._store&&window._store.publicGroups&&window._store.publicGroups[groupId];
-  window.currentGroup=g||{id:groupId,jid:groupId};
-
-  let chatName=document.getElementById("chatName");
-  if(chatName) chatName.innerText=(g&&(g.name||g.displayName))||groupId;
-
-  show("chat");
-
-  let messagesEl=document.getElementById("messages");
-  if(messagesEl) messagesEl.innerHTML="";
-
-  let isPublic=g&&(g.isPublic||g.tag);
-  window.unsubscribeGroupMessages=db.collection(isPublic?"publicGroupMessages":"groupMessages")
-    .where("groupId","==",groupId)
-    .onSnapshot(snap=>{
-      if(!messagesEl) return;
-      messagesEl.innerHTML="";
-      let msgs=[];
-      snap.forEach(doc=>{ msgs.push({id:doc.id,...doc.data()}); });
-      msgs.sort((a,b)=>(a.time||0)-(b.time||0));
-      msgs.forEach(m=>renderMessage(m, messagesEl));
-      messagesEl.scrollTop=messagesEl.scrollHeight;
-    });
-};
-
-/* ===== CREATE GROUP (stub — Kik requires app) ===== */
-window.createGroup=function(){
-  showPopup("To create a group on Kik, please use the Kik app. You can then search for and join your group here.");
+window.toggleFab=function(){
+fabOpen=!fabOpen;
+fabMenu.style.display=fabOpen?"flex":"none";
 };
 
 /* ===== PROFILE ===== */
-window.openProfile=function(){
-  show("profile");
-  let content=document.getElementById("profileContent");
-  if(!content) return;
-  let u=window.myData||{};
-  content.innerHTML=`
-    <div style="display:flex;flex-direction:column;align-items:center;padding:20px;gap:12px;">
-      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#333;display:flex;align-items:center;justify-content:center;font-size:32px;">
-        ${u.photo?`<img src="${u.photo}" style="width:100%;height:100%;object-fit:cover;">`:(u.displayName||u.username||"?")[0]||"👤"}
-      </div>
-      <div style="font-size:20px;font-weight:bold;">${escapeHtml(u.displayName||u.username||"")}</div>
-      <div style="opacity:0.6;">@${escapeHtml(u.username||u.uid||"")}</div>
-      ${u.status?`<div style="opacity:0.7;font-size:13px;">${escapeHtml(u.status)}</div>`:""}
-      <button onclick="show('settings')">Settings</button>
-    </div>
-  `;
+window.openProfile=function(uid=window.currentUser.uid){
+db.collection("users").doc(uid).get().then(doc=>{
+let u=doc.data()||{};
+let isMe=uid===window.currentUser.uid;
+
+// Build full profile HTML first
+let coverStyle = u.coverPhoto
+? 'background-image:url("'+u.coverPhoto+'");background-size:cover;background-position:center top;'
+: '';
+profileContent.innerHTML=&lt;div class="profileCover" id="profileCoverArea" style="${coverStyle}">
+${isMe?<button class="coverEditBtn" onclick="pickCoverPhoto()">📷 Cover</button>:''} &lt;/div&gt; &lt;div class="profileAvatarWrap"&gt; &lt;div class="avatar" ${isMe?'onclick="pickImage()"':''}>
+${u.photo?:<div style="font-size:40px;">👤</div>} &lt;/div&gt; &lt;/div&gt; &lt;div class="displayName"&gt;${u.displayName||u.username}</div>
+ {u.premium?<div class="premiumBadge"&gt;💎 Premium User&lt;/div>:""}
+<div class="username">@ {u.status?<div class="profileStatus"&gt;${u.status}</div>:isMe?<div class="profileStatus profileStatusEmpty" onclick="editStatus()">+ Add a status</div>:''}${isMe&&u.status?<div class="profileStatusEdit" onclick="editStatus()"&gt;✏️ Edit status&lt;/div>:''}
+ {!isMe?&lt;div class="profileActions"&gt; &lt;button class="profileActionBtn" onclick="openChat('${uid}','${u.username}','${u.photo||''}')">💬 Message</button>
+<button class="profileActionBtn blockBtn" onclick="blockUser('${uid}','${u.username}')">🚫 Block</button>
+</div>
+:""};
+// Also apply via JS as a belt-and-braces fallback
+if(u.coverPhoto){
+let coverEl = document.getElementById("profileCoverArea");
+if(coverEl){
+coverEl.style.backgroundImage = 'url("' + u.coverPhoto + '")';
+coverEl.style.backgroundSize = "cover";
+coverEl.style.backgroundPosition = "center top";
+}
+}
+
+// Restore brightness slider value if on own profile
+if(isMe){
+let saved=localStorage.getItem("conz_brightness");
+let slider=document.getElementById("brightnessSlider");
+if(saved && slider) slider.value=saved;
+}
+
+if(window.daysOnApp) daysOnApp.innerText=Math.floor((Date.now()-u.created)/86400000)+" days on ConzChat";
+show("profile");
+});
+};
+
+/* ===== PROFILE PICTURE ===== */
+window.pickImage=function(){ filePicker.click(); };
+
+
+/* ===== STATUS ===== */
+window.editStatus=function(){
+let current=(window.myData&&window.myData.status)||'';
+let inp=document.getElementById('statusInput');
+if(inp) inp.value=current;
+document.getElementById('editStatusPopup').style.display='flex';
+if(inp) setTimeout(()=>inp.focus(),100);
+};
+
+window.submitStatus=function(){
+let val=(document.getElementById('statusInput').value||'').trim().slice(0,60);
+document.getElementById('editStatusPopup').style.display='none';
+db.collection("users").doc(window.currentUser.uid).update({status:val}).then(()=>{
+if(window.myData) window.myData.status=val;
+openProfile(window.currentUser.uid);
+});
+};
+
+filePicker.onchange=e=>{
+let f=e.target.files[0];
+if(!f) return;
+let img=new Image();
+let reader=new FileReader();
+reader.onload=()=>{
+img.onload=()=>{
+let canvas=document.createElement("canvas");
+let maxSize=400;
+let w=img.width,h=img.height;
+if(w>h){if(w>maxSize){h=h*(maxSize/w);w=maxSize;}}
+else{if(h>maxSize){w=w*(maxSize/h);h=maxSize;}}
+canvas.width=w;canvas.height=h;
+canvas.getContext("2d").drawImage(img,0,0,w,h);
+let compressed=canvas.toDataURL("image/jpeg",0.75);
+db.collection("users").doc(window.currentUser.uid).update({photo:compressed});
+window.myData.photo=compressed;
+loadAvatar();
+openProfile(window.currentUser.uid);
+};
+img.src=reader.result;
+};
+reader.readAsDataURL(f);
+};
+
+/* ===== COVER PHOTO ===== */
+window.pickCoverPhoto=function(){
+let inp=document.getElementById("coverPhotoPicker");
+if(inp) inp.click();
+};
+
+document.addEventListener("change",function(e){
+if(e.target.id!=="coverPhotoPicker") return;
+let f=e.target.files[0];
+if(!f) return;
+let img=new Image();
+let reader=new FileReader();
+reader.onload=()=>{
+img.onload=()=>{
+let canvas=document.createElement("canvas");
+// Keep well under Firestore 1MB limit: 600x220 @ 65% quality
+canvas.width=600; canvas.height=220;
+let ctx=canvas.getContext("2d");
+// Cover-fill: scale to fill canvas, centre-crop
+let scale=Math.max(canvas.width/img.width, canvas.height/img.height);
+let sw=img.widthscale, sh=img.heightscale;
+let ox=(canvas.width-sw)/2, oy=(canvas.height-sh)/2;
+ctx.drawImage(img, ox, oy, sw, sh);
+let compressed=canvas.toDataURL("image/jpeg",0.65);
+db.collection("users").doc(window.currentUser.uid).update({coverPhoto:compressed})
+.then(()=>{
+window.myData.coverPhoto=compressed;
+openProfile(window.currentUser.uid);
+})
+.catch(err=>{ showPopup("Cover photo too large, try a smaller image."); });
+};
+img.src=reader.result;
+};
+reader.readAsDataURL(f);
+});
+
+window.editDisplayName=function(){
+let popup=document.getElementById('changeNamePopup');
+if(!popup) return;
+let inp=document.getElementById('newDisplayNameInput');
+if(inp) inp.value=window.myData.displayName||window.myData.username||'';
+popup.style.display='flex';
+if(inp) setTimeout(()=>inp.focus(),100);
+};
+
+window.submitChangeDisplayName=function(){
+let inp=document.getElementById('newDisplayNameInput');
+let newName=inp?inp.value.trim():'';
+if(!newName){ showPopup("Please enter a name"); return; }
+document.getElementById('changeNamePopup').style.display='none';
+db.collection("users").doc(window.currentUser.uid).update({displayName:newName});
+window.myData.displayName=newName;
+openProfile(window.currentUser.uid);
+};
+
+function loadAvatar(){
+profileBtn.innerHTML=window.myData.photo
+?<img src="${window.myData.photo}" style="width:30px;height:30px;border-radius:50%;pointer-events:none;">`
+:"👤";
+}
+
+/* ===== BLOCK USER ===== */
+let _pendingBlockUid=null, _pendingBlockUsername=null;
+window.blockUser=function(uid,username){
+_pendingBlockUid=uid; _pendingBlockUsername=username;
+let title=document.getElementById('blockConfirmTitle');
+let text=document.getElementById('blockConfirmText');
+if(title) title.textContent=Block @${username}?`;
+if(text) text.textContent="They won't be able to message you.";
+let popup=document.getElementById('blockConfirmPopup');
+if(popup) popup.style.display='flex';
+};
+
+window.confirmBlockUser=async function(){
+document.getElementById('blockConfirmPopup').style.display='none';
+let uid=_pendingBlockUid, username=_pendingBlockUsername;
+if(!uid) return;
+try{
+let myRef=db.collection("users").doc(window.currentUser.uid);
+let myDoc=await myRef.get();
+let blocked=(myDoc.data().blockedUsers||[]);
+if(!blocked.includes(uid)){ blocked.push(uid); await myRef.update({blockedUsers:blocked}); }
+showPopup(@${username} has been blocked.`);
+show("home");
+}catch(err){ showPopup(err.message); }
+};
+
+window.unblockUser=async function(uid,username){
+try{
+let myRef=db.collection("users").doc(window.currentUser.uid);
+let myDoc=await myRef.get();
+let blocked=(myDoc.data().blockedUsers||[]).filter(b=>b!==uid);
+await myRef.update({blockedUsers:blocked});
+showPopup(@${username} has been unblocked.`);
+}catch(err){ showPopup(err.message); }
+};
+
+/* ===== SEARCH ===== */
+window.openSearch=()=>show("search");
+
+window.searchUsers=function(){
+let query=event.target.value.trim().toLowerCase();
+results.innerHTML="";
+if(!query) return;
+db.collection("users").get().then(snap=>{
+results.innerHTML="";
+snap.forEach(doc=>{
+let u=doc.data()||{};
+if(u.banned) return;
+if((u.username||"").toLowerCase()!==query) return;
+let div=document.createElement("div");
+div.className="privateChatItem";
+div.innerHTML=&lt;div class="chatAvatar"&gt;${u.photo?<img src="${u.photo}">:""}&lt;/div&gt; &lt;div&gt;${u.username}</div>
+`;
+div.onclick=()=>openChat(doc.id,u.username,u.photo);
+results.appendChild(div);
+});
+});
+};
+
+/* ===== OPEN DM CHAT ===== */
+window.openChat=function(uid,name,photo){
+window.currentGroup=null;
+window.currentChatUser=uid;
+window._conzAIMode=false;
+// Hide bot badge when opening a normal chat
+let topbarBadge=document.getElementById('chatTopbarBadge');
+if(topbarBadge){ topbarBadge.style.display='none'; topbarBadge.textContent=''; }
+
+if(unsubscribeMessages) unsubscribeMessages();
+if(unsubscribeDMTyping) unsubscribeDMTyping();
+if(window.unsubscribeGroupMessages){ window.unsubscribeGroupMessages(); window.unsubscribeGroupMessages=null; }
+if(window.unsubscribePublicGroupMessages){ window.unsubscribePublicGroupMessages(); window.unsubscribePublicGroupMessages=null; }
+
+// Mark this conversation as seen now
+lastSeenTimes[uid]=Date.now();
+saveLastSeen();
+
+show("chat");
+
+// Plain centered name — no status indicator
+chatName.innerHTML = name;
+chatName.onclick=()=>{ openProfile(uid); };
+
+// DM typing listener
+unsubscribeDMTyping=db.collection("dmTyping")
+.where("to","==",window.currentUser.uid)
+.where("from","==",uid)
+.onSnapshot(snap=>{
+let isTyping=false;
+snap.forEach(doc=>{
+let d=doc.data();
+if(d.typing && (Date.now()-d.ts)<5000) isTyping=true;
+});
+showTypingIndicator(isTyping, name);
+});
+
+// Messages listener
+unsubscribeMessages=db.collection("messages")
+.orderBy("time")
+.onSnapshot(snap=>{
+messages.innerHTML="";
+snap.forEach(doc=>{
+let m=doc.data();
+// Only update receipts if Disable Read Receipts mod is OFF
+if(!(window.conzMods && window.conzMods.disableReceipts)){
+if(m.to===window.currentUser.uid && m.from===uid && m.receipt==="S")
+db.collection("messages").doc(doc.id).update({receipt:"D"});
+if(m.to===window.currentUser.uid && m.from===uid && m.receipt!=="R")
+db.collection("messages").doc(doc.id).update({receipt:"R"});
+}
+
+if(!(m.from===window.currentUser.uid||m.to===window.currentUser.uid)) return;
+let other=m.from===window.currentUser.uid?m.to:m.from;
+if(other!==uid) return;
+
+let isMine=m.from===window.currentUser.uid;
+let msgId=doc.id;
+let wrap=document.createElement("div");
+wrap.className="msgWrap "+(isMine?"me":"them")+" msgAnim";
+
+let avatar=document.createElement("div");
+avatar.className="msgAvatar";
+
+let bubble=document.createElement("div");
+bubble.className="msg";
+bubble.dataset.id=msgId;
+
+let receiptIcon="";
+if(isMine){
+if(m.receipt==="R") receiptIcon=<span class="receiptRead" title="Read"&gt;✓✓&lt;/span>;
+else if(m.receipt==="D") receiptIcon=<span class="receiptDelivered" title="Delivered"&gt;✓✓&lt;/span>;
+else receiptIcon=<span class="receiptSent" title="Sent"&gt;✓&lt;/span>;
+}
+
+// Reply-to preview
+let replyHtml="";
+if(m.replyTo){
+replyHtml=<div class="replyPreview"&gt;&lt;span class="replyBar"&gt;&lt;/span&gt;&lt;span class="replyText"&gt;${m.replyTo.text||"📎 Media"}</span></div>`;
+}
+
+// Reactions display
+let reactionsHtml="";
+if(m.reactions && Object.keys(m.reactions).length>0){
+let counts={};
+Object.values(m.reactions).forEach(e=>{ counts[e]=(counts[e]||0)+1; });
+reactionsHtml=<div class="msgReactions">+Object.entries(counts).map(([e,c])=><span class="reactionBubble"&gt;${e}${c&gt;1?" "+c:""}&lt;/span>).join("")+</div>;
+}
+
+// Handle image/video/voice messages
+let contentHtml="";
+if(m.type==="image"){
+if(m.viewOnce){
+if(m.viewed && !isMine){
+contentHtml=<div class="viewOnceOpened"&gt;🔥 Photo opened&lt;/div>;
+} else if(!isMine){
+contentHtml=<div class="viewOnceThumb" onclick="openViewOnce('${msgId}','image','latex
+{m.url}')"&gt;&lt;span class="viewOnceIcon"&gt;🔥&lt;/span&gt;&lt;span class="viewOnceLabel"&gt;Tap to open · Disappears after viewing&lt;/span&gt;&lt;/div>`; } else { contentHtml=`<div class="viewOnceSent"&gt;🔥 Disappearing photo
+
+{m.viewed?' · <span style="color:#ff6b6b">Opened</span>':' · Unopened'}</div>; } } else { contentHtml=; if(m.isCamera) contentHtml+=<div class="msgCameraLabel">📷 Camera</div>; } } else if(m.type==="video"){ if(m.viewOnce){ if(m.viewed && !isMine){ contentHtml=<div class="viewOnceOpened">🔥 Video opened</div>; } else if(!isMine){ contentHtml=<div class="viewOnceThumb" onclick="openViewOnce(' {m.url}')"><span class="viewOnceIcon">🔥</span><span class="viewOnceLabel">Tap to open · Disappears after viewing</span></div>; } else { contentHtml=<div class="viewOnceSent">🔥 Disappearing videolatex
+{m.viewed?' · &lt;span style="color:#ff6b6b"&gt;Opened&lt;/span&gt;':' · Unopened'}&lt;/div>`; } } else { contentHtml=`<video src="
+
+{m.url}" class="msgVideo" controls playsinline></video>; if(m.isCamera) contentHtml+=<div class="msgCameraLabel">📷 Camera</div>; } } else if(m.type==="voice"){ let transcriptHtml = m.transcript ?<div class="voiceTranscript">" {m.url}" controls class="voiceAudio"></audio><div class="voiceLabel">🎤️ Voice Note</div>latex
+{transcriptHtml}&lt;/div>`; } else if(m.type==="gif"){ contentHtml=`<img src="
+
+{m.url}" class="msgImage msgGif" style="border-radius:10px;max-width:220px;" onclick="viewFullImage('latex
+{m.url}')">`; } else { contentHtml=`<div class="msgText"&gt;
+
+{m.text||""}</div>`;
+}
+
+bubble.innerHTML=${replyHtml}
+${contentHtml} ${reactionsHtml}
+<div class="msgMeta">${formatKikTime(m.time)} ${receiptIcon}</div>
+`;
+
+// Long-press for action sheet (reactions, reply, delete)
+let pressTimer;
+bubble.addEventListener("touchstart",()=>{
+pressTimer=setTimeout(()=>{ showMsgActions(msgId, m, isMine, name, photo); },500);
+});
+bubble.addEventListener("touchend",()=>clearTimeout(pressTimer));
+bubble.addEventListener("touchmove",()=>clearTimeout(pressTimer));
+// Desktop right-click
+bubble.addEventListener("contextmenu",(e)=>{ e.preventDefault(); showMsgActions(msgId, m, isMine, name, photo); });
+
+if(isMine){
+if(window.myData.photo) avatar.innerHTML=<img src="${window.myData.photo}">; wrap.appendChild(bubble); wrap.appendChild(avatar); } else { if(photo) avatar.innerHTML=`;
+wrap.appendChild(avatar);
+wrap.appendChild(bubble);
+}
+messages.appendChild(wrap);
+});
+messages.scrollTop=messages.scrollHeight;
+});
+};
+
+/* ===== MESSAGE ACTION SHEET (long-press) ===== */
+window._replyTo = null;
+
+function showMsgActions(msgId, m, isMine, senderName, senderPhoto){
+// Remove any existing sheet
+let old=document.getElementById("msgActionSheet");
+if(old) old.remove();
+
+let sheet=document.createElement("div");
+sheet.id="msgActionSheet";
+sheet.className="msgActionSheet";
+
+const emojis=["❤️","😂","😮","😢","👍","🔥"];
+let emojiRow=emojis.map(e=><button class="reactionEmojiBtn" onclick="addReaction('${msgId}',' {e}</button>`).join("");
+
+sheet.innerHTML=&lt;div class="actionSheetReactions"&gt;${emojiRow}</div>
+<div class="actionSheetDivider"></div>
+<button class="actionSheetBtn" onclick="startReply('${msgId}','${(m.text||'📎 Media').replace(/'/g,"'")}','${senderName}')"&gt;↩️ Reply&lt;/button&gt; ${isMine?<button class="actionSheetBtn actionSheetDelete" onclick="deleteMsg('${msgId}')">🗑️ Delete</button>:""} &lt;button class="actionSheetBtn" onclick="document.getElementById('msgActionSheet').remove()"&gt;Cancel&lt;/button&gt;;
+
+document.body.appendChild(sheet);
+// Dismiss on backdrop tap
+setTimeout(()=>{
+document.addEventListener("touchstart", function dismissSheet(e){
+if(!sheet.contains(e.target)){ sheet.remove(); document.removeEventListener("touchstart",dismissSheet); }
+});
+},100);
+}
+window.showMsgActions=showMsgActions;
+
+window.addReaction=function(msgId, emoji){
+let old=document.getElementById("msgActionSheet");
+if(old) old.remove();
+let uid=window.currentUser.uid;
+// Determine collection
+let col = window.currentGroup ? (window.currentGroup.tag ? "publicGroupMessages" : "groupMessages") : "messages";
+db.collection(col).doc(msgId).update({
+[reactions.${uid}`]: emoji
+}).catch(e=>console.warn("reaction err",e));
+if(navigator.vibrate) navigator.vibrate(30);
+};
+
+window.startReply=function(msgId, text, senderName){
+let old=document.getElementById("msgActionSheet");
+if(old) old.remove();
+window._replyTo={ id:msgId, text:text, sender:senderName };
+let bar=document.getElementById("replyBar");
+if(!bar){
+bar=document.createElement("div");
+bar.id="replyBar";
+bar.className="replyBar";
+let inputWrap=document.querySelector(".chatInputBar");
+if(inputWrap) inputWrap.parentNode.insertBefore(bar, inputWrap);
+}
+bar.innerHTML=<span class="replyBarLine"&gt;&lt;/span&gt;&lt;div class="replyBarContent"&gt;&lt;span class="replyBarName"&gt;${senderName}</span><span class="replyBarText"> {text.length>60?"...":""}</span></div><button class="replyBarClose" onclick="cancelReply()">✕</button>`;
+bar.style.display="flex";
+if(window.msgInput) window.msgInput.focus();
+};
+
+window.cancelReply=function(){
+window._replyTo=null;
+let bar=document.getElementById("replyBar");
+if(bar) bar.style.display="none";
+};
+
+window.deleteMsg=function(msgId){
+let old=document.getElementById("msgActionSheet");
+if(old) old.remove();
+let col = window.currentGroup ? (window.currentGroup.tag ? "publicGroupMessages" : "groupMessages") : "messages";
+db.collection(col).doc(msgId).update({ deleted:true, text:"This message was deleted", type:"text" })
+.catch(e=>console.warn("delete err",e));
+if(navigator.vibrate) navigator.vibrate([30,20,30]);
+};
+
+/* ===== TYPING INDICATOR — bottom above input ===== */
+function showTypingIndicator(isTyping, name){
+let typingEl=document.getElementById("typingIndicator");
+if(!typingEl) return;
+if(isTyping){
+typingEl.innerHTML=<span class="typingDots"&gt;${name} is typing<span class="dot1">.</span><span class="dot2">.</span><span class="dot3">.</span></span>`;
+typingEl.style.display="flex";
+} else {
+typingEl.style.display="none";
+}
+}
+window.showTypingIndicator=showTypingIndicator;
+
+/* ===== SEND HANDLER ===== */
+window.handleSend=function(){
+let val=msgInput.value.trim();
+if(!val) return;
+
+// Conz super menu trigger
+if(val.toLowerCase()==="conz" && !window.currentGroup){
+msgInput.value="";
+const menu=document.getElementById("conzMenu");
+if(getComputedStyle(menu).display==="none") menu.style.display="flex";
+else menu.style.display="none";
+return;
+}
+
+if(window.currentGroup){
+// Public group (has .tag) vs private group (has .groupId or is a string)
+if(typeof window.currentGroup==="object" && window.currentGroup.tag){
+if(typeof window.sendPublicGroupMessage==="function") sendPublicGroupMessage();
+} else {
+if(typeof window.sendGroupMessage==="function") sendGroupMessage();
+}
+return;
+}
+
+if(!window.currentChatUser) return;
+
+// Route to Conz AI if in bot chat mode
+if(window._conzAIMode && window.sendConzAIMessage){
+let text=val;
+msgInput.value="";
+sendBtn.classList.remove("active");
+msgInput.focus();
+window.sendConzAIMessage(text);
+return;
+}
+
+clearDMTyping();
+
+let msgData={
+text:val,
+from:window.currentUser.uid,
+to:window.currentChatUser,
+time:Date.now(),
+receipt:"S",
+type:"text"
+};
+if(window._replyTo) msgData.replyTo = window._replyTo;
+
+db.collection("messages").add(msgData);
+
+// Haptic feedback
+if(navigator.vibrate) navigator.vibrate(20);
+
+// Clear reply
+window.cancelReply();
+
+msgInput.value="";
+sendBtn.classList.remove("active");
+// Keep keyboard open — do NOT blur
+msgInput.focus();
+};
+
+// Legacy alias
+window.sendMessage=window.handleSend;
+
+/* ===== DM TYPING ===== */
+function setDMTyping(){
+if(!window.currentChatUser) return;
+// Skip if Disable Typing mod is ON
+if(window.conzMods && window.conzMods.disableTyping) return;
+db.collection("dmTyping").doc(window.currentUser.uid+""+window.currentChatUser).set({
+from:window.currentUser.uid,to:window.currentChatUser,typing:true,ts:Date.now()
+});
+}
+function clearDMTyping(){
+if(!window.currentChatUser) return;
+db.collection("dmTyping").doc(window.currentUser.uid+""+window.currentChatUser).set({
+from:window.currentUser.uid,to:window.currentChatUser,typing:false,ts:Date.now()
+});
+}
+
+/* ===== LAST SEEN PERSISTENCE (for accurate unread counts) ===== */
+function saveLastSeen(){
+try{ localStorage.setItem("conz_lastSeen",JSON.stringify(lastSeenTimes)); }catch(e){}
+}
+function loadLastSeen(){
+try{
+let s=localStorage.getItem("conz_lastSeen");
+if(s) lastSeenTimes=JSON.parse(s);
+}catch(e){}
+}
+loadLastSeen();
+
+/* ===== LOAD CHAT LIST — no duplicates, accurate unread ===== */
+function loadChats(){
+db.collection("messages").orderBy("time","desc").onSnapshot(snap=>{
+// Remove all existing DM rows
+document.querySelectorAll(".privateChatItem").forEach(x=>x.remove());
+
+let seen={};
+// Collect latest message per conversation
+let convMap={};
+
+snap.forEach(doc=>{
+let m=doc.data();
+if(m.from!==window.currentUser.uid && m.to!==window.currentUser.uid) return;
+let other=m.from===window.currentUser.uid?m.to:m.from;
+if(!convMap[other]){
+convMap[other]={ latest:m, unread:0 };
+}
+// Count unread: messages TO me, FROM other, after last seen
+if(m.to===window.currentUser.uid && m.from===other){
+let lastSeen=lastSeenTimes[other]||0;
+if(m.time > lastSeen) convMap[other].unread++;
+}
+});
+
+// Render one row per unique conversation
+Object.keys(convMap).forEach(other=>{
+if(seen[other]) return;
+seen[other]=true;
+let { unread }=convMap[other];
+db.collection("users").doc(other).get().then(u=>{
+let d=u.data()||{};
+let div=document.createElement("div");
+div.className="privateChatItem";
+div.innerHTML=&lt;div class="chatAvatar"&gt;${d.photo?<img src="${d.photo}">:""} &lt;/div&gt; &lt;div class="chatNameWrap"&gt; &lt;div class="chatItemName"&gt;${d.username}</div>
+latex
+{unread&gt;0?`<div class="unreadBadge"&gt;
+
+{unread>99?"99+":unread}</div>:""} &lt;/div&gt;;
+div.onclick=()=>{
+lastSeenTimes[other]=Date.now();
+saveLastSeen();
+// Remove badge immediately on tap
+let badge=div.querySelector(".unreadBadge");
+if(badge) badge.remove();
+openChat(other,d.username,d.photo||"");
+};
+chatList.appendChild(div);
+});
+});
+});
+}
+
+/* ===== INPUT EVENTS ===== */
+setTimeout(()=>{
+if(window.msgInput && window.sendBtn){
+msgInput.addEventListener("input",()=>{
+if(msgInput.value.trim()) sendBtn.classList.add("active");
+else sendBtn.classList.remove("active");
+
+if(window.currentChatUser && !window.currentGroup){
+setDMTyping();
+clearTimeout(dmTypingTimeout);
+dmTypingTimeout=setTimeout(clearDMTyping,3000);
+}
+});
+
+msgInput.addEventListener("keydown",function(e){
+if(e.key==="Enter" && !e.shiftKey){
+e.preventDefault();
+handleSend();
+}
+});
+}
+},500);
+
+/* ===== VIEW FULL IMAGE ===== */
+window.viewFullImage=function(url){
+let overlay=document.createElement("div");
+overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:99999;display:flex;justify-content:center;align-items:center;";
+overlay.innerHTML=<img src="${url}" style="max-width:95%;max-height:90%;border-radius:8px;">`;
+overlay.onclick=()=>overlay.remove();
+document.body.appendChild(overlay);
+};
+
+/* ===== VIEW ONCE (DISAPPEARING MEDIA) ===== */
+window.openViewOnce=function(msgId, type, url){
+// Show the media fullscreen
+let overlay=document.createElement("div");
+overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;";
+let closeBtn=<div style="position:absolute;top:16px;right:16px;color:#fff;font-size:28px;cursor:pointer;z-index:2;" id="viewOnceClose"&gt;✕&lt;/div>;
+let label=<div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.7);font-size:13px;background:rgba(0,0,0,0.6);padding:4px 12px;border-radius:20px;"&gt;🔥 Disappears when you close&lt;/div>;
+if(type==="image"){
+overlay.innerHTML=closeBtn+label+<img src="${url}" style="max-width:100%;max-height:90%;object-fit:contain;">; } else { overlay.innerHTML=closeBtn+label+<video src="${url}" autoplay controls playsinline style="max-width:100%;max-height:90%;"&gt;&lt;/video>;
+}
+document.body.appendChild(overlay);
+
+// Mark as viewed in Firestore and wipe the URL
+let collection = window.currentGroup && window.currentGroup.tag ? "publicGroupMessages"
+: window.currentGroup ? "groupMessages" : "messages";
+db.collection(collection).doc(msgId).update({ viewed:true, url:"" }).catch(()=>{});
+
+// Close on X or tap outside media
+overlay.addEventListener("click", function(e){
+if(e.target===overlay || e.target.id==="viewOnceClose") overlay.remove();
+});
+};
+
+/* ===== DEV FUNCTIONS ===== */
+window.superBoot=async function(){
+if(!window.isDev){ showPopup("YOU AINT A DEV!"); return; }
+if(!window.currentChatUser){ showPopup("OPEN A CHAT FIRST"); return; }
+try{
+await db.collection("users").doc(window.currentChatUser).update({forceLogout:true,logoutMessage:"LOGGED OUT BY Super Menu SixSevenn🙌"});
+showPopup("USER BOOTED");
+}catch(err){ showPopup(err.message); }
+};
+
+window.superBan=async function(){
+if(!window.isDev){ showPopup("YOU AINT A DEV!"); return; }
+if(!window.currentChatUser){ showPopup("OPEN A CHAT FIRST"); return; }
+try{
+await db.collection("users").doc(window.currentChatUser).update({banned:true,forceLogout:true,logoutMessage:"This account has been permanently BANNED ~Conz~"});
+showPopup("USER BANNED");
+}catch(err){ showPopup(err.message); }
+};
+
+/* ===== GIF PICKER ===== */
+const GIPHY_KEY = 'gvnL7xPoArGXv6249XCJl87Hto1qv9wa'; // Giphy API key
+let _gifSearchTimeout = null;
+
+window.openGifPicker = function(){
+let picker = document.getElementById('gifPicker');
+if(!picker) return;
+picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+if(picker.style.display === 'block'){
+loadTrendingGifs();
+let inp = document.getElementById('gifSearchInput');
+if(inp){ inp.value=''; setTimeout(()=>inp.focus(),100); }
+}
+};
+
+window.closeGifPicker = function(){
+let picker = document.getElementById('gifPicker');
+if(picker) picker.style.display = 'none';
+};
+
+function loadTrendingGifs(){
+fetch(https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=18&rating=pg-13`)
+.then(r=>r.json()).then(data=>renderGifResults(data.data||[]))
+.catch(()=>{ document.getElementById('gifResults').innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:13px;grid-column:span 3;text-align:center;padding:20px;">Could not load GIFs</div>'; });
+}
+
+window.searchGifs = function(query){
+clearTimeout(_gifSearchTimeout);
+if(!query.trim()){ loadTrendingGifs(); return; }
+_gifSearchTimeout = setTimeout(()=>{
+fetch(https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(query)}&limit=18&rating=pg-13)
+.then(r=>r.json()).then(data=>renderGifResults(data.data||[]))
+.catch(()=>{});
+}, 400);
+};
+
+function renderGifResults(results){
+let container = document.getElementById('gifResults');
+if(!container) return;
+container.innerHTML = '';
+if(!results.length){
+container.innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:13px;grid-column:span 3;text-align:center;padding:20px;">No GIFs found</div>';
+return;
+}
+results.forEach(item=>{
+let url = item.images && item.images.original ? item.images.original.url : '';
+let preview = item.images && item.images.fixed_width_small ? item.images.fixed_width_small.url : url;
+if(!url) return;
+let img = document.createElement('img');
+img.src = preview;
+img.style.cssText = 'width:100%;border-radius:8px;cursor:pointer;object-fit:cover;aspect-ratio:1;';
+img.onclick = ()=>sendGif(url);
+container.appendChild(img);
+});
+}
+
+window.sendGif = function(url){
+closeGifPicker();
+// Close media bar too
+let mb = document.getElementById('mediaBar');
+if(mb) mb.style.display='none';
+// Send as a gif type message
+let msgData = {
+from: window.currentUser.uid,
+time: Date.now(),
+type: 'gif',
+url: url,
+text: '',
+isCamera: false,
+viewOnce: false,
+viewed: false
+};
+if(window.currentGroup && typeof window.currentGroup === 'object' && window.currentGroup.tag){
+db.collection('publicGroupMessages').add({...msgData, groupId: window.currentGroup.id});
+} else if(window.currentGroup){
+db.collection('groupMessages').add({...msgData, groupId: typeof window.currentGroup==='string'?window.currentGroup:window.currentGroup.id});
+} else if(window.currentChatUser){
+db.collection('messages').add({...msgData, to: window.currentChatUser, receipt:'S'});
+}
+};
+
+/* ===== POPUP ===== */
+window.showPopup=function(text){
+document.getElementById("popupText").innerText=text;
+document.getElementById("customPopup").style.display="flex";
+};
+window.closePopup=function(){
+document.getElementById("customPopup").style.display="none";
+};
+window.showTitledPopup=function(title,text){
+let titleEl=document.getElementById('popupTitle');
+let textEl=document.getElementById('popupText');
+if(titleEl){ titleEl.innerText=title; titleEl.style.display='block'; }
+if(textEl) textEl.innerText=text;
+document.getElementById('customPopup').style.display='flex';
+};
+const _origClosePopup=window.closePopup;
+window.closePopup=function(){
+let titleEl=document.getElementById('popupTitle');
+if(titleEl){ titleEl.innerText=''; titleEl.style.display='none'; }
+_origClosePopup();
+};
+
+/* ===== PREMIUM MENU ===== */
+window.openPremiumMenu=function(){
+document.getElementById("conzMenu").style.display="none";
+document.getElementById("premiumMenu").style.display="flex";
+};
+window.closePremiumMenu=function(){
+document.getElementById("premiumMenu").style.display="none";
+document.getElementById("conzMenu").style.display="flex";
+};
+window.openCredits=function(){ show("creditsScreen"); };
+
+window.startAnimatedMessage=function(){
+let isDev=window.currentUser?.uid===DEV_UID;
+let isPremium=window.currentUser?.premium;
+if(!isDev&&!isPremium){ showPopup("You are currently using a standard account, this menu is for premium users, contact Conz/@Borg to purchase premium, lifetime premium is currently £10."); return; }
+let text=document.getElementById("animatedMessageInput").value.trim();
+if(!text) return;
+window.animatedMessageLoop=setInterval(function(){
+msgInput.value="🎭 "+text+" 🎭";
+handleSend();
+},150);
+document.getElementById("premiumConsole").innerHTML="Spam started";
+};
+
+window.stopAnimatedMessage=function(){
+clearInterval(window.animatedMessageLoop);
+document.getElementById("premiumConsole").innerHTML="Spam stopped";
+};
+
+window.givePremium=function(){
+if(window.currentUser?.uid!==DEV_UID){ showPopup("YOU AINT A DEV!"); return; }
+if(!window.currentChatUser){ showPopup("No user selected."); return; }
+db.collection("users").doc(window.currentChatUser).update({premium:true,premiumPopup:"Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."});
+showPopup("Premium granted successfully");
 };
 
 /* ===== SETTINGS ===== */
-window.openSettings=function(){ show("settings"); };
+// Settings now opens a full screen — toggleSettings kept as no-op for safety
+window.toggleSettings=function(){ show('settings'); };
 
-/* ===== SIGN OUT ===== */
-window.signOut=async function(){
-  await auth.signOut();
-  window.currentUser=null;
-  window.myData={};
-  show("welcome");
+window.openChangeDisplayName=function(){
+let popup=document.getElementById('changeNamePopup');
+let inp=document.getElementById('newDisplayNameInput');
+if(inp) inp.value=window.myData.displayName||window.myData.username||'';
+if(popup) popup.style.display='flex';
+setTimeout(()=>{ if(inp) inp.focus(); },100);
 };
 
-/* ===== THEMES SCREEN ===== */
-function renderThemes(){
-  let list=document.getElementById("themeList");
-  if(!list) return;
-  list.innerHTML="";
-  Object.keys(themes).forEach(name=>{
-    let t=themes[name];
-    let btn=document.createElement("button");
-    btn.className="themeBtn";
-    btn.style.background=t.main;
-    btn.style.color=t.secondary;
-    btn.style.border=`2px solid ${t.secondary}`;
-    btn.innerText=name.charAt(0).toUpperCase()+name.slice(1);
-    btn.onclick=()=>{ applyTheme(name); showPopup(`${name} theme applied!`); };
-    list.appendChild(btn);
-  });
-  let resetBtn=document.createElement("button");
-  resetBtn.innerText="Reset Theme";
-  resetBtn.onclick=()=>{ resetTheme(); showPopup("Theme reset!"); };
-  list.appendChild(resetBtn);
+window.submitChangeDisplayName=async function(){
+let inp=document.getElementById('newDisplayNameInput');
+let name=(inp?inp.value:'').trim();
+if(!name){ showPopup('Please enter a display name.'); return; }
+try{
+await db.collection('users').doc(window.currentUser.uid).update({displayName:name});
+window.myData.displayName=name;
+document.getElementById('changeNamePopup').style.display='none';
+showPopup('Display name updated!');
+// Refresh profile if open
+if(document.getElementById('profile')?.classList.contains('active')){
+openProfile(window.currentUser.uid);
 }
-
-/* ===== CREDITS ===== */
-window.openCredits=function(){
-  fabOpen=false;
-  let fm=document.getElementById("fabMenu");
-  if(fm) fm.style.display="none";
-  show("creditsScreen");
-  let content=document.getElementById("creditsContent");
-  if(content) content.innerHTML=`
-    <div style="padding:20px;text-align:center;">
-      <h2>ConzChat Credits</h2>
-      <p>👑 <strong>Conz</strong> — Lead Developer</p>
-      <p>🛠️ <strong>Void</strong> — Co-Developer</p>
-      <p>🛠️ <strong>Trojan</strong> — Co-Developer</p>
-      <p style="opacity:0.6;margin-top:20px;">Kik Backend powered by kik-bot-api-unofficial</p>
-    </div>
-  `;
+}catch(e){ showPopup('Failed to update: '+e.message); }
 };
 
-/* ===== FAB ===== */
-window.toggleFab=function(){
-  fabOpen=!fabOpen;
-  let fm=document.getElementById("fabMenu");
-  if(fm) fm.style.display=fabOpen?"flex":"none";
-};
-
-/* ===== UPDATES ===== */
-function renderUpdates(){
-  let content=document.getElementById("updateContent");
-  if(!content) return;
-  content.innerHTML=`
-    <div style="padding:20px;">
-      <h3>Version 1.6 — Kik Backend</h3>
-      <p>• Replaced Firebase with Kik's XMPP network</p>
-      <p>• Real Kik accounts, users, and groups</p>
-      <p>• Search real Kik public groups</p>
-      <p>• Messages routed through Kik servers</p>
-      <h3 style="margin-top:16px;">Version 1.5</h3>
-      <p>• Voice & Video Calls in DMs and Groups</p>
-      <p>• Public Groups work globally</p>
-      <p>• Kik-style read receipts</p>
-    </div>
-  `;
-}
-
-/* ===== CONZMODS ===== */
-function renderConzMods(){
-  let content=document.getElementById("conzModsContent");
-  if(!content) return;
-  content.innerHTML=`
-    <div style="padding:20px;">
-      <h3>🛠️ ConzChat Mods</h3>
-      <p style="opacity:0.7;">Mods coming soon...</p>
-    </div>
-  `;
-}
-
-/* ===== DEV SUGGESTIONS BTN ===== */
-function updateSuggestionsDevBtn(){
-  let btn=document.getElementById("devSuggestionsBtn");
-  if(!btn) return;
-  btn.style.display=(window.isDev)?"block":"none";
-}
-
-/* ===== SUGGESTIONS ===== */
-window.openLeaveSuggestions=function(){
-  fabOpen=false;
-  let fm=document.getElementById("fabMenu");
-  if(fm) fm.style.display="none";
-  show("leaveSuggestionsScreen");
-};
-
-window.submitSuggestion=function(){
-  let input=document.getElementById("suggestionInput");
-  let text=(input?input.value:"").trim();
-  if(!text){ showPopup("Please write a suggestion first."); return; }
-  // Store suggestion locally (no Firebase)
-  let suggestions=JSON.parse(localStorage.getItem("conzchat_suggestions")||"[]");
-  suggestions.push({ text, ts: Date.now(), uid: window.currentUser&&window.currentUser.uid });
-  localStorage.setItem("conzchat_suggestions", JSON.stringify(suggestions));
-  if(input) input.value="";
-  showPopup("Your suggestion has been saved! 💡");
-};
-
-window.openDevSuggestions=function(){
-  fabOpen=false;
-  let fm=document.getElementById("fabMenu");
-  if(fm) fm.style.display="none";
-  show("devSuggestionsScreen");
-  let list=document.getElementById("devSuggestionsList");
-  if(!list) return;
-  let suggestions=JSON.parse(localStorage.getItem("conzchat_suggestions")||"[]");
-  if(!suggestions.length){ list.innerHTML='<div style="opacity:0.5;text-align:center;padding:20px;">No suggestions yet.</div>'; return; }
-  list.innerHTML="";
-  suggestions.sort((a,b)=>b.ts-a.ts).forEach(s=>{
-    let div=document.createElement("div");
-    div.className="devSuggestionCard";
-    div.innerHTML=`<div class="devSuggText">${escapeHtml(s.text)}</div><div class="devSuggDate">${new Date(s.ts).toLocaleString()}</div>`;
-    list.appendChild(div);
-  });
-};
-
-/* ===== ESCAPE HTML ===== */
-function escapeHtml(str){
-  if(!str) return "";
-  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-/* ===== PUBLIC GROUP SEARCH ===== */
-window.searchPublicGroups=function(){
-  let q=(document.getElementById("publicGroupSearchInput")||{}).value||"";
-  let results=document.getElementById("publicGroupResults");
-  if(!results) return;
-  if(q.length<2){ results.innerHTML=""; return; }
-
-  window.searchGroupsOnKik(q);
-
-  setTimeout(()=>{
-    let groups=Object.values(window._store&&window._store.publicGroups||{});
-    let filtered=groups.filter(g=>(g.tag||"").toLowerCase().includes(q.toLowerCase())||(g.displayName||"").toLowerCase().includes(q.toLowerCase()));
-    results.innerHTML="";
-    if(!filtered.length){ results.innerHTML='<div style="opacity:0.5;text-align:center;padding:16px;">No groups found yet. Try again in a moment.</div>'; return; }
-    filtered.forEach(g=>{
-      let div=document.createElement("div");
-      div.className="publicGroupCard";
-      div.innerHTML=`
-        <div class="chatAvatar">${g.photo?`<img src="${g.photo}">`:"👥"}</div>
-        <div class="chatNameWrap">
-          <div>${escapeHtml(g.displayName||g.name||g.tag)}</div>
-          <div style="font-size:12px;opacity:0.6;">${escapeHtml(g.tag||"")} · ${g.memberCount||0} members</div>
-        </div>
-        <button onclick="joinPublicGroup('${g.id||g.jid}','${escapeHtml(g.tag||"")}')">Join</button>
-      `;
-      results.appendChild(div);
-    });
-  }, 1500);
-};
-
-window.joinPublicGroup=async function(groupJid, hashtag){
-  let token=window._kikToken;
-  if(!token){ showPopup("Not logged in"); return; }
-  try{
-    const res=await fetch(window.GATEWAY_URL+"/api/join_group",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({token, group_jid:groupJid, hashtag})
-    });
-    const data=await res.json();
-    if(data.status==="joining"){ showPopup("Joining group..."); }
-    else { showPopup(data.error||"Failed to join"); }
-  }catch(e){ showPopup(e.message); }
-};
-
-/* ===== RENDER PUBLIC GROUPS ===== */
-window.renderPublicGroups=function(){
-  // Populated from socket events — nothing to do here initially
-};
-
-/* ===== START APP (called after auth) ===== */
-function startApp(user){
-  // Populate myData from profile
-  window.myData={
-    uid: user.uid||user.username,
-    username: user.username||user.uid,
-    displayName: user.displayName||user.username||user.uid,
-    photo: user.photo||"",
-    premium: false,
-    banned: false,
-    blockedUsers: []
-  };
-
-  loadAvatar();
-  renderThemes();
-  renderUpdates();
-  renderConzMods();
-  show("home");
-
-  // Load contacts and groups
-  if(!window.chatsLoaded){
-    window.chatsLoaded=true;
-    loadChats();
-    loadGroups();
-    renderPublicGroups();
-  }
-
-  // Listen for profile updates from socket
-  let socket=window._socket;
-  if(socket){
-    socket.on("profile_update", (data)=>{
-      if(data.username===user.username||data.jid===user.uid){
-        window.myData={...window.myData,...data, displayName:data.display_name||data.username};
-        loadAvatar();
-      }
-    });
-  }
-}
-
-/* ===== MEDIA BAR ===== */
-window.toggleMediaBar=function(){
-  let bar=document.getElementById("mediaBar");
-  if(bar) bar.style.display=(bar.style.display==="none"||!bar.style.display)?"flex":"none";
-};
-window.openCamera=function(){
-  document.getElementById("cameraInput")&&document.getElementById("cameraInput").click();
-};
-window.openGallery=function(){
-  document.getElementById("galleryInput")&&document.getElementById("galleryInput").click();
-};
-window.openVideo=function(){
-  document.getElementById("videoInput")&&document.getElementById("videoInput").click();
-};
-
-/* ===== CALLS (stubs — WebRTC calls still work peer-to-peer) ===== */
-window.startVoiceCall=function(){ showPopup("Voice calls require WebRTC setup. Coming soon!"); };
-window.startVideoCall=function(){ showPopup("Video calls require WebRTC setup. Coming soon!"); };
-window.endCall=function(){ show("chat"); };
-window.toggleMute=function(){};
-window.toggleCamera=function(){};
+window.openChangePassword=function(){
+let popup=document.getElementById('changePasswordPopup');
+let cur=document.getElementById('currentPasswordInput');
+let nw=docum
