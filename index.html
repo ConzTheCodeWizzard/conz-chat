@@ -74,9 +74,17 @@
     .tagline {
       font-size: 14px;
       color: var(--muted);
-      margin-bottom: 52px;
+      margin-bottom: 44px;
       letter-spacing: 0.03em;
       animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: fadeUp 0.6s 0.2s ease both;
     }
 
     .btn-download {
@@ -92,20 +100,36 @@
       text-decoration: none;
       letter-spacing: 0.02em;
       transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      animation: fadeUp 0.6s 0.2s ease both;
       box-shadow: 0 0 50px rgba(255,0,51,0.4);
+      min-width: 280px;
+      justify-content: center;
     }
     .btn-download:hover {
       background: var(--red-dark);
       transform: translateY(-2px);
       box-shadow: 0 0 60px rgba(255,0,51,0.55);
     }
+    .btn-download.btn-clone {
+      background: transparent;
+      border: 2px solid var(--red);
+      box-shadow: 0 0 30px rgba(255,0,51,0.15);
+    }
+    .btn-download.btn-clone:hover {
+      background: rgba(255,0,51,0.08);
+      box-shadow: 0 0 40px rgba(255,0,51,0.3);
+    }
     .btn-download svg {
       width: 20px; height: 20px; flex-shrink: 0;
     }
 
+    .clone-hint {
+      font-size: 11px;
+      color: #444;
+      margin-top: -6px;
+    }
+
     .version {
-      margin-top: 16px;
+      margin-top: 20px;
       font-size: 12px;
       color: #444;
       animation: fadeUp 0.6s 0.3s ease both;
@@ -153,7 +177,7 @@
 
     @media (max-width: 480px) {
       .logo-text { font-size: 30px; }
-      .btn-download { font-size: 15px; padding: 15px 30px; }
+      .btn-download { font-size: 15px; padding: 15px 30px; min-width: 240px; }
     }
   </style>
 </head>
@@ -171,14 +195,26 @@
 
     <p class="tagline">Made with love by Conz ❤️</p>
 
-    <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/latest/download/ConzChat.apk">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Download for Android
-    </a>
+    <div class="btn-group">
+      <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/latest/download/ConzChat.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download ConzChat
+      </a>
+
+      <a class="btn-download btn-clone" id="downloadCloneBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/latest/download/ConzChat-Clone.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download ConzChat (Clone)
+      </a>
+      <p class="clone-hint">Run two accounts on one device</p>
+    </div>
 
     <p class="version" id="versionText">v2.1</p>
 
@@ -200,16 +236,17 @@
   <div class="footer">© 2025 ConzChat</div>
 
   <script>
-    // Pull latest release tag from GitHub API and update version + download link
     fetch('https://api.github.com/repos/ConzTheCodeWizzard/conz-chat/releases/latest')
       .then(r => r.json())
       .then(data => {
         if (data && data.tag_name) {
           document.getElementById('versionText').textContent = data.tag_name;
         }
-        if (data && data.assets && data.assets.length > 0) {
-          const apk = data.assets.find(a => a.name.endsWith('.apk'));
+        if (data && data.assets) {
+          const apk = data.assets.find(a => a.name === 'ConzChat.apk');
+          const cloneApk = data.assets.find(a => a.name === 'ConzChat-Clone.apk');
           if (apk) document.getElementById('downloadBtn').href = apk.browser_download_url;
+          if (cloneApk) document.getElementById('downloadCloneBtn').href = cloneApk.browser_download_url;
         }
       })
       .catch(() => {});
