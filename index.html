@@ -196,7 +196,7 @@
     <p class="tagline">Made with love by Conz ❤️</p>
 
     <div class="btn-group">
-      <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/latest/download/ConzChat.apk">
+      <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v2.5/ConzChat-v2.5.apk">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
@@ -205,7 +205,7 @@
         Download ConzChat
       </a>
 
-      <a class="btn-download btn-clone" id="downloadCloneBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/latest/download/ConzChat-Clone.apk">
+      <a class="btn-download btn-clone" id="downloadCloneBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v2.5/ConzChat-Clone-v2.5.apk">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
@@ -243,7 +243,7 @@
           document.getElementById('versionText').textContent = data.tag_name;
         }
         if (data && data.assets) {
-          const apk = data.assets.find(a => a.name.startsWith('ConzChat-v') && !a.name.includes('Clone'));
+          const apk = data.assets.find(a => a.name.startsWith('ConzChat-v') && !a.name.includes('Clone') && !a.name.includes('source'));
           const cloneApk = data.assets.find(a => a.name.startsWith('ConzChat-Clone-v'));
           if (apk) document.getElementById('downloadBtn').href = apk.browser_download_url;
           if (cloneApk) document.getElementById('downloadCloneBtn').href = cloneApk.browser_download_url;
