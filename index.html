@@ -216,7 +216,7 @@
       <p class="clone-hint">Run two accounts on one device</p>
     </div>
 
-    <p class="version" id="versionText">v2.1</p>
+    <p class="version" id="versionText">v2.2</p>
 
     <div class="divider"></div>
 
@@ -233,7 +233,7 @@
 
   </div>
 
-  <div class="footer">© 2025 ConzChat</div>
+  <div class="footer">© 2026 ConzChat</div>
 
   <script>
     fetch('https://api.github.com/repos/ConzTheCodeWizzard/conz-chat/releases/latest')
@@ -243,8 +243,8 @@
           document.getElementById('versionText').textContent = data.tag_name;
         }
         if (data && data.assets) {
-          const apk = data.assets.find(a => a.name === 'ConzChat.apk');
-          const cloneApk = data.assets.find(a => a.name === 'ConzChat-Clone.apk');
+          const apk = data.assets.find(a => a.name.startsWith('ConzChat-v') && !a.name.includes('Clone'));
+          const cloneApk = data.assets.find(a => a.name.startsWith('ConzChat-Clone-v'));
           if (apk) document.getElementById('downloadBtn').href = apk.browser_download_url;
           if (cloneApk) document.getElementById('downloadCloneBtn').href = cloneApk.browser_download_url;
         }
