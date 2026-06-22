@@ -37,8 +37,11 @@ object FirebaseManager {
     fun updateFcmToken(token: String) {
         val uid = currentUid
         if (uid.isNotEmpty()) {
-            usersRef.document(uid).update("fcmToken", token)
-                .addOnFailureListener { }
+            // Use set with merge=true so it creates the field even if it doesn't exist yet
+            usersRef.document(uid).set(
+                mapOf("fcmToken" to token),
+                com.google.firebase.firestore.SetOptions.merge()
+            ).addOnFailureListener { }
         }
     }
 }
