@@ -5,12 +5,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import com.google.firebase.FirebaseApp
+import com.conzchat.app.util.OneSignalManager
 
 class ConzChatApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
+        OneSignalManager.init(this)
         createNotificationChannels()
     }
 

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-65:/values-en-rXC/values-en-rXC.xml",
+            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-69:/values-en-rXC/values-en-rXC.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/b378a474182759abccdd49cd90a42aac/transformed/browser-1.4.0/res/values-en-rXC/values-en-rXC.xml",

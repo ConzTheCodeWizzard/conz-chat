@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-65:/values-gl/values-gl.xml",
+            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-69:/values-gl/values-gl.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/5cfe9d13d6af8fb7093e63634289017e/transformed/biometric-1.1.0/res/values-gl/values-gl.xml",

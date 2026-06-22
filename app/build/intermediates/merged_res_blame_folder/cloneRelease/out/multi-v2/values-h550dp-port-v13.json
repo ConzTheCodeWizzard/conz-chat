@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-65:/values-h550dp-port-v13/values-h550dp-port-v13.xml",
+            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-69:/values-h550dp-port-v13/values-h550dp-port-v13.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/1d937183e2b2abd718120d8a1f04043c/transformed/material-1.11.0/res/values-h550dp-port-v13/values-h550dp-port-v13.xml",

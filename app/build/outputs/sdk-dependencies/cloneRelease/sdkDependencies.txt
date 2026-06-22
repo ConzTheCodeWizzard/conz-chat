@@ -2168,6 +2168,71 @@ library {
   repo_index {
   }
 }
+library {
+  maven_library {
+    groupId: "com.onesignal"
+    artifactId: "OneSignal"
+    version: "5.1.31"
+  }
+  digests {
+    sha256: "X\336\267\036\303y;\342\273\322\031$R\f@Y\'^\025\343>\244\302\301Z\230,\017\n\363\t\325"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "com.onesignal"
+    artifactId: "core"
+    version: "5.1.31"
+  }
+  digests {
+    sha256: "\347V\320\371\322r\314\034\227\f\275@p\002\213\351\343<\356\317J#K\"\305\201\207x\317\347_\037"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "com.onesignal"
+    artifactId: "notifications"
+    version: "5.1.31"
+  }
+  digests {
+    sha256: "\311\201\304\'\333J\233I-\340\375;\206\221\332\333\2756\034\236b\022}rq\347\353\256\033\345\341\364"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "com.onesignal"
+    artifactId: "in-app-messages"
+    version: "5.1.31"
+  }
+  digests {
+    sha256: "c\335\374G\245U&\363\361\361\002#\202\371\350\351s*%\300\210\3412u\345\214\177\213\t=W\317"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "com.onesignal"
+    artifactId: "location"
+    version: "5.1.31"
+  }
+  digests {
+    sha256: "@\225\222y\247\323\247*w\225[\264\347&\236C$\033K}\025\004\vs?IO\245=\"\215E"
+  }
+  repo_index {
+    value: 1
+  }
+}
 library_dependencies {
   library_dep_index: 1
 }
@@ -3540,6 +3605,47 @@ library_dependencies {
   library_dep_index: 1
   library_dep_index: 71
 }
+library_dependencies {
+  library_index: 179
+  library_dep_index: 180
+  library_dep_index: 181
+  library_dep_index: 182
+  library_dep_index: 183
+}
+library_dependencies {
+  library_index: 180
+  library_dep_index: 50
+  library_dep_index: 6
+  library_dep_index: 20
+  library_dep_index: 19
+}
+library_dependencies {
+  library_index: 181
+  library_dep_index: 133
+  library_dep_index: 157
+  library_dep_index: 180
+  library_dep_index: 6
+  library_dep_index: 20
+  library_dep_index: 19
+  library_dep_index: 156
+}
+library_dependencies {
+  library_index: 182
+  library_dep_index: 62
+  library_dep_index: 128
+  library_dep_index: 180
+  library_dep_index: 181
+  library_dep_index: 6
+  library_dep_index: 20
+  library_dep_index: 19
+}
+library_dependencies {
+  library_index: 183
+  library_dep_index: 180
+  library_dep_index: 6
+  library_dep_index: 20
+  library_dep_index: 19
+}
 module_dependencies {
   module_name: "base"
   dependency_index: 0
@@ -3579,6 +3685,7 @@ module_dependencies {
   dependency_index: 170
   dependency_index: 171
   dependency_index: 178
+  dependency_index: 179
 }
 repositories {
   maven_repo {

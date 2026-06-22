@@ -11,8 +11,8 @@ android {
         applicationId = "com.conzchat.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 404
-        versionName = "4.0.4"
+        versionCode = 405
+        versionName = "4.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIPHY_API_KEY", "\"gvnL7xPoArGXv6249XCJl87Hto1qv9wa\"")
         buildConfigField("String", "DEV_UID", "\"GAEtvdjvwla73GscQWnGthTPG6f1\"")
@@ -110,6 +110,8 @@ dependencies {
     // ExoPlayer (for video in feed)
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
+    // OneSignal Push Notifications
+    implementation("com.onesignal:OneSignal:5.1.31")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

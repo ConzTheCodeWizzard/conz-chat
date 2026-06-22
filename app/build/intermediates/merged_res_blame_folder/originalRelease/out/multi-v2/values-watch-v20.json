@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-65:/values-watch-v20/values-watch-v20.xml",
+            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-69:/values-watch-v20/values-watch-v20.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/0db691effe1a47971fed4eb4da696e33/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",

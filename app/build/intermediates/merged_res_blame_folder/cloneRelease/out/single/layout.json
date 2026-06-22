@@ -1,206 +1,202 @@
 [
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_gif.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_gif.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_chat_list.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_chat_list.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_user_search.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_user_search.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_full_image.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_full_image.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_feed_post.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_feed_post.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_credits.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_credits.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_saved_accounts.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_saved_accounts.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_saved_accounts.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_saved_accounts.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_account_settings.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_account_settings.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_story_add.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_story_add.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_suggestions.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_suggestions.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_group_message.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_group_message.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_suggestion.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_suggestion.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_friend_request_card.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_friend_request_card.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_story.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_story.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_dev_menu.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_dev_menu.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_create_group.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_create_group.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_message.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_message.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_mods.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_mods.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_create_post.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_create_post.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_conz_ai_chat.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_conz_ai_chat.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_welcome.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_welcome.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_friend_requests.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_friend_requests.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/bottom_sheet_gif_picker.xml",
+        "source": "com.conzchat.app-main-74:/layout/bottom_sheet_gif_picker.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_public_group.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_public_group.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_stories.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_stories.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_friend_request_card.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_friend_request_card.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_friends.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_friends.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_check_updates.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_check_updates.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_saved_account.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_saved_account.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_comment.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_comment.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_collected_account.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_collected_account.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_public_groups.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_public_groups.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_home.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_home.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_group_message.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_group_message.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_account_collector.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_account_collector.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_story_add.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_story_add.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_user_search.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_user_search.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_settings.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_settings.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_ai_message.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_ai_message.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_credits.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_credits.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_group_chat.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_group_chat.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_friend_request.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_friend_request.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_public_group.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_public_group.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_full_image.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_full_image.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_chat.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_chat.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/bottom_sheet_voice_recorder.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/bottom_sheet_voice_recorder.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_suggestion.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_suggestion.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_account_collector.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_account_collector.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_feed.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_feed.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_group_info.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_group_info.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_comments.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_comments.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_comments.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_comments.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_conz_ai_chat.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_conz_ai_chat.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_profile.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_profile.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_suggestions.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_suggestions.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_dev_menu.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_dev_menu.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_friend_request.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_friend_request.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_user_search.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_user_search.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/activity_main.xml",
+        "source": "com.conzchat.app-main-74:/layout/activity_main.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/dialog_edit_profile.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/dialog_edit_profile.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/bottom_sheet_voice_recorder.xml",
+        "source": "com.conzchat.app-main-74:/layout/bottom_sheet_voice_recorder.xml"
     },
     {
-        "merged": "com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_mods.xml",
-        "source": "com.conzchat.app-main-70:/layout/fragment_mods.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_friend.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_friend.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_ai_message.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_ai_message.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_group_info.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_group_info.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_home.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_home.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_create_group.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_create_group.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_stories.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_stories.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_call.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_call.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_call.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_call.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_login.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_login.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_friends.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_friends.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_settings.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_settings.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/bottom_sheet_gif_picker.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/bottom_sheet_gif_picker.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_account_settings.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_account_settings.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_welcome.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_welcome.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_mods.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_mods.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_chat.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_chat.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_feed_post.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_feed_post.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_saved_account.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_saved_account.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_user_search.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_user_search.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_register.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_register.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_comment.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_comment.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_chat_list.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_chat_list.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_public_groups.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_public_groups.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_message.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_message.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_register.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_register.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_create_post.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_create_post.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_check_updates.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_check_updates.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_collected_account.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_collected_account.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/dialog_edit_profile.xml",
+        "source": "com.conzchat.app-main-74:/layout/dialog_edit_profile.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_feed.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_feed.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_profile.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_profile.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/activity_main.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/activity_main.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_gif.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_gif.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_group_chat.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_group_chat.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/item_story.xml",
+        "source": "com.conzchat.app-main-74:/layout/item_story.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_login.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_login.xml"
-    },
-    {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_friend.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_friend.xml"
+        "merged": "com.conzchat.app-mergeCloneReleaseResources-70:/layout/fragment_friend_requests.xml",
+        "source": "com.conzchat.app-main-74:/layout/fragment_friend_requests.xml"
     }
 ]

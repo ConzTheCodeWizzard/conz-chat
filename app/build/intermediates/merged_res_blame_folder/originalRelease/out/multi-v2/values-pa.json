@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-65:/values-pa/values-pa.xml",
+            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-69:/values-pa/values-pa.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/1babc7fc97ab61e80c4a922a8fe82001/transformed/jetified-media3-ui-1.2.1/res/values-pa/values-pa.xml",

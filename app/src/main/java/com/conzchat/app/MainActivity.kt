@@ -71,6 +71,8 @@ class MainActivity : AppCompatActivity() {
                 FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                     FirebaseManager.updateFcmToken(token)
                 }
+                // Link this device to the user in OneSignal for push notifications
+                com.conzchat.app.util.OneSignalManager.login(user.uid)
                 // Start session guard
                 SessionManager.startSessionGuard(user.uid) {
                     runOnUiThread {
@@ -79,6 +81,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 showHome()
             } else {
+                // Unlink device from user in OneSignal
+                com.conzchat.app.util.OneSignalManager.logout()
                 SessionManager.stopSessionGuard()
                 showWelcome()
             }

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-65:/values-ms/values-ms.xml",
+            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-69:/values-ms/values-ms.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/b378a474182759abccdd49cd90a42aac/transformed/browser-1.4.0/res/values-ms/values-ms.xml",

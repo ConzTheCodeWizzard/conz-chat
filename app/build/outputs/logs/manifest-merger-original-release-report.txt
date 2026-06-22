@@ -29,6 +29,11 @@ MERGED from [com.google.mlkit:face-detection:16.1.6] /home/ubuntu/.gradle/caches
 MERGED from [com.google.android.gms:play-services-mlkit-face-detection:17.1.0] /home/ubuntu/.gradle/caches/transforms-3/6178ee23fc8f6447e519a99c663f4f30/transformed/jetified-play-services-mlkit-face-detection-17.1.0/AndroidManifest.xml:2:1-18:12
 MERGED from [com.google.mlkit:vision-common:17.2.0] /home/ubuntu/.gradle/caches/transforms-3/52fa7e4848d514c5a668238b5dae1b31/transformed/jetified-vision-common-17.2.0/AndroidManifest.xml:2:1-18:12
 MERGED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:2:1-26:12
+MERGED from [com.onesignal:OneSignal:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/ab5240d31850c6a98fb0a790ab8cb702/transformed/jetified-OneSignal-5.1.31/AndroidManifest.xml:2:1-9:12
+MERGED from [com.onesignal:in-app-messages:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/78ed4a18cc62020b9d73d9e3b7f5040a/transformed/jetified-in-app-messages-5.1.31/AndroidManifest.xml:2:1-9:12
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:2:1-113:12
+MERGED from [com.onesignal:location:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/d32de3b94a83231ecf33cc0009cb5180/transformed/jetified-location-5.1.31/AndroidManifest.xml:2:1-12:12
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:2:1-24:12
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/0db691effe1a47971fed4eb4da696e33/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /home/ubuntu/.gradle/caches/transforms-3/b5e237571158d0678e53931999707a4c/transformed/jetified-glide-4.16.0/AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/ubuntu/.gradle/caches/transforms-3/42107b1844aecf6a429abf100ae053b3/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:17:1-24:12
@@ -154,6 +159,8 @@ MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] /home/ubuntu
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:5:5-67
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:9:5-67
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:9:5-67
 MERGED from [com.google.firebase:firebase-storage:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/d7d6d397989a4b6ae5a9019d3f04d492/transformed/jetified-firebase-storage-20.3.0/AndroidManifest.xml:24:5-67
 MERGED from [com.google.firebase:firebase-storage:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/d7d6d397989a4b6ae5a9019d3f04d492/transformed/jetified-firebase-storage-20.3.0/AndroidManifest.xml:24:5-67
 MERGED from [com.google.firebase:firebase-firestore:24.10.0] /home/ubuntu/.gradle/caches/transforms-3/773bbd9649cf572d125ebca30514aae6/transformed/jetified-firebase-firestore-24.10.0/AndroidManifest.xml:11:5-67
@@ -180,6 +187,8 @@ MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.8] /home
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:5:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:6:5-79
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:10:5-79
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:10:5-79
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/ubuntu/.gradle/caches/transforms-3/42107b1844aecf6a429abf100ae053b3/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
 MERGED from [androidx.media3:media3-exoplayer:1.2.1] /home/ubuntu/.gradle/caches/transforms-3/42107b1844aecf6a429abf100ae053b3/transformed/jetified-media3-exoplayer-1.2.1/AndroidManifest.xml:22:5-79
 MERGED from [androidx.media3:media3-common:1.2.1] /home/ubuntu/.gradle/caches/transforms-3/0fe34f8925a90620c496b2abf24288b5/transformed/jetified-media3-common-1.2.1/AndroidManifest.xml:22:5-79
@@ -264,12 +273,16 @@ ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:20:5-76
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:20:22-73
 uses-permission#android.permission.POST_NOTIFICATIONS
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:23:5-77
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:17:5-77
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:17:5-77
 MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:23:5-77
 MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:23:5-77
 	android:name
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:23:22-74
 uses-permission#android.permission.VIBRATE
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:24:5-66
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:24:5-66
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:24:5-66
 	android:name
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:24:22-63
 uses-permission#android.permission.FOREGROUND_SERVICE
@@ -292,6 +305,8 @@ ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:30:5-81
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:30:22-78
 uses-permission#android.permission.WAKE_LOCK
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:31:5-68
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:18:5-68
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:18:5-68
 MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:24:5-68
 MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:24:5-68
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:5-68
@@ -310,6 +325,8 @@ MERGED from [com.google.android.gms:play-services-measurement-sdk-api:21.5.0] /h
 		ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:31:22-65
 uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
 ADDED from /home/ubuntu/ConzChat-v4/app/src/main/AndroidManifest.xml:32:5-81
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:29:5-81
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:29:5-81
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:5-81
 MERGED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:5-81
 	android:name
@@ -349,6 +366,10 @@ MERGED from [com.google.mlkit:vision-common:17.2.0] /home/ubuntu/.gradle/caches/
 MERGED from [com.google.mlkit:vision-common:17.2.0] /home/ubuntu/.gradle/caches/transforms-3/52fa7e4848d514c5a668238b5dae1b31/transformed/jetified-vision-common-17.2.0/AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:8:5-24:19
 MERGED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:8:5-24:19
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:48:5-111:19
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:48:5-111:19
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:12:5-22:19
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:12:5-22:19
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/3078a6976fd36cfa8c44764f63004171/transformed/jetified-firebase-storage-ktx-20.3.0/AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/3078a6976fd36cfa8c44764f63004171/transformed/jetified-firebase-storage-ktx-20.3.0/AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-storage:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/d7d6d397989a4b6ae5a9019d3f04d492/transformed/jetified-firebase-storage-20.3.0/AndroidManifest.xml:26:5-37:19
@@ -569,6 +590,16 @@ MERGED from [com.google.mlkit:vision-common:17.2.0] /home/ubuntu/.gradle/caches/
 MERGED from [com.google.mlkit:vision-common:17.2.0] /home/ubuntu/.gradle/caches/transforms-3/52fa7e4848d514c5a668238b5dae1b31/transformed/jetified-vision-common-17.2.0/AndroidManifest.xml:6:5-44
 MERGED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:6:5-44
 MERGED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:6:5-44
+MERGED from [com.onesignal:OneSignal:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/ab5240d31850c6a98fb0a790ab8cb702/transformed/jetified-OneSignal-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:OneSignal:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/ab5240d31850c6a98fb0a790ab8cb702/transformed/jetified-OneSignal-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:in-app-messages:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/78ed4a18cc62020b9d73d9e3b7f5040a/transformed/jetified-in-app-messages-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:in-app-messages:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/78ed4a18cc62020b9d73d9e3b7f5040a/transformed/jetified-in-app-messages-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:5:5-7:41
+MERGED from [com.onesignal:location:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/d32de3b94a83231ecf33cc0009cb5180/transformed/jetified-location-5.1.31/AndroidManifest.xml:8:5-10:41
+MERGED from [com.onesignal:location:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/d32de3b94a83231ecf33cc0009cb5180/transformed/jetified-location-5.1.31/AndroidManifest.xml:8:5-10:41
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:4:5-6:41
+MERGED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:4:5-6:41
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/0db691effe1a47971fed4eb4da696e33/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/ubuntu/.gradle/caches/transforms-3/0db691effe1a47971fed4eb4da696e33/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /home/ubuntu/.gradle/caches/transforms-3/b5e237571158d0678e53931999707a4c/transformed/jetified-glide-4.16.0/AndroidManifest.xml:5:5-7:41
@@ -875,6 +906,230 @@ ADDED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transfo
 		ADDED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:22:17-82
 	android:name
 		ADDED from [com.google.mlkit:common:18.10.0] /home/ubuntu/.gradle/caches/transforms-3/df168d5165b439e67637b74263e60c2b/transformed/jetified-common-18.10.0/AndroidManifest.xml:21:17-120
+permission#${applicationId}.permission.C2D_MESSAGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:10:5-12:47
+	android:protectionLevel
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:12:9-44
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:11:9-63
+permission#com.conzchat.app.permission.C2D_MESSAGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:10:5-12:47
+	android:protectionLevel
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:12:9-44
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:11:9-63
+uses-permission#${applicationId}.permission.C2D_MESSAGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:14:5-79
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:14:22-76
+uses-permission#com.conzchat.app.permission.C2D_MESSAGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:14:5-79
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:14:22-76
+uses-permission#com.google.android.c2dm.permission.RECEIVE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:19:5-82
+MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:26:5-82
+MERGED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:26:5-82
+MERGED from [com.google.android.gms:play-services-cloud-messaging:17.1.0] /home/ubuntu/.gradle/caches/transforms-3/b2b56db7812fc3d39118ada07897430f/transformed/jetified-play-services-cloud-messaging-17.1.0/AndroidManifest.xml:11:5-82
+MERGED from [com.google.android.gms:play-services-cloud-messaging:17.1.0] /home/ubuntu/.gradle/caches/transforms-3/b2b56db7812fc3d39118ada07897430f/transformed/jetified-play-services-cloud-messaging-17.1.0/AndroidManifest.xml:11:5-82
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:19:22-79
+uses-permission#com.sec.android.provider.badge.permission.READ
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:31:5-86
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:31:22-83
+uses-permission#com.sec.android.provider.badge.permission.WRITE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:32:5-87
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:32:22-84
+uses-permission#com.htc.launcher.permission.READ_SETTINGS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:33:5-81
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:33:22-78
+uses-permission#com.htc.launcher.permission.UPDATE_SHORTCUT
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:34:5-83
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:34:22-80
+uses-permission#com.sonyericsson.home.permission.BROADCAST_BADGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:35:5-88
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:35:22-85
+uses-permission#com.sonymobile.home.permission.PROVIDER_INSERT_BADGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:36:5-92
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:36:22-89
+uses-permission#com.anddoes.launcher.permission.UPDATE_COUNT
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:37:5-84
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:37:22-81
+uses-permission#com.majeur.launcher.permission.UPDATE_BADGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:38:5-83
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:38:22-80
+uses-permission#com.huawei.android.launcher.permission.CHANGE_BADGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:39:5-91
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:39:22-88
+uses-permission#com.huawei.android.launcher.permission.READ_SETTINGS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:40:5-92
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:40:22-89
+uses-permission#com.huawei.android.launcher.permission.WRITE_SETTINGS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:41:5-93
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:41:22-90
+uses-permission#android.permission.READ_APP_BADGE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:42:5-73
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:42:22-70
+uses-permission#com.oppo.launcher.permission.READ_SETTINGS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:43:5-82
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:43:22-79
+uses-permission#com.oppo.launcher.permission.WRITE_SETTINGS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:44:5-83
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:44:22-80
+uses-permission#me.everything.badger.permission.BADGE_COUNT_READ
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:45:5-88
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:45:22-85
+uses-permission#me.everything.badger.permission.BADGE_COUNT_WRITE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:46:5-89
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:46:22-86
+receiver#com.onesignal.notifications.receivers.FCMBroadcastReceiver
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:49:9-60:20
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:51:13-36
+	android:permission
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:52:13-73
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:50:13-86
+intent-filter#action:name:com.google.android.c2dm.intent.RECEIVE+category:name:${applicationId}
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:55:13-59:29
+	android:priority
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:55:28-50
+intent-filter#action:name:com.google.android.c2dm.intent.RECEIVE+category:name:com.conzchat.app
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:55:13-59:29
+	android:priority
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:55:28-50
+action#com.google.android.c2dm.intent.RECEIVE
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:56:17-81
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:56:25-78
+category#${applicationId}
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:58:17-61
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:58:27-58
+category#com.conzchat.app
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:58:17-61
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:58:27-58
+service#com.onesignal.notifications.services.HmsMessageServiceOneSignal
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:62:9-68:19
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:64:13-37
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:63:13-91
+intent-filter#action:name:com.huawei.push.action.MESSAGING_EVENT
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:65:13-67:29
+action#com.huawei.push.action.MESSAGING_EVENT
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:66:17-81
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:66:25-78
+activity#com.onesignal.NotificationOpenedActivityHMS
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:69:9-77:20
+	android:noHistory
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:72:13-37
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:71:13-36
+	android:theme
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:73:13-72
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:70:13-71
+intent-filter#action:name:android.intent.action.VIEW
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:74:13-76:29
+action#android.intent.action.VIEW
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:75:17-69
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:75:25-66
+receiver#com.onesignal.notifications.receivers.NotificationDismissReceiver
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:79:9-81:39
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:81:13-36
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:80:13-93
+receiver#com.onesignal.notifications.receivers.BootUpReceiver
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:82:9-89:20
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:84:13-36
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:83:13-80
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.QUICKBOOT_POWERON
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:85:13-88:29
+action#android.intent.action.BOOT_COMPLETED
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:86:17-79
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:86:25-76
+action#android.intent.action.QUICKBOOT_POWERON
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:87:17-82
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:87:25-79
+receiver#com.onesignal.notifications.receivers.UpgradeReceiver
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:90:9-96:20
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:92:13-36
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:91:13-81
+intent-filter#action:name:android.intent.action.MY_PACKAGE_REPLACED
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:93:13-95:29
+action#android.intent.action.MY_PACKAGE_REPLACED
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:94:17-84
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:94:25-81
+activity#com.onesignal.notifications.activities.NotificationOpenedActivity
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:98:9-104:75
+	android:excludeFromRecents
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:100:13-46
+	android:noHistory
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:102:13-37
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:101:13-36
+	android:theme
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:104:13-72
+	android:taskAffinity
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:103:13-36
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:99:13-93
+activity#com.onesignal.notifications.activities.NotificationOpenedActivityAndroid22AndOlder
+ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:105:9-110:75
+	android:excludeFromRecents
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:107:13-46
+	android:noHistory
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:109:13-37
+	android:exported
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:108:13-36
+	android:theme
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:110:13-72
+	android:name
+		ADDED from [com.onesignal:notifications:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/2be4de9f5148f0b3f728bd19738f1bc0/transformed/jetified-notifications-5.1.31/AndroidManifest.xml:106:13-110
+service#com.onesignal.core.services.SyncJobService
+ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:13:9-16:72
+	android:exported
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:15:13-37
+	android:permission
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:16:13-69
+	android:name
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:14:13-70
+activity#com.onesignal.core.activities.PermissionsActivity
+ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:18:9-21:75
+	android:exported
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:20:13-37
+	android:theme
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:21:13-72
+	android:name
+		ADDED from [com.onesignal:core:5.1.31] /home/ubuntu/.gradle/caches/transforms-3/6b20c1ec23baee9928e745f90bb51717/transformed/jetified-core-5.1.31/AndroidManifest.xml:19:13-77
 service#com.google.firebase.components.ComponentDiscoveryService
 ADDED from [com.google.firebase:firebase-storage-ktx:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/3078a6976fd36cfa8c44764f63004171/transformed/jetified-firebase-storage-ktx-20.3.0/AndroidManifest.xml:9:9-15:19
 MERGED from [com.google.firebase:firebase-storage:20.3.0] /home/ubuntu/.gradle/caches/transforms-3/d7d6d397989a4b6ae5a9019d3f04d492/transformed/jetified-firebase-storage-20.3.0/AndroidManifest.xml:27:9-36:19
@@ -955,12 +1210,6 @@ ADDED from [com.google.firebase:firebase-messaging-ktx:23.4.0] /home/ubuntu/.gra
 		ADDED from [com.google.firebase:firebase-messaging-ktx:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/88e3f642925e90fd943f7a66c69e68d2/transformed/jetified-firebase-messaging-ktx-23.4.0/AndroidManifest.xml:28:17-82
 	android:name
 		ADDED from [com.google.firebase:firebase-messaging-ktx:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/88e3f642925e90fd943f7a66c69e68d2/transformed/jetified-firebase-messaging-ktx-23.4.0/AndroidManifest.xml:27:17-129
-uses-permission#com.google.android.c2dm.permission.RECEIVE
-ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:26:5-82
-MERGED from [com.google.android.gms:play-services-cloud-messaging:17.1.0] /home/ubuntu/.gradle/caches/transforms-3/b2b56db7812fc3d39118ada07897430f/transformed/jetified-play-services-cloud-messaging-17.1.0/AndroidManifest.xml:11:5-82
-MERGED from [com.google.android.gms:play-services-cloud-messaging:17.1.0] /home/ubuntu/.gradle/caches/transforms-3/b2b56db7812fc3d39118ada07897430f/transformed/jetified-play-services-cloud-messaging-17.1.0/AndroidManifest.xml:11:5-82
-	android:name
-		ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:26:22-79
 receiver#com.google.firebase.iid.FirebaseInstanceIdReceiver
 ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:29:9-40:20
 	android:exported
@@ -971,10 +1220,6 @@ ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/
 		ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:30:13-78
 intent-filter#action:name:com.google.android.c2dm.intent.RECEIVE
 ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:33:13-35:29
-action#com.google.android.c2dm.intent.RECEIVE
-ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:34:17-81
-	android:name
-		ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:34:25-78
 meta-data#com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED
 ADDED from [com.google.firebase:firebase-messaging:23.4.0] /home/ubuntu/.gradle/caches/transforms-3/519e7dcc54be541aa76fcc2e9fbdc1fe/transformed/jetified-firebase-messaging-23.4.0/AndroidManifest.xml:37:13-39:40
 	android:value
@@ -1021,10 +1266,6 @@ ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/cache
 		ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/caches/transforms-3/4e90d3d35d8fd9b7f0ca387b80e6bfbf/transformed/jetified-firebase-auth-22.3.0/AndroidManifest.xml:30:13-80
 intent-filter#action:name:android.intent.action.VIEW+category:name:android.intent.category.BROWSABLE+category:name:android.intent.category.DEFAULT+data:host:firebase.auth+data:path:/+data:scheme:genericidp
 ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/caches/transforms-3/4e90d3d35d8fd9b7f0ca387b80e6bfbf/transformed/jetified-firebase-auth-22.3.0/AndroidManifest.xml:35:13-45:29
-action#android.intent.action.VIEW
-ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/caches/transforms-3/4e90d3d35d8fd9b7f0ca387b80e6bfbf/transformed/jetified-firebase-auth-22.3.0/AndroidManifest.xml:36:17-69
-	android:name
-		ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/caches/transforms-3/4e90d3d35d8fd9b7f0ca387b80e6bfbf/transformed/jetified-firebase-auth-22.3.0/AndroidManifest.xml:36:25-66
 category#android.intent.category.DEFAULT
 ADDED from [com.google.firebase:firebase-auth:22.3.0] /home/ubuntu/.gradle/caches/transforms-3/4e90d3d35d8fd9b7f0ca387b80e6bfbf/transformed/jetified-firebase-auth-22.3.0/AndroidManifest.xml:38:17-76
 	android:name
@@ -1263,10 +1504,6 @@ ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transf
 		ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:111:13-88
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.TIMEZONE_CHANGED+action:name:android.intent.action.TIME_SET
 ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:116:13-120:29
-action#android.intent.action.BOOT_COMPLETED
-ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:117:17-79
-	android:name
-		ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:117:25-76
 action#android.intent.action.TIME_SET
 ADDED from [androidx.work:work-runtime:2.9.0] /home/ubuntu/.gradle/caches/transforms-3/51088fddb821ffee1f3a016053fe5964/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:17-73
 	android:name

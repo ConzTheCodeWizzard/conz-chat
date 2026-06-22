@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-65:/values-lt/values-lt.xml",
+            "outputFile": "com.conzchat.app-mergeOriginalReleaseResources-69:/values-lt/values-lt.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/1d937183e2b2abd718120d8a1f04043c/transformed/material-1.11.0/res/values-lt/values-lt.xml",

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#0A0A0A">
+
+    <!-- Caller avatar -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ivCallerAvatar"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/ic_default_avatar"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Caller name -->
+    <TextView
+        android:id="@+id/tvCallerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Call type -->
+    <TextView
+        android:id="@+id/tvCallType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#888888"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Call status / timer -->
+    <TextView
+        android:id="@+id/tvCallStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="#FF0033"
+        android:layout_marginBottom="60dp" />
+
+    <!-- Control buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="24dp">
+
+        <!-- Mute -->
+        <TextView
+            android:id="@+id/btnMute"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:text="🎤"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:background="@drawable/bg_fab"
+            android:layout_marginHorizontal="12dp"
+            android:visibility="gone" />
+
+        <!-- Speaker -->
+        <TextView
+            android:id="@+id/btnSpeaker"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:text="🔊"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:background="@drawable/bg_fab"
+            android:layout_marginHorizontal="12dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Accept / Decline (incoming) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/btnDecline"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:text="📵"
+            android:textSize="28sp"
+            android:gravity="center"
+            android:background="@drawable/bg_btn_red"
+            android:layout_marginHorizontal="24dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/btnAccept"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:text="📞"
+            android:textSize="28sp"
+            android:gravity="center"
+            android:background="@drawable/bg_fab"
+            android:layout_marginHorizontal="24dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- End call button -->
+    <TextView
+        android:id="@+id/btnEndCall"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:text="📵"
+        android:textSize="28sp"
+        android:gravity="center"
+        android:background="@drawable/bg_btn_red"
+        android:visibility="gone" />
+
+</LinearLayout>

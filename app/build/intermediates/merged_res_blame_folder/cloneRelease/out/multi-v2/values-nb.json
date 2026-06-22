@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-65:/values-nb/values-nb.xml",
+            "outputFile": "com.conzchat.app-mergeCloneReleaseResources-69:/values-nb/values-nb.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-3/58f66c1704377fb3812fa991a78293e0/transformed/core-1.12.0/res/values-nb/values-nb.xml",

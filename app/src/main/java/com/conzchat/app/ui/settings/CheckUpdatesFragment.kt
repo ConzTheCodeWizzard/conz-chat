@@ -24,7 +24,7 @@ class CheckUpdatesFragment : Fragment() {
     companion object {
         fun newInstance() = CheckUpdatesFragment()
         // Current app version — bump this each release
-        const val CURRENT_VERSION = "4.0.4"
+        const val CURRENT_VERSION = "4.0.5"
     }
 
     private var _binding: FragmentCheckUpdatesBinding? = null
