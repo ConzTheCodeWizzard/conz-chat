@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ConzChat Brand Colors -->
+    <color name="colorPrimary">#CC0022</color>
+    <color name="colorPrimaryDark">#990019</color>
+    <color name="colorPrimaryVariant">#FF0033</color>
+    <color name="colorSecondary">#FF0033</color>
+    <color name="colorAccent">#FF0033</color>
+
+    <!-- Background Colors -->
+    <color name="bgMain">#0D0D0D</color>
+    <color name="bgCard">#1A1A1A</color>
+    <color name="bgInput">#222222</color>
+    <color name="bgBubbleMe">#CC0022</color>
+    <color name="bgBubbleThem">#1E1E1E</color>
+    <color name="bgChatBar">#111111</color>
+    <color name="bgTopBar">#0D0D0D</color>
+
+    <!-- Text Colors -->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#AAAAAA</color>
+    <color name="textHint">#666666</color>
+    <color name="textRed">#FF0033</color>
+    <color name="textGreen">#00FF88</color>
+
+    <!-- Status Colors -->
+    <color name="receiptRead">#00BFFF</color>
+    <color name="receiptDelivered">#AAAAAA</color>
+    <color name="receiptSent">#888888</color>
+
+    <!-- Divider -->
+    <color name="divider">#2A2A2A</color>
+
+    <!-- Transparent -->
+    <color name="transparent">#00000000</color>
+
+    <!-- Premium Gold -->
+    <color name="premiumGold">#FFD700</color>
+
+    <!-- Story ring colors -->
+    <color name="storyUnseen">#FF0033</color>
+    <color name="storySeen">#444444</color>
+
+    <!-- Aliases -->
+    <color name="accent">#FF0033</color>
+    <color name="online">#00CC44</color>
+    <color name="gold">#FFD700</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Notification -->
+    <color name="notificationBg">#1A1A1A</color>
+</resources>

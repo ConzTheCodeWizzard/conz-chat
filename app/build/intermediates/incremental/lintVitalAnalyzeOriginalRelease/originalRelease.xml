@@ -1,0 +1,38 @@
+<variant
+    name="originalRelease"
+    package="com.conzchat.app"
+    minSdkVersion="24"
+    targetSdkVersion="34"
+    mergedManifest="build/intermediates/merged_manifest/originalRelease/AndroidManifest.xml"
+    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.0:proguard-rules.pro"
+    partialResultsDir="build/intermediates/lint_vital_partial_results/originalRelease/out"
+    desugaredMethodsFiles="/home/ubuntu/.gradle/caches/transforms-3/5cd62aa016b4a7daa4c19898eb19adc6/transformed/D8BackportedDesugaredMethods.txt">
+  <buildFeatures
+      viewBinding="true"
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/original/java:src/release/java:src/originalRelease/java:src/main/kotlin:src/original/kotlin:src/release/kotlin:src/originalRelease/kotlin"
+        resDirectories="src/main/res:src/original/res:src/release/res:src/originalRelease/res"
+        assetsDirectories="src/main/assets:src/original/assets:src/release/assets:src/originalRelease/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <resValues>
+    <resValue
+        type="string"
+        name="app_name"
+        value="ConzChat" />
+  </resValues>
+  <artifact
+      classOutputs="build/intermediates/javac/originalRelease/classes:build/tmp/kotlin-classes/originalRelease:build/tmp/kapt3/classes/originalRelease:build/kotlinToolingMetadata:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/originalRelease/R.jar"
+      type="MAIN"
+      applicationId="com.conzchat.app"
+      generatedSourceFolders="build/generated/source/kapt/originalRelease:build/generated/ap_generated_sources/originalRelease/out:build/generated/source/buildConfig/original/release:build/generated/data_binding_base_class_source_out/originalRelease/out"
+      generatedResourceFolders="build/generated/res/resValues/original/release"
+      desugaredMethodsFiles="/home/ubuntu/.gradle/caches/transforms-3/5cd62aa016b4a7daa4c19898eb19adc6/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

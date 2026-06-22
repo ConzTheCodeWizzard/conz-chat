@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgMain">
+
+    <!-- Main content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@color/bgTopBar">
+
+            <!-- My avatar -->
+            <ImageView
+                android:id="@+id/ivMyAvatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_default_avatar"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_avatar"
+                android:clipToOutline="true" />
+
+            <!-- App name -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ConzChat"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FF0033"
+                android:gravity="center"
+                android:layout_marginHorizontal="12dp" />
+
+            <!-- Friend request badge + search -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/ivSearch"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_search"
+                    android:padding="6dp"
+                    android:tint="#FFFFFF" />
+                <TextView
+                    android:id="@+id/tvFriendBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:background="@drawable/bg_btn_red"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:layout_gravity="top|end" />
+            </FrameLayout>
+
+            <ImageView
+                android:id="@+id/ivConzFeed"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_feed"
+                android:padding="6dp"
+                android:tint="#FFFFFF"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+        <!-- Stories rail -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvStories"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            android:clipToPadding="false"
+            android:background="@color/bgCard" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
+
+        <!-- Announcement banner (dismissible, shown when dev sends announcement) -->
+        <TextView
+            android:id="@+id/tvAnnouncement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:paddingHorizontal="16dp"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:background="#CC1A0A"
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="" />
+
+        <!-- Chat list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChats"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <!-- FAB overlay (dismiss) -->
+    <View
+        android:id="@+id/fabOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone" />
+
+    <!-- FAB menu (vertical stack) — only 3 items + optional Dev Inbox -->
+    <LinearLayout
+        android:id="@+id/fabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        android:gravity="end">
+
+        <!-- Dev Inbox — only shown to DEV_UID, hidden by default -->
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabDevInbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📬 Dev Inbox"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#CC0022"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabPublicGroups"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌐 Public Groups"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#CC0022"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabNewGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="👥 New Group"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#CC0022"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabNewDm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💬 New Chat"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#CC0022"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+
+    <!-- Main FAB button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#CC0022"
+        app:tint="#FFFFFF"
+        app:elevation="8dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
