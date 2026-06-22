@@ -21,6 +21,7 @@ import com.conzchat.app.model.GroupMessage
 import com.conzchat.app.model.ReplyTo
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.ImageUtils
+import com.conzchat.app.util.OneSignalNotifier
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -191,7 +192,25 @@ class GroupChatFragment : Fragment() {
             FirebaseManager.groupsRef.document(groupId).update(
                 mapOf("lastMessage" to text, "lastTime" to System.currentTimeMillis())
             )
+            sendGroupPushNotification(senderName, text)
             binding.etMessage.setText("")
+        }
+    }
+
+    private fun sendGroupPushNotification(senderName: String, messageText: String) {
+        FirebaseManager.groupsRef.document(groupId).get().addOnSuccessListener { snap ->
+            @Suppress("UNCHECKED_CAST")
+            val members = snap.get("members") as? List<String> ?: return@addOnSuccessListener
+            val otherMembers = members.filter { it != uid }
+            if (otherMembers.isNotEmpty()) {
+                OneSignalNotifier.sendGroupNotification(
+                    toUids = otherMembers,
+                    groupName = groupName,
+                    senderName = senderName,
+                    messageText = messageText,
+                    chatId = groupId
+                )
+            }
         }
     }
 
@@ -209,6 +228,7 @@ class GroupChatFragment : Fragment() {
             FirebaseManager.groupsRef.document(groupId).update(
                 mapOf("lastMessage" to "📷 Photo", "lastTime" to System.currentTimeMillis())
             )
+            sendGroupPushNotification(senderName, "📷 Photo")
         }
         closeMediaBar()
     }

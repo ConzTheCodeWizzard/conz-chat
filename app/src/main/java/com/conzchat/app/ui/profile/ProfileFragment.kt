@@ -237,7 +237,18 @@ class ProfileFragment : Fragment() {
             "time" to System.currentTimeMillis()
         )
         FirebaseManager.friendRequestsRef.add(reqData)
-            .addOnSuccessListener { context?.toast("Friend request sent!") }
+            .addOnSuccessListener {
+                context?.toast("Friend request sent!")
+                // Send push notification to recipient
+                FirebaseManager.usersRef.document(myUid).get().addOnSuccessListener { snap ->
+                    val myName = snap.getString("displayName") ?: snap.getString("username") ?: "Someone"
+                    com.conzchat.app.util.OneSignalNotifier.sendFriendRequestNotification(
+                        toUid = profileUid,
+                        fromName = myName,
+                        fromUid = myUid
+                    )
+                }
+            }
             .addOnFailureListener { context?.toast("Failed to send request") }
     }
 

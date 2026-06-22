@@ -11,8 +11,8 @@ android {
         applicationId = "com.conzchat.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 405
-        versionName = "4.0.5"
+        versionCode = 406
+        versionName = "4.0.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GIPHY_API_KEY", "\"gvnL7xPoArGXv6249XCJl87Hto1qv9wa\"")
         buildConfigField("String", "DEV_UID", "\"GAEtvdjvwla73GscQWnGthTPG6f1\"")

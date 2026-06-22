@@ -8,8 +8,8 @@ public final class BuildConfig {
   public static final String APPLICATION_ID = "com.conzchat.app";
   public static final String BUILD_TYPE = "release";
   public static final String FLAVOR = "original";
-  public static final int VERSION_CODE = 405;
-  public static final String VERSION_NAME = "4.0.5";
+  public static final int VERSION_CODE = 406;
+  public static final String VERSION_NAME = "4.0.6";
   // Field from default config.
   public static final String DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
   // Field from default config.

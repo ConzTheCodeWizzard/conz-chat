@@ -31,6 +31,7 @@ import com.conzchat.app.ui.profile.ProfileFragment
 import com.conzchat.app.util.ConzMods
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.ImageUtils
+import com.conzchat.app.util.OneSignalNotifier
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -364,9 +365,26 @@ class ChatFragment : Fragment() {
             msgData["selfDestructAt"] = System.currentTimeMillis() + 30000L
         }
         FirebaseManager.messagesRef.add(msgData)
+        // Send push notification via OneSignal
+        sendDmPushNotification(text)
         binding.etMessage.setText("")
         cancelReply()
         activity?.window?.decorView?.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+    }
+
+    private fun sendDmPushNotification(messageText: String) {
+        val myUid = uid
+        if (myUid.isEmpty() || otherUid.isEmpty()) return
+        // Get sender's display name from Firestore then send notification
+        FirebaseManager.usersRef.document(myUid).get().addOnSuccessListener { snap ->
+            val senderName = snap.getString("displayName") ?: snap.getString("username") ?: "Someone"
+            OneSignalNotifier.sendDmNotification(
+                toUid = otherUid,
+                senderName = senderName,
+                messageText = messageText,
+                senderUid = myUid
+            )
+        }
     }
 
     private fun sendImageFromUri(uri: Uri, isCamera: Boolean = false) {
@@ -381,6 +399,7 @@ class ChatFragment : Fragment() {
         )
         replyTo?.let { msgData["replyTo"] = mapOf("id" to it.id, "text" to it.text, "sender" to it.sender) }
         FirebaseManager.messagesRef.add(msgData)
+        sendDmPushNotification("📷 Photo")
         cancelReply()
         closeMediaBar()
     }
@@ -399,6 +418,7 @@ class ChatFragment : Fragment() {
             "viewOnce" to viewOnceMode, "viewed" to false
         )
         FirebaseManager.messagesRef.add(msgData)
+        sendDmPushNotification("🎥 Video")
         closeMediaBar()
     }
 
@@ -414,6 +434,7 @@ class ChatFragment : Fragment() {
             "text" to "", "receipt" to "S"
         )
         FirebaseManager.messagesRef.add(msgData)
+        sendDmPushNotification("🎤 Voice message")
         closeMediaBar()
     }
 
@@ -425,6 +446,7 @@ class ChatFragment : Fragment() {
             "text" to "", "receipt" to "S"
         )
         FirebaseManager.messagesRef.add(msgData)
+        sendDmPushNotification("GIF")
     }
 
     private fun addReaction(msgId: String, emoji: String) {
