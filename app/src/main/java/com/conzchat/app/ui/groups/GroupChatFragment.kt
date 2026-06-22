@@ -203,7 +203,7 @@ class GroupChatFragment : Fragment() {
             val members = snap.get("members") as? List<String> ?: return@addOnSuccessListener
             val otherMembers = members.filter { it != uid }
             if (otherMembers.isNotEmpty()) {
-                OneSignalNotifier.sendGroupNotification(
+                com.conzchat.app.util.FcmNotifier.sendGroupNotification(
                     toUids = otherMembers,
                     groupName = groupName,
                     senderName = senderName,

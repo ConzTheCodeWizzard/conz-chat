@@ -375,10 +375,10 @@ class ChatFragment : Fragment() {
     private fun sendDmPushNotification(messageText: String) {
         val myUid = uid
         if (myUid.isEmpty() || otherUid.isEmpty()) return
-        // Get sender's display name from Firestore then send notification
+        // Get sender's display name from Firestore then send notification via FCM v1 API
         FirebaseManager.usersRef.document(myUid).get().addOnSuccessListener { snap ->
             val senderName = snap.getString("displayName") ?: snap.getString("username") ?: "Someone"
-            OneSignalNotifier.sendDmNotification(
+            com.conzchat.app.util.FcmNotifier.sendDmNotification(
                 toUid = otherUid,
                 senderName = senderName,
                 messageText = messageText,

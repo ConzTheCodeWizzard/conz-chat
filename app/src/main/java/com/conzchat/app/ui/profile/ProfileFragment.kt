@@ -242,7 +242,7 @@ class ProfileFragment : Fragment() {
                 // Send push notification to recipient
                 FirebaseManager.usersRef.document(myUid).get().addOnSuccessListener { snap ->
                     val myName = snap.getString("displayName") ?: snap.getString("username") ?: "Someone"
-                    com.conzchat.app.util.OneSignalNotifier.sendFriendRequestNotification(
+                    com.conzchat.app.util.FcmNotifier.sendFriendRequestNotification(
                         toUid = profileUid,
                         fromName = myName,
                         fromUid = myUid
