@@ -476,17 +476,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Long-press any message to set a self-destruct timer"
+                        android:text="Your messages auto-delete after 30 seconds"
                         android:textSize="12sp"
                         android:textColor="#666666" />
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/tvSelfDestructStatus"
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchSelfDestruct"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Available"
-                    android:textSize="12sp"
-                    android:textColor="#4CAF50" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <!-- Notification Sound -->

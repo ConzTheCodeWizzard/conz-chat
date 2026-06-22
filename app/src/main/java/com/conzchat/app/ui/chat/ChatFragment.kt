@@ -237,6 +237,14 @@ class ChatFragment : Fragment() {
                     val isMine = from == uid
                     val msgId = doc.id
 
+                    // Self-destruct: delete expired messages
+                    val selfDestruct = m["selfDestruct"] as? Boolean ?: false
+                    val selfDestructAt = m["selfDestructAt"] as? Long ?: 0L
+                    if (selfDestruct && selfDestructAt > 0 && System.currentTimeMillis() > selfDestructAt) {
+                        FirebaseManager.messagesRef.document(msgId).delete()
+                        return@forEach
+                    }
+
                     // Update receipts
                     if (!ConzMods.isDisableReceipts(requireContext())) {
                         if (!isMine && m["receipt"] != "R") {
@@ -348,7 +356,11 @@ class ChatFragment : Fragment() {
             "receipt" to "S"
         )
         replyTo?.let { msgData["replyTo"] = mapOf("id" to it.id, "text" to it.text, "sender" to it.sender) }
-
+        // Self-Destruct: add timer if enabled (30 seconds)
+        if (ConzMods.isSelfDestruct(requireContext())) {
+            msgData["selfDestruct"] = true
+            msgData["selfDestructAt"] = System.currentTimeMillis() + 30000L
+        }
         FirebaseManager.messagesRef.add(msgData)
         binding.etMessage.setText("")
         cancelReply()

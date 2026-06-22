@@ -91,7 +91,9 @@ object ConzMods {
     fun setPictureBgUri(ctx: Context, uri: String) = prefs(ctx).edit().putString("picture_bg_uri", uri).apply()
 
     // Self Destruct
-    fun getSelfDestructSecs(ctx: Context): Int = prefs(ctx).getInt("self_destruct_secs", 0)
+    fun isSelfDestruct(ctx: Context) = prefs(ctx).getBoolean("self_destruct_enabled", false)
+    fun setSelfDestruct(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("self_destruct_enabled", v).apply()
+    fun getSelfDestructSecs(ctx: Context): Int = prefs(ctx).getInt("self_destruct_secs", 30)
     fun setSelfDestructSecs(ctx: Context, secs: Int) = prefs(ctx).edit().putInt("self_destruct_secs", secs).apply()
 
     // Reactions

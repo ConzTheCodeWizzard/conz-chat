@@ -65,6 +65,9 @@ public final class FragmentModsBinding implements ViewBinding {
   public final SwitchCompat switchScreenshot;
 
   @NonNull
+  public final SwitchCompat switchSelfDestruct;
+
+  @NonNull
   public final SwitchCompat switchTranslate;
 
   @NonNull
@@ -76,9 +79,6 @@ public final class FragmentModsBinding implements ViewBinding {
   @NonNull
   public final SwitchCompat switchVoiceChanger;
 
-  @NonNull
-  public final TextView tvSelfDestructStatus;
-
   private FragmentModsBinding(@NonNull LinearLayout rootView, @NonNull TextView btnSoundBuzz,
       @NonNull TextView btnSoundChime, @NonNull TextView btnSoundDefault,
       @NonNull TextView btnSoundPop, @NonNull EditText etAutoReplyMsg, @NonNull ImageView ivBack,
@@ -86,9 +86,9 @@ public final class FragmentModsBinding implements ViewBinding {
       @NonNull SwitchCompat switchFakeCamera, @NonNull SwitchCompat switchGhostMode,
       @NonNull SwitchCompat switchLightMode, @NonNull SwitchCompat switchPictureBg,
       @NonNull SwitchCompat switchReceipts, @NonNull SwitchCompat switchScreenshot,
-      @NonNull SwitchCompat switchTranslate, @NonNull SwitchCompat switchTyping,
-      @NonNull SwitchCompat switchVibeSync, @NonNull SwitchCompat switchVoiceChanger,
-      @NonNull TextView tvSelfDestructStatus) {
+      @NonNull SwitchCompat switchSelfDestruct, @NonNull SwitchCompat switchTranslate,
+      @NonNull SwitchCompat switchTyping, @NonNull SwitchCompat switchVibeSync,
+      @NonNull SwitchCompat switchVoiceChanger) {
     this.rootView = rootView;
     this.btnSoundBuzz = btnSoundBuzz;
     this.btnSoundChime = btnSoundChime;
@@ -104,11 +104,11 @@ public final class FragmentModsBinding implements ViewBinding {
     this.switchPictureBg = switchPictureBg;
     this.switchReceipts = switchReceipts;
     this.switchScreenshot = switchScreenshot;
+    this.switchSelfDestruct = switchSelfDestruct;
     this.switchTranslate = switchTranslate;
     this.switchTyping = switchTyping;
     this.switchVibeSync = switchVibeSync;
     this.switchVoiceChanger = switchVoiceChanger;
-    this.tvSelfDestructStatus = tvSelfDestructStatus;
   }
 
   @Override
@@ -222,6 +222,12 @@ public final class FragmentModsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.switchSelfDestruct;
+      SwitchCompat switchSelfDestruct = ViewBindings.findChildViewById(rootView, id);
+      if (switchSelfDestruct == null) {
+        break missingId;
+      }
+
       id = R.id.switchTranslate;
       SwitchCompat switchTranslate = ViewBindings.findChildViewById(rootView, id);
       if (switchTranslate == null) {
@@ -246,17 +252,11 @@ public final class FragmentModsBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.tvSelfDestructStatus;
-      TextView tvSelfDestructStatus = ViewBindings.findChildViewById(rootView, id);
-      if (tvSelfDestructStatus == null) {
-        break missingId;
-      }
-
       return new FragmentModsBinding((LinearLayout) rootView, btnSoundBuzz, btnSoundChime,
           btnSoundDefault, btnSoundPop, etAutoReplyMsg, ivBack, switchAppLock, switchAutoReply,
           switchFakeCamera, switchGhostMode, switchLightMode, switchPictureBg, switchReceipts,
-          switchScreenshot, switchTranslate, switchTyping, switchVibeSync, switchVoiceChanger,
-          tvSelfDestructStatus);
+          switchScreenshot, switchSelfDestruct, switchTranslate, switchTyping, switchVibeSync,
+          switchVoiceChanger);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

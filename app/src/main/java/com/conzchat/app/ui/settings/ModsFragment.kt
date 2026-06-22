@@ -45,6 +45,7 @@ class ModsFragment : Fragment() {
         binding.switchGhostMode.isChecked = ConzMods.isGhostMode(ctx)
         binding.switchAutoReply.isChecked = ConzMods.isAutoReply(ctx)
         binding.switchTranslate.isChecked = ConzMods.isTranslate(ctx)
+        binding.switchSelfDestruct.isChecked = ConzMods.isSelfDestruct(ctx)
         binding.switchVibeSync.isChecked = ConzMods.isVibeSync(ctx)
 
         // Auto-reply message field
@@ -76,6 +77,8 @@ class ModsFragment : Fragment() {
         }
         binding.switchLightMode.setOnCheckedChangeListener { _, checked ->
             ConzMods.setLightMode(ctx, checked)
+            // Recreate activity to apply theme change
+            activity?.recreate()
         }
         binding.switchAppLock.setOnCheckedChangeListener { _, checked ->
             if (checked) {
@@ -100,6 +103,9 @@ class ModsFragment : Fragment() {
         }
         binding.switchTranslate.setOnCheckedChangeListener { _, checked ->
             ConzMods.setTranslate(ctx, checked)
+        }
+        binding.switchSelfDestruct.setOnCheckedChangeListener { _, checked ->
+            ConzMods.setSelfDestruct(ctx, checked)
         }
         binding.switchVibeSync.setOnCheckedChangeListener { _, checked ->
             ConzMods.setVibeSync(ctx, checked)

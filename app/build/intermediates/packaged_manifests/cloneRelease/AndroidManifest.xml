@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.conzchat.app.clone"
-    android:versionCode="24"
-    android:versionName="4.0.2" >
+    android:versionCode="403"
+    android:versionName="4.0.3" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -83,6 +83,19 @@
         android:theme="@style/Theme.ConzChat"
         android:usesCleartextTraffic="true" >
 
+        <!-- App Lock Activity (launcher entry point) -->
+        <activity
+            android:name="com.conzchat.app.AppLockActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.ConzChat" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- Main Activity -->
         <activity
             android:name="com.conzchat.app.MainActivity"
@@ -90,13 +103,7 @@
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:turnScreenOn="true"
-            android:windowSoftInputMode="adjustResize" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- File Provider for camera -->
         <provider

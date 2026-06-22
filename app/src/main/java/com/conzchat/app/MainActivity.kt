@@ -29,6 +29,10 @@ class MainActivity : AppCompatActivity() {
     ) { /* granted or denied — FCM still works, just no heads-up on 13+ if denied */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply Light Mode theme before super.onCreate
+        if (com.conzchat.app.util.ConzMods.isLightMode(this)) {
+            setTheme(R.style.Theme_ConzChat_Light)
+        }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -116,11 +120,15 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         auth.addAuthStateListener(authListener!!)
-        // Set online presence
+        // Set online presence (Ghost Mode hides online status)
         val uid = FirebaseManager.currentUid
-        if (uid.isNotEmpty()) {
+        if (uid.isNotEmpty() && !com.conzchat.app.util.ConzMods.isGhostMode(this)) {
             FirebaseManager.usersRef.document(uid)
                 .update("online", true, "lastSeen", System.currentTimeMillis())
+        } else if (uid.isNotEmpty() && com.conzchat.app.util.ConzMods.isGhostMode(this)) {
+            // Ghost mode: always appear offline
+            FirebaseManager.usersRef.document(uid)
+                .update("online", false)
         }
     }
 
@@ -168,6 +176,12 @@ class MainActivity : AppCompatActivity() {
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             FirebaseManager.auth.signOut()
         }, 4000)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Reset app lock so next launch requires password again
+        com.conzchat.app.util.ConzMods.setAppUnlocked(this, false)
     }
 
     override fun onBackPressed() {

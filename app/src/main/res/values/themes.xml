@@ -14,6 +14,23 @@
         <item name="android:textColorSecondary">@color/textSecondary</item>
     </style>
 
+    <!-- Light Mode Theme -->
+    <style name="Theme.ConzChat.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:colorBackground">@color/lightBg</item>
+        <item name="android:windowBackground">@color/lightBg</item>
+        <item name="android:statusBarColor">@color/lightBg</item>
+        <item name="android:navigationBarColor">@color/lightBg</item>
+        <item name="android:textColorPrimary">@color/lightTextPrimary</item>
+        <item name="android:textColorSecondary">@color/lightTextSecondary</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
     <style name="Theme.ConzChat.Splash" parent="Theme.ConzChat">
         <item name="android:windowBackground">@color/bgMain</item>
         <item name="android:windowFullscreen">true</item>

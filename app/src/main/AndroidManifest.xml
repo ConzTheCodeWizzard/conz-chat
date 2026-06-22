@@ -48,6 +48,18 @@
         android:hardwareAccelerated="true"
         android:largeHeap="true">
 
+        <!-- App Lock Activity (launcher entry point) -->
+        <activity
+            android:name=".AppLockActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.ConzChat">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
@@ -55,12 +67,7 @@
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
-            android:turnScreenOn="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:turnScreenOn="true" />
 
         <!-- File Provider for camera -->
         <provider

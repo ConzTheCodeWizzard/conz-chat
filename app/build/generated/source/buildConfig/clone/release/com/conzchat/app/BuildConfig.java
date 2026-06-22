@@ -8,8 +8,8 @@ public final class BuildConfig {
   public static final String APPLICATION_ID = "com.conzchat.app.clone";
   public static final String BUILD_TYPE = "release";
   public static final String FLAVOR = "clone";
-  public static final int VERSION_CODE = 24;
-  public static final String VERSION_NAME = "4.0.2";
+  public static final int VERSION_CODE = 403;
+  public static final String VERSION_NAME = "4.0.3";
   // Field from default config.
   public static final String DEV_UID = "GAEtvdjvwla73GscQWnGthTPG6f1";
   // Field from default config.

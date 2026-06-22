@@ -72,12 +72,12 @@
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-68:/layout/activity_main.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeOriginalReleaseResources-66:/layout/fragment_conz_ai_chat.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-68:/layout/fragment_conz_ai_chat.xml"
-    },
-    {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeOriginalReleaseResources-66:/layout/item_chat_list.xml",
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-68:/layout/item_chat_list.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeOriginalReleaseResources-66:/layout/fragment_conz_ai_chat.xml",
+        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-68:/layout/fragment_conz_ai_chat.xml"
     },
     {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeOriginalReleaseResources-66:/layout/fragment_public_groups.xml",

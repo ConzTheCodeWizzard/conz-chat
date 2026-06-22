@@ -15,6 +15,12 @@ color colorPrimaryVariant
 color colorSecondary
 color divider
 color gold
+color lightBg
+color lightBgCard
+color lightBgInput
+color lightDivider
+color lightTextPrimary
+color lightTextSecondary
 color notificationBg
 color online
 color premiumGold
@@ -282,6 +288,7 @@ id switchPictureBg
 id switchReceipts
 id switchScreenshot
 id switchScreenshotProtection
+id switchSelfDestruct
 id switchTranslate
 id switchTyping
 id switchVibeSync
@@ -337,7 +344,6 @@ id tvReplyText
 id tvRequestsLabel
 id tvRight
 id tvRotating
-id tvSelfDestructStatus
 id tvSenderName
 id tvStatus
 id tvStatusEdit
@@ -407,6 +413,9 @@ layout item_suggestion
 layout item_user_search
 mipmap ic_launcher
 mipmap ic_launcher_round
+raw notif_buzz
+raw notif_chime
+raw notif_pop
 string action_answer
 string action_decline
 string app_name
@@ -445,6 +454,7 @@ string version_text
 string welcome_tagline
 style Theme.ConzChat
 style Theme.ConzChat.Call
+style Theme.ConzChat.Light
 style Theme.ConzChat.Splash
 style Widget.ConzChat.Button
 style Widget.ConzChat.Button.Outlined

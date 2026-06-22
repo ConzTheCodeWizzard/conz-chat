@@ -49,4 +49,12 @@
 
     <!-- Notification -->
     <color name="notificationBg">#1A1A1A</color>
+
+    <!-- Light Mode Colors -->
+    <color name="lightBg">#F5F5F5</color>
+    <color name="lightBgCard">#FFFFFF</color>
+    <color name="lightBgInput">#EEEEEE</color>
+    <color name="lightTextPrimary">#1A1A1A</color>
+    <color name="lightTextSecondary">#555555</color>
+    <color name="lightDivider">#DDDDDD</color>
 </resources>

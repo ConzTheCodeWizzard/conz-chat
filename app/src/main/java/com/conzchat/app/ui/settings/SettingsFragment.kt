@@ -9,11 +9,14 @@ import android.view.WindowManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.conzchat.app.ConzChatApp
 import com.conzchat.app.MainActivity
 import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentSettingsBinding
+import com.conzchat.app.db.ConzDatabase
+import com.conzchat.app.db.SavedAccount
 import com.conzchat.app.util.AppPreferences
 import com.conzchat.app.util.ConzMods
 import com.conzchat.app.util.FirebaseManager
@@ -110,11 +113,11 @@ class SettingsFragment : Fragment() {
         binding.btnLogout.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Sign Out")
-                .setMessage("Would you like to save this account first?")
-                .setPositiveButton("Yes, Save & Logout") { _, _ ->
+                .setMessage("Would you like to save this account to Saved Accounts before logging out?")
+                .setPositiveButton("Save & Logout") { _, _ ->
                     saveAccountThenLogout()
                 }
-                .setNegativeButton("No, Just Logout") { _, _ ->
+                .setNegativeButton("Just Logout") { _, _ ->
                     FirebaseManager.auth.signOut()
                 }
                 .setNeutralButton("Cancel", null)
@@ -214,36 +217,65 @@ class SettingsFragment : Fragment() {
     }
 
     private fun saveAccountThenLogout() {
-        val prefs = requireContext().getSharedPreferences("conz_creds", android.content.Context.MODE_PRIVATE)
+        // Use applicationContext to avoid issues when fragment detaches
+        val appContext = requireContext().applicationContext
+        val prefs = appContext.getSharedPreferences("conz_creds", android.content.Context.MODE_PRIVATE)
         val email = prefs.getString("lastEmail", null)
         val password = prefs.getString("lastPassword", null)
         val user = FirebaseManager.auth.currentUser
-        if (email == null || password == null || user == null) {
-            context?.toast("No credentials to save")
+
+        if (email.isNullOrEmpty() || password.isNullOrEmpty() || user == null) {
+            Toast.makeText(appContext, "No credentials found — logging out", Toast.LENGTH_SHORT).show()
             FirebaseManager.auth.signOut()
             return
         }
+
         // Get username from Firestore then save to Room DB
         FirebaseManager.usersRef.document(user.uid).get().addOnSuccessListener { doc ->
-            val username = doc.getString("username") ?: "Unknown"
-            val db = com.conzchat.app.db.ConzDatabase.get(requireContext())
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                db.savedAccountDao().insert(
-                    com.conzchat.app.db.SavedAccount(
-                        email = email,
-                        password = password,
-                        username = username,
-                        savedAt = System.currentTimeMillis()
+            val username = doc.getString("displayName")
+                ?: doc.getString("username")
+                ?: email.substringBefore("@")
+            val db = ConzDatabase.get(appContext)
+            CoroutineScope(Dispatchers.IO).launch {
+                // Check if already saved
+                val existing = db.savedAccountDao().findByEmail(email)
+                if (existing != null) {
+                    // Update existing entry
+                    db.savedAccountDao().insert(
+                        existing.copy(password = password, username = username, savedAt = System.currentTimeMillis())
                     )
-                )
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    context?.toast("\u2705 Account saved!")
+                } else {
+                    db.savedAccountDao().insert(
+                        SavedAccount(
+                            email = email,
+                            password = password,
+                            username = username,
+                            savedAt = System.currentTimeMillis()
+                        )
+                    )
+                }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(appContext, "Account saved!", Toast.LENGTH_SHORT).show()
                     FirebaseManager.auth.signOut()
                 }
             }
         }.addOnFailureListener {
-            context?.toast("Failed to save, logging out anyway")
-            FirebaseManager.auth.signOut()
+            // Still save with email as username fallback
+            val db = ConzDatabase.get(appContext)
+            CoroutineScope(Dispatchers.IO).launch {
+                db.savedAccountDao().insert(
+                    SavedAccount(
+                        email = email,
+                        password = password,
+                        username = email.substringBefore("@"),
+                        savedAt = System.currentTimeMillis()
+                    )
+                )
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(appContext, "Account saved!", Toast.LENGTH_SHORT).show()
+                    FirebaseManager.auth.signOut()
+                }
+            }
         }
     }
 
