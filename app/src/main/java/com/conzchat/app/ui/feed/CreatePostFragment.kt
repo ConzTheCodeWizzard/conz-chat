@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
+import com.conzchat.app.util.HarleyThemeHelper
 
 class CreatePostFragment : Fragment() {
     private var _binding: FragmentCreatePostBinding? = null
@@ -48,6 +49,7 @@ class CreatePostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         binding.btnBack.setOnClickListener {
             if (!isPosting) parentFragmentManager.popBackStack()
         }

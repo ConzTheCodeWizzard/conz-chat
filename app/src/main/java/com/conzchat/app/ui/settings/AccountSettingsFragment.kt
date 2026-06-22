@@ -17,6 +17,7 @@ import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.conzchat.app.util.HarleyThemeHelper
 
 class AccountSettingsFragment : Fragment() {
 
@@ -35,6 +36,7 @@ class AccountSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 

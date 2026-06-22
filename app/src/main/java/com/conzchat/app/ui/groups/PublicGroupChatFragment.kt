@@ -14,6 +14,7 @@ import com.conzchat.app.model.GroupMessage
 import com.conzchat.app.util.FirebaseManager
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.conzchat.app.util.HarleyThemeHelper
 
 class PublicGroupChatFragment : Fragment() {
 
@@ -46,6 +47,7 @@ class PublicGroupChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         groupId = arguments?.getString("groupId") ?: ""
         groupName = arguments?.getString("name") ?: ""
         groupTag = arguments?.getString("tag") ?: ""

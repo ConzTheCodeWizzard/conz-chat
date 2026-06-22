@@ -16,6 +16,11 @@ import com.conzchat.app.util.ConzMods
 class AppLockActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply theme
+        when {
+            ConzMods.isHarleyQuinnTheme(this) -> setTheme(R.style.Theme_ConzChat_HarleyQuinn)
+            ConzMods.isLightMode(this) -> setTheme(R.style.Theme_ConzChat_Light)
+        }
         super.onCreate(savedInstanceState)
 
         // If app lock is not enabled or already unlocked, skip
@@ -24,10 +29,16 @@ class AppLockActivity : AppCompatActivity() {
             return
         }
 
+        val isHQ = ConzMods.isHarleyQuinnTheme(this)
+
         // Build the lock screen UI programmatically
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(0xFF0D0D0D.toInt())
+            if (isHQ) {
+                setBackgroundColor(0xFF0A0A12.toInt())
+            } else {
+                setBackgroundColor(0xFF0D0D0D.toInt())
+            }
             gravity = android.view.Gravity.CENTER
             setPadding(80, 0, 80, 0)
         }
@@ -75,7 +86,7 @@ class AppLockActivity : AppCompatActivity() {
         val unlockBtn = android.widget.Button(this).apply {
             text = "UNLOCK"
             setTextColor(0xFFFFFFFF.toInt())
-            setBackgroundColor(0xFFCC0022.toInt())
+            setBackgroundColor(if (isHQ) 0xFFE91E8C.toInt() else 0xFFCC0022.toInt())
             textSize = 16f
             setPadding(0, 24, 0, 24)
             setOnClickListener {

@@ -15,6 +15,7 @@ import com.conzchat.app.db.ConzDatabase
 import com.conzchat.app.db.SavedAccount
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import com.conzchat.app.util.HarleyThemeHelper
 
 class SavedAccountsFragment : Fragment() {
     private var _binding: FragmentSavedAccountsBinding? = null
@@ -33,6 +34,7 @@ class SavedAccountsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         adapter = SavedAccountAdapter(accounts,
             onTap = { account -> autoSignIn(account) },
             onDelete = { account -> deleteAccount(account) }

@@ -36,12 +36,12 @@
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_create_group.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_conz_ai_chat.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_conz_ai_chat.xml"
-    },
-    {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_mods.xml",
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_mods.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_conz_ai_chat.xml",
+        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_conz_ai_chat.xml"
     },
     {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_friend_requests.xml",
@@ -52,12 +52,12 @@
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_public_group.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_check_updates.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_check_updates.xml"
-    },
-    {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_friend_request_card.xml",
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_friend_request_card.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_check_updates.xml",
+        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_check_updates.xml"
     },
     {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_comment.xml",
@@ -72,12 +72,12 @@
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_group_message.xml"
     },
     {
-        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_settings.xml",
-        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_settings.xml"
-    },
-    {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/item_story_add.xml",
         "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/item_story_add.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_settings.xml",
+        "source": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-main-70:/layout/fragment_settings.xml"
     },
     {
         "merged": "/home/ubuntu/.gradle/daemon/8.4/com.conzchat.app-mergeCloneReleaseResources-66:/layout/fragment_credits.xml",

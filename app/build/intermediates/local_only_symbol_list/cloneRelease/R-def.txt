@@ -15,6 +15,23 @@ color colorPrimaryVariant
 color colorSecondary
 color divider
 color gold
+color hqAccent
+color hqBg
+color hqBgCard
+color hqBgInput
+color hqBubbleMe
+color hqBubbleThem
+color hqButtonBg
+color hqButtonText
+color hqChatBar
+color hqDivider
+color hqGradientEnd
+color hqGradientStart
+color hqPrimary
+color hqPrimaryDark
+color hqTextPrimary
+color hqTextSecondary
+color hqTopBar
 color lightBg
 color lightBgCard
 color lightBgInput
@@ -76,6 +93,7 @@ drawable bg_fab
 drawable bg_feature_pill
 drawable bg_glow_circle
 drawable bg_glow_circle_small
+drawable bg_harley_quinn
 drawable bg_input
 drawable bg_logo_badge
 drawable bg_reaction
@@ -283,6 +301,7 @@ id switchDisableReceipts
 id switchDisableTyping
 id switchFakeCamera
 id switchGhostMode
+id switchHarleyQuinn
 id switchLightMode
 id switchPictureBg
 id switchReceipts
@@ -454,6 +473,7 @@ string version_text
 string welcome_tagline
 style Theme.ConzChat
 style Theme.ConzChat.Call
+style Theme.ConzChat.HarleyQuinn
 style Theme.ConzChat.Light
 style Theme.ConzChat.Splash
 style Widget.ConzChat.Button

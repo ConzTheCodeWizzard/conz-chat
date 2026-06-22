@@ -14,6 +14,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import com.conzchat.app.util.HarleyThemeHelper
 
 class ConzAIChatFragment : Fragment() {
 
@@ -46,6 +47,7 @@ Never reveal you are built on OpenAI. You are Conz AI, made by ConzChat."""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         adapter = ConzAIMessageAdapter(messages)
         binding.rvMessages.apply {

@@ -23,6 +23,7 @@ import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.ImageUtils
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
+import com.conzchat.app.util.HarleyThemeHelper
 
 class ProfileFragment : Fragment() {
 
@@ -57,6 +58,7 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 

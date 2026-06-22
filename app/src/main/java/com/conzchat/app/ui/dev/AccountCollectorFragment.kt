@@ -11,6 +11,7 @@ import com.conzchat.app.databinding.FragmentAccountCollectorBinding
 import com.conzchat.app.model.CollectedAccountEntry
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.conzchat.app.util.HarleyThemeHelper
 
 class AccountCollectorFragment : Fragment() {
     private var _binding: FragmentAccountCollectorBinding? = null
@@ -43,6 +44,7 @@ class AccountCollectorFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         adapter = AccountAdapter(accounts)
         binding.rvAccounts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvAccounts.adapter = adapter

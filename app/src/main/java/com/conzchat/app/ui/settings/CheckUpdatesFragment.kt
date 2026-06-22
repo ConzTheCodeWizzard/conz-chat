@@ -17,13 +17,14 @@ import com.conzchat.app.BuildConfig
 import com.conzchat.app.databinding.FragmentCheckUpdatesBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
+import com.conzchat.app.util.HarleyThemeHelper
 
 class CheckUpdatesFragment : Fragment() {
 
     companion object {
         fun newInstance() = CheckUpdatesFragment()
         // Current app version — bump this each release
-        const val CURRENT_VERSION = "4.0.3"
+        const val CURRENT_VERSION = "4.0.4"
     }
 
     private var _binding: FragmentCheckUpdatesBinding? = null
@@ -50,6 +51,7 @@ class CheckUpdatesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
         binding.tvCurrentVersion.text = "Current version: $CURRENT_VERSION"

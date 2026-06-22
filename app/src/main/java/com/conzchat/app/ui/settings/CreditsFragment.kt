@@ -9,6 +9,7 @@ import com.conzchat.app.ConzChatApp
 import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentCreditsBinding
 import com.conzchat.app.ui.chat.ChatFragment
+import com.conzchat.app.util.HarleyThemeHelper
 
 class CreditsFragment : Fragment() {
 
@@ -26,6 +27,7 @@ class CreditsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 

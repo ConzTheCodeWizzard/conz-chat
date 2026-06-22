@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.conzchat.app.databinding.FragmentFullImageBinding
+import com.conzchat.app.util.HarleyThemeHelper
 
 class FullImageFragment : Fragment() {
 
@@ -26,6 +27,7 @@ class FullImageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         val url = arguments?.getString("url") ?: return
         Glide.with(this).load(url).into(binding.ivFull)
         binding.ivFull.setOnClickListener { parentFragmentManager.popBackStack() }

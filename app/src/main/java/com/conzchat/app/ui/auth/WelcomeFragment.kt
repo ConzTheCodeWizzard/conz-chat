@@ -13,6 +13,7 @@ import android.view.animation.OvershootInterpolator
 import androidx.fragment.app.Fragment
 import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentWelcomeBinding
+import com.conzchat.app.util.HarleyThemeHelper
 
 class WelcomeFragment : Fragment() {
 
@@ -45,6 +46,7 @@ class WelcomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         // Start everything invisible for entrance animation
         binding.tvAppName.alpha = 0f

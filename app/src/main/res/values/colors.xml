@@ -57,4 +57,23 @@
     <color name="lightTextPrimary">#1A1A1A</color>
     <color name="lightTextSecondary">#555555</color>
     <color name="lightDivider">#DDDDDD</color>
+
+    <!-- Harley Quinn Theme Colors -->
+    <color name="hqPrimary">#E91E8C</color>
+    <color name="hqPrimaryDark">#880E4F</color>
+    <color name="hqAccent">#00BCD4</color>
+    <color name="hqBg">#0A0A12</color>
+    <color name="hqBgCard">#1A0A20</color>
+    <color name="hqBgInput">#2A1030</color>
+    <color name="hqBubbleMe">#E91E8C</color>
+    <color name="hqBubbleThem">#1A2A3A</color>
+    <color name="hqTopBar">#12001A</color>
+    <color name="hqChatBar">#0A0012</color>
+    <color name="hqTextPrimary">#FFFFFF</color>
+    <color name="hqTextSecondary">#FF80CB</color>
+    <color name="hqDivider">#3A1A4A</color>
+    <color name="hqButtonBg">#E91E8C</color>
+    <color name="hqButtonText">#FFFFFF</color>
+    <color name="hqGradientStart">#E91E8C</color>
+    <color name="hqGradientEnd">#00BCD4</color>
 </resources>

@@ -15,6 +15,23 @@
     <color name="colorSecondary">#FF0033</color>
     <color name="divider">#2A2A2A</color>
     <color name="gold">#FFD700</color>
+    <color name="hqAccent">#00BCD4</color>
+    <color name="hqBg">#0A0A12</color>
+    <color name="hqBgCard">#1A0A20</color>
+    <color name="hqBgInput">#2A1030</color>
+    <color name="hqBubbleMe">#E91E8C</color>
+    <color name="hqBubbleThem">#1A2A3A</color>
+    <color name="hqButtonBg">#E91E8C</color>
+    <color name="hqButtonText">#FFFFFF</color>
+    <color name="hqChatBar">#0A0012</color>
+    <color name="hqDivider">#3A1A4A</color>
+    <color name="hqGradientEnd">#00BCD4</color>
+    <color name="hqGradientStart">#E91E8C</color>
+    <color name="hqPrimary">#E91E8C</color>
+    <color name="hqPrimaryDark">#880E4F</color>
+    <color name="hqTextPrimary">#FFFFFF</color>
+    <color name="hqTextSecondary">#FF80CB</color>
+    <color name="hqTopBar">#12001A</color>
     <color name="lightBg">#F5F5F5</color>
     <color name="lightBgCard">#FFFFFF</color>
     <color name="lightBgInput">#EEEEEE</color>
@@ -114,6 +131,19 @@
     </style>
     <style name="Theme.ConzChat.Call" parent="Theme.ConzChat">
         <item name="android:windowBackground">@color/bgMain</item>
+    </style>
+    <style name="Theme.ConzChat.HarleyQuinn" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/hqPrimary</item>
+        <item name="colorPrimaryVariant">@color/hqPrimaryDark</item>
+        <item name="colorOnPrimary">@color/hqTextPrimary</item>
+        <item name="colorSecondary">@color/hqAccent</item>
+        <item name="colorOnSecondary">@color/hqTextPrimary</item>
+        <item name="android:colorBackground">@color/hqBg</item>
+        <item name="android:windowBackground">@color/hqBg</item>
+        <item name="android:statusBarColor">@color/hqTopBar</item>
+        <item name="android:navigationBarColor">@color/hqBg</item>
+        <item name="android:textColorPrimary">@color/hqTextPrimary</item>
+        <item name="android:textColorSecondary">@color/hqTextSecondary</item>
     </style>
     <style name="Theme.ConzChat.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>

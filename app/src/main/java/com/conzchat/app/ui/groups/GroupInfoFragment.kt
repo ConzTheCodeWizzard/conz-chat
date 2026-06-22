@@ -11,6 +11,7 @@ import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentGroupInfoBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
+import com.conzchat.app.util.HarleyThemeHelper
 
 class GroupInfoFragment : Fragment() {
 
@@ -31,6 +32,7 @@ class GroupInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         val groupId = arguments?.getString("groupId") ?: ""
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 

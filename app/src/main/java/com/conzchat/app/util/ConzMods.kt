@@ -104,6 +104,10 @@ object ConzMods {
     fun getStickerPack(ctx: Context): String = prefs(ctx).getString("sticker_pack", "default") ?: "default"
     fun setStickerPack(ctx: Context, pack: String) = prefs(ctx).edit().putString("sticker_pack", pack).apply()
 
+    // Harley Quinn Theme
+    fun isHarleyQuinnTheme(ctx: Context) = prefs(ctx).getBoolean("harley_quinn_theme", false)
+    fun setHarleyQuinnTheme(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("harley_quinn_theme", v).apply()
+
     // Voice Changer
     fun isVoiceChangerEnabled(ctx: Context) = prefs(ctx).getBoolean("voice_changer_enabled", false)
     fun setVoiceChangerEnabled(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("voice_changer_enabled", v).apply()

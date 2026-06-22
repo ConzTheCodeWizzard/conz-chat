@@ -29,12 +29,21 @@ class MainActivity : AppCompatActivity() {
     ) { /* granted or denied — FCM still works, just no heads-up on 13+ if denied */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply Light Mode theme before super.onCreate
-        if (com.conzchat.app.util.ConzMods.isLightMode(this)) {
-            setTheme(R.style.Theme_ConzChat_Light)
+        // Apply theme before super.onCreate
+        when {
+            com.conzchat.app.util.ConzMods.isHarleyQuinnTheme(this) -> setTheme(R.style.Theme_ConzChat_HarleyQuinn)
+            com.conzchat.app.util.ConzMods.isLightMode(this) -> setTheme(R.style.Theme_ConzChat_Light)
         }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Apply Harley Quinn background image if theme is active
+        if (com.conzchat.app.util.ConzMods.isHarleyQuinnTheme(this)) {
+            val container = findViewById<android.widget.FrameLayout>(R.id.fragmentContainer)
+            container.background = ContextCompat.getDrawable(this, R.drawable.bg_harley_quinn)
+            // Add a semi-transparent overlay so text is still readable
+            container.foreground = android.graphics.drawable.ColorDrawable(0xAA0A0A12.toInt())
+        }
 
         // Apply brightness from preferences
         val brightness = AppPreferences.getBrightness(this)

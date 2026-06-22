@@ -11,6 +11,7 @@ import com.conzchat.app.databinding.FragmentDevMenuBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.FieldValue
+import com.conzchat.app.util.HarleyThemeHelper
 
 class DevMenuFragment : Fragment() {
 
@@ -25,6 +26,7 @@ class DevMenuFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         // Hard guard — only DEV_UID can see this screen
         if (uid != ConzChatApp.DEV_UID) {

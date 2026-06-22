@@ -11,6 +11,7 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import com.conzchat.app.databinding.FragmentModsBinding
 import com.conzchat.app.util.ConzMods
+import com.conzchat.app.util.HarleyThemeHelper
 
 class ModsFragment : Fragment() {
 
@@ -28,6 +29,7 @@ class ModsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
@@ -39,6 +41,7 @@ class ModsFragment : Fragment() {
         binding.switchFakeCamera.isChecked = ConzMods.isFakeCamera(ctx)
         binding.switchScreenshot.isChecked = ConzMods.isScreenshotProtection(ctx)
         binding.switchLightMode.isChecked = ConzMods.isLightMode(ctx)
+        binding.switchHarleyQuinn.isChecked = ConzMods.isHarleyQuinnTheme(ctx)
         binding.switchAppLock.isChecked = ConzMods.isAppLockEnabled(ctx)
         binding.switchPictureBg.isChecked = ConzMods.isPictureBgEnabled(ctx)
         binding.switchVoiceChanger.isChecked = ConzMods.isVoiceChangerEnabled(ctx)
@@ -77,7 +80,20 @@ class ModsFragment : Fragment() {
         }
         binding.switchLightMode.setOnCheckedChangeListener { _, checked ->
             ConzMods.setLightMode(ctx, checked)
-            // Recreate activity to apply theme change
+            // Disable Harley Quinn if enabling light mode
+            if (checked) {
+                ConzMods.setHarleyQuinnTheme(ctx, false)
+                binding.switchHarleyQuinn.isChecked = false
+            }
+            activity?.recreate()
+        }
+        binding.switchHarleyQuinn.setOnCheckedChangeListener { _, checked ->
+            ConzMods.setHarleyQuinnTheme(ctx, checked)
+            // Disable Light Mode if enabling Harley Quinn
+            if (checked) {
+                ConzMods.setLightMode(ctx, false)
+                binding.switchLightMode.isChecked = false
+            }
             activity?.recreate()
         }
         binding.switchAppLock.setOnCheckedChangeListener { _, checked ->

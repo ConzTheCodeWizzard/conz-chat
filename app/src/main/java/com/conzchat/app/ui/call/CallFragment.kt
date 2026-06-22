@@ -19,6 +19,7 @@ import com.conzchat.app.databinding.FragmentCallBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
+import com.conzchat.app.util.HarleyThemeHelper
 
 class CallFragment : Fragment() {
 
@@ -64,6 +65,7 @@ class CallFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         toUid = arguments?.getString("toUid") ?: ""
         toName = arguments?.getString("toName") ?: ""

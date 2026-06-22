@@ -11,6 +11,7 @@ import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentPublicGroupsBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
+import com.conzchat.app.util.HarleyThemeHelper
 
 class PublicGroupsFragment : Fragment() {
 
@@ -25,6 +26,7 @@ class PublicGroupsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
         binding.btnCreate.setOnClickListener { showCreatePublicGroup() }
         loadPublicGroups()

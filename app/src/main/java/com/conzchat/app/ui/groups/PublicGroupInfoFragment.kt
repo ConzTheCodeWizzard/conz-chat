@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.conzchat.app.databinding.FragmentGroupInfoBinding
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
+import com.conzchat.app.util.HarleyThemeHelper
 
 class PublicGroupInfoFragment : Fragment() {
 
@@ -29,6 +30,7 @@ class PublicGroupInfoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         val groupId = arguments?.getString("groupId") ?: ""
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
         binding.btnAddMember.visibility = View.GONE

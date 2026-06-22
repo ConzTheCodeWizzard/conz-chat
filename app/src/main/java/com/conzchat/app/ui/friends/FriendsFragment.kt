@@ -13,6 +13,7 @@ import com.conzchat.app.ui.chat.ChatFragment
 import com.conzchat.app.ui.profile.ProfileFragment
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
+import com.conzchat.app.util.HarleyThemeHelper
 
 class FriendsFragment : Fragment() {
 
@@ -27,6 +28,7 @@ class FriendsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
         loadFriendRequests()
         loadFriends()

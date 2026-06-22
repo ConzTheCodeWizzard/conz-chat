@@ -53,6 +53,9 @@ public final class FragmentModsBinding implements ViewBinding {
   public final SwitchCompat switchGhostMode;
 
   @NonNull
+  public final SwitchCompat switchHarleyQuinn;
+
+  @NonNull
   public final SwitchCompat switchLightMode;
 
   @NonNull
@@ -84,11 +87,11 @@ public final class FragmentModsBinding implements ViewBinding {
       @NonNull TextView btnSoundPop, @NonNull EditText etAutoReplyMsg, @NonNull ImageView ivBack,
       @NonNull SwitchCompat switchAppLock, @NonNull SwitchCompat switchAutoReply,
       @NonNull SwitchCompat switchFakeCamera, @NonNull SwitchCompat switchGhostMode,
-      @NonNull SwitchCompat switchLightMode, @NonNull SwitchCompat switchPictureBg,
-      @NonNull SwitchCompat switchReceipts, @NonNull SwitchCompat switchScreenshot,
-      @NonNull SwitchCompat switchSelfDestruct, @NonNull SwitchCompat switchTranslate,
-      @NonNull SwitchCompat switchTyping, @NonNull SwitchCompat switchVibeSync,
-      @NonNull SwitchCompat switchVoiceChanger) {
+      @NonNull SwitchCompat switchHarleyQuinn, @NonNull SwitchCompat switchLightMode,
+      @NonNull SwitchCompat switchPictureBg, @NonNull SwitchCompat switchReceipts,
+      @NonNull SwitchCompat switchScreenshot, @NonNull SwitchCompat switchSelfDestruct,
+      @NonNull SwitchCompat switchTranslate, @NonNull SwitchCompat switchTyping,
+      @NonNull SwitchCompat switchVibeSync, @NonNull SwitchCompat switchVoiceChanger) {
     this.rootView = rootView;
     this.btnSoundBuzz = btnSoundBuzz;
     this.btnSoundChime = btnSoundChime;
@@ -100,6 +103,7 @@ public final class FragmentModsBinding implements ViewBinding {
     this.switchAutoReply = switchAutoReply;
     this.switchFakeCamera = switchFakeCamera;
     this.switchGhostMode = switchGhostMode;
+    this.switchHarleyQuinn = switchHarleyQuinn;
     this.switchLightMode = switchLightMode;
     this.switchPictureBg = switchPictureBg;
     this.switchReceipts = switchReceipts;
@@ -198,6 +202,12 @@ public final class FragmentModsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.switchHarleyQuinn;
+      SwitchCompat switchHarleyQuinn = ViewBindings.findChildViewById(rootView, id);
+      if (switchHarleyQuinn == null) {
+        break missingId;
+      }
+
       id = R.id.switchLightMode;
       SwitchCompat switchLightMode = ViewBindings.findChildViewById(rootView, id);
       if (switchLightMode == null) {
@@ -254,9 +264,9 @@ public final class FragmentModsBinding implements ViewBinding {
 
       return new FragmentModsBinding((LinearLayout) rootView, btnSoundBuzz, btnSoundChime,
           btnSoundDefault, btnSoundPop, etAutoReplyMsg, ivBack, switchAppLock, switchAutoReply,
-          switchFakeCamera, switchGhostMode, switchLightMode, switchPictureBg, switchReceipts,
-          switchScreenshot, switchSelfDestruct, switchTranslate, switchTyping, switchVibeSync,
-          switchVoiceChanger);
+          switchFakeCamera, switchGhostMode, switchHarleyQuinn, switchLightMode, switchPictureBg,
+          switchReceipts, switchScreenshot, switchSelfDestruct, switchTranslate, switchTyping,
+          switchVibeSync, switchVoiceChanger);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

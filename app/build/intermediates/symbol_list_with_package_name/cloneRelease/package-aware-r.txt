@@ -1517,6 +1517,23 @@ color foreground_material_light
 color gold
 color highlighted_text_material_dark
 color highlighted_text_material_light
+color hqAccent
+color hqBg
+color hqBgCard
+color hqBgInput
+color hqBubbleMe
+color hqBubbleThem
+color hqButtonBg
+color hqButtonText
+color hqChatBar
+color hqDivider
+color hqGradientEnd
+color hqGradientStart
+color hqPrimary
+color hqPrimaryDark
+color hqTextPrimary
+color hqTextSecondary
+color hqTopBar
 color lightBg
 color lightBgCard
 color lightBgInput
@@ -3169,6 +3186,7 @@ drawable bg_fab
 drawable bg_feature_pill
 drawable bg_glow_circle
 drawable bg_glow_circle_small
+drawable bg_harley_quinn
 drawable bg_input
 drawable bg_logo_badge
 drawable bg_reaction
@@ -4095,6 +4113,7 @@ id switchDisableReceipts
 id switchDisableTyping
 id switchFakeCamera
 id switchGhostMode
+id switchHarleyQuinn
 id switchLightMode
 id switchPictureBg
 id switchReceipts
@@ -5398,6 +5417,7 @@ style Theme_AppCompat_Light_NoActionBar
 style Theme_AppCompat_NoActionBar
 style Theme_ConzChat
 style Theme_ConzChat_Call
+style Theme_ConzChat_HarleyQuinn
 style Theme_ConzChat_Light
 style Theme_ConzChat_Splash
 style Theme_Design

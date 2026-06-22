@@ -30,6 +30,7 @@ import com.conzchat.app.util.toast
 import com.conzchat.app.ui.call.CallFragment
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.conzchat.app.util.HarleyThemeHelper
 
 class HomeFragment : Fragment() {
 
@@ -66,6 +67,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         setupRecyclerViews()
         setupClickListeners()

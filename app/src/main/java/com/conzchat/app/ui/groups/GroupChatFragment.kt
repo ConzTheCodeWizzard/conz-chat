@@ -25,6 +25,7 @@ import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import java.io.File
+import com.conzchat.app.util.HarleyThemeHelper
 
 class GroupChatFragment : Fragment() {
 
@@ -66,6 +67,7 @@ class GroupChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         groupId = arguments?.getString("groupId") ?: ""
         groupName = arguments?.getString("name") ?: ""
         groupPhoto = arguments?.getString("photo") ?: ""

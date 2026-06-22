@@ -35,6 +35,7 @@ import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import java.io.File
+import com.conzchat.app.util.HarleyThemeHelper
 
 class ChatFragment : Fragment() {
 
@@ -94,6 +95,7 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         otherUid = arguments?.getString("uid") ?: ""
         otherName = arguments?.getString("name") ?: ""

@@ -31,6 +31,21 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
+    <!-- Harley Quinn Theme -->
+    <style name="Theme.ConzChat.HarleyQuinn" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/hqPrimary</item>
+        <item name="colorPrimaryVariant">@color/hqPrimaryDark</item>
+        <item name="colorOnPrimary">@color/hqTextPrimary</item>
+        <item name="colorSecondary">@color/hqAccent</item>
+        <item name="colorOnSecondary">@color/hqTextPrimary</item>
+        <item name="android:colorBackground">@color/hqBg</item>
+        <item name="android:windowBackground">@color/hqBg</item>
+        <item name="android:statusBarColor">@color/hqTopBar</item>
+        <item name="android:navigationBarColor">@color/hqBg</item>
+        <item name="android:textColorPrimary">@color/hqTextPrimary</item>
+        <item name="android:textColorSecondary">@color/hqTextSecondary</item>
+    </style>
+
     <style name="Theme.ConzChat.Splash" parent="Theme.ConzChat">
         <item name="android:windowBackground">@color/bgMain</item>
         <item name="android:windowFullscreen">true</item>

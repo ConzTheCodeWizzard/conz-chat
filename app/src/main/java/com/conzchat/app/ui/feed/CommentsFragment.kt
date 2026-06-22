@@ -19,6 +19,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
+import com.conzchat.app.util.HarleyThemeHelper
 
 class CommentsFragment : Fragment() {
     private var _binding: FragmentCommentsBinding? = null
@@ -50,6 +51,7 @@ class CommentsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         adapter = CommentAdapter(comments, requireContext())
         binding.rvComments.layoutManager = LinearLayoutManager(requireContext())
         binding.rvComments.adapter = adapter

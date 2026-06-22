@@ -13,6 +13,7 @@ import com.conzchat.app.util.toast
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import com.conzchat.app.util.HarleyThemeHelper
 
 class RegisterFragment : Fragment() {
 
@@ -29,6 +30,7 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         binding.btnRegister.setOnClickListener {
             val username = binding.etUsername.text.toString().trim()

@@ -14,6 +14,7 @@ import com.conzchat.app.databinding.FragmentSuggestionsBinding
 import com.conzchat.app.ui.profile.ProfileFragment
 import com.conzchat.app.util.FirebaseManager
 import de.hdodenhof.circleimageview.CircleImageView
+import com.conzchat.app.util.HarleyThemeHelper
 
 class SuggestionsFragment : Fragment() {
 
@@ -28,6 +29,7 @@ class SuggestionsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
         loadSuggestions()
     }

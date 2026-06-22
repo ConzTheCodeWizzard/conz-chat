@@ -15,6 +15,7 @@ import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.ImageUtils
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
+import com.conzchat.app.util.HarleyThemeHelper
 
 class StoriesFragment : Fragment() {
 
@@ -46,6 +47,7 @@ class StoriesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         viewUid = arguments?.getString("viewUid")
 
         binding.ivClose.setOnClickListener { parentFragmentManager.popBackStack() }

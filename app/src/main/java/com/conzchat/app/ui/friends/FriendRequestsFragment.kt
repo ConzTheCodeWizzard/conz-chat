@@ -14,6 +14,7 @@ import com.conzchat.app.R
 import com.conzchat.app.util.FirebaseManager
 import com.conzchat.app.util.toast
 import com.google.firebase.firestore.ListenerRegistration
+import com.conzchat.app.util.HarleyThemeHelper
 
 class FriendRequestsFragment : Fragment() {
 
@@ -34,6 +35,7 @@ class FriendRequestsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
 
         view.findViewById<View>(R.id.ivBack).setOnClickListener { parentFragmentManager.popBackStack() }
 

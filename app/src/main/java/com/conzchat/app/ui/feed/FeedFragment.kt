@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.conzchat.app.util.HarleyThemeHelper
 
 class FeedFragment : Fragment() {
     private var _binding: FragmentFeedBinding? = null
@@ -34,6 +35,7 @@ class FeedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        HarleyThemeHelper.applyTheme(requireContext(), view)
         adapter = FeedAdapter(posts, requireContext(),
             onLike = { post -> toggleLike(post) },
             onComment = { post -> openComments(post) },
