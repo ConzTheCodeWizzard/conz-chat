@@ -1,4 +1,448 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <me
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ConzChat — a fast, private, feature-rich Android messenger." />
+  <title>ConzChat</title>
+  <link rel="icon" type="image/png" href="icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #FF0033;
+      --red-dark: #CC0028;
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --text: #ffffff;
+      --muted: #888888;
+      --border: #1e1e1e;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 520px; height: 520px; background: var(--red); top: -140px; right: -120px; }
+    .blob-2 { width: 420px; height: 420px; background: #660015; bottom: -100px; left: -100px; }
+
+    /* ── Developers button ── */
+    .dev-btn {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      z-index: 100;
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 7px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .dev-btn:hover {
+      background: rgba(255,0,51,0.1);
+      box-shadow: 0 0 18px rgba(255,0,51,0.35);
+    }
+
+    /* ── Drawer overlay ── */
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      background: transparent;
+    }
+    .drawer-overlay.open { display: block; }
+
+    /* ── Drawer panel ── */
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      background: #0f0f0f;
+      border-bottom: 1px solid #2a0009;
+      box-shadow: 0 8px 40px rgba(255,0,51,0.18);
+      padding: 56px 28px 32px;
+      transform: translateY(-110%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 540px;
+      margin: 0 auto;
+      border-radius: 0 0 20px 20px;
+    }
+    .drawer.open {
+      transform: translateY(0);
+    }
+
+    .drawer-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .drawer-close:hover { color: var(--red); }
+
+    /* ── Developer cards ── */
+    .dev-section {
+      margin-bottom: 28px;
+    }
+    .dev-section:last-of-type { margin-bottom: 0; }
+
+    .dev-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--red);
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+
+    .dev-bio {
+      font-size: 13.5px;
+      color: #cccccc;
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+
+    .btn-kik {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 22px;
+      border-radius: 50px;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-kik:hover {
+      background: rgba(255,0,51,0.1);
+      box-shadow: 0 0 16px rgba(255,0,51,0.3);
+    }
+
+    .dev-divider {
+      width: 100%;
+      height: 1px;
+      background: #1e1e1e;
+      margin: 24px 0;
+    }
+
+    /* ── Page ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .logo-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 0 30px rgba(255,0,51,0.4);
+    }
+    .logo-text {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--red);
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 44px;
+      letter-spacing: 0.03em;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--red);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 17px 40px;
+      border-radius: 50px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 0 50px rgba(255,0,51,0.4);
+      min-width: 280px;
+      justify-content: center;
+    }
+    .btn-download:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 0 60px rgba(255,0,51,0.55);
+    }
+    .btn-download.btn-clone {
+      background: transparent;
+      border: 2px solid var(--red);
+      box-shadow: 0 0 30px rgba(255,0,51,0.15);
+    }
+    .btn-download.btn-clone:hover {
+      background: rgba(255,0,51,0.08);
+      box-shadow: 0 0 40px rgba(255,0,51,0.3);
+    }
+    .btn-download svg {
+      width: 20px; height: 20px; flex-shrink: 0;
+    }
+
+    .clone-hint {
+      font-size: 11px;
+      color: #444;
+      margin-top: -6px;
+    }
+
+    .btn-download.btn-latest {
+      background: var(--red);
+      border: 2px solid var(--red);
+      box-shadow: 0 0 50px rgba(255,0,51,0.4);
+    }
+    .btn-download.btn-latest:hover {
+      background: var(--red-dark);
+      box-shadow: 0 0 60px rgba(255,0,51,0.55);
+    }
+
+    .latest-hint {
+      font-size: 11px;
+      color: #888;
+      margin-top: -6px;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    .version {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #444;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .divider {
+      width: 36px; height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 52px auto;
+      animation: fadeUp 0.6s 0.35s ease both;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 500px;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .pill {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: 13px;
+      color: #bbb;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 18px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: #2a2a2a;
+      z-index: 1;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .logo-text { font-size: 30px; }
+      .btn-download { font-size: 15px; padding: 15px 30px; min-width: 240px; }
+      .drawer { padding: 52px 20px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- Developers Button -->
+  <button class="dev-btn" id="devBtn" onclick="openDrawer()">Developers</button>
+
+  <!-- Drawer Overlay (click outside to close) -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+  <!-- Developers Drawer -->
+  <div class="drawer" id="devDrawer">
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">&#x2715;</button>
+
+    <!-- Conz -->
+    <div class="dev-section">
+      <p class="dev-name">Conz: Founder / Main Developer</p>
+      <p class="dev-bio">Conz is the main dev of ConzChat, his purpose behind the app was and still is to bring something fresh to the table.</p>
+      <a class="btn-kik" href="https://kik.me/ConzNew" target="_blank" rel="noopener noreferrer">
+        Contact Conz On KiK
+      </a>
+    </div>
+
+    <div class="dev-divider"></div>
+
+    <!-- Void -->
+    <div class="dev-section">
+      <p class="dev-name">Void: Co Dev / Expert Coder</p>
+      <p class="dev-bio">Void is the Co dev of ConzChat and has recently joined the team bringing 7+ years of coding experience along with him.</p>
+      <a class="btn-kik" href="https://kik.me/Adking100" target="_blank" rel="noopener noreferrer">
+        Contact Void On KiK
+      </a>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="logo-wrap">
+      <img class="logo-img" src="icon.png" alt="ConzChat" />
+      <span class="logo-text">ConzChat</span>
+    </div>
+
+    <p class="tagline">Made with love by Conz ❤️</p>
+
+    <div class="btn-group">
+      <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.0.8/ConzChat-v4.0.8.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download ConzChat
+      </a>
+
+      <a class="btn-download btn-clone" id="downloadCloneBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.0.8/ConzChat-Clone-v4.0.8.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download ConzChat (Clone)
+      </a>
+      <p class="clone-hint">Run two accounts on one device</p>
+
+      <a class="btn-download btn-latest" id="downloadLatestBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.1.0-modified/ConzChat-Latest-Modified.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download ConzChat (Latest)
+      </a>
+      <p class="clone-hint latest-hint">This is the latest updated version of ConzChat, the original and clone are outdated, please use this one.</p>
+    </div>
+
+    <p class="version" id="versionText">v4.0.8</p>
+
+    <div class="divider"></div>
+
+    <div class="pills">
+      <span class="pill">🔥 Conz AI</span>
+      <span class="pill">📸 Stories</span>
+      <span class="pill">📞 Voice &amp; Video</span>
+      <span class="pill">⚡ ConzMods</span>
+      <span class="pill">👥 Groups</span>
+      <span class="pill">🎞️ GIFs</span>
+      <span class="pill">🔔 Push Notifications</span>
+      <span class="pill">🌐 Public Rooms</span>
+      <span class="pill">🎭 ConzLenses AR</span>
+      <span class="pill">👻 Ghost Mode</span>
+      <span class="pill">💣 Self-Destruct</span>
+      <span class="pill">🔒 Secret Vault</span>
+      <span class="pill">🌍 Translate</span>
+      <span class="pill">⏰ Message Scheduler</span>
+    </div>
+
+  </div>
+
+  <div class="footer">© 2026 ConzChat</div>
+
+  <script>
+    function openDrawer() {
+      document.getElementById('devDrawer').classList.add('open');
+      document.getElementById('drawerOverlay').classList.add('open');
+    }
+    function closeDrawer() {
+      document.getElementById('devDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('open');
+    }
+
+    fetch('https://api.github.com/repos/ConzTheCodeWizzard/conz-chat/releases/latest')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.tag_name) {
+          document.getElementById('versionText').textContent = data.tag_name;
+        }
+        if (data && data.assets) {
+          const apk = data.assets.find(a => a.name.startsWith('ConzChat-v') && !a.name.includes('Clone') && !a.name.includes('source'));
+          const cloneApk = data.assets.find(a => a.name.startsWith('ConzChat-Clone-v'));
+          if (apk) document.getElementById('downloadBtn').href = apk.browser_download_url;
+          if (cloneApk) document.getElementById('downloadCloneBtn').href = cloneApk.browser_download_url;
+        }
+      })
+      .catch(() => {});
+  </script>
+
+</body>
+</html>
+
