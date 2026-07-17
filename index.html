@@ -14,6 +14,7 @@
       --red-dark: #CC0028;
       --bg: #0a0a0a;
       --bg2: #111111;
+      --bg3: #161616;
       --text: #ffffff;
       --muted: #888888;
       --border: #1e1e1e;
@@ -219,6 +220,9 @@
       box-shadow: 0 0 50px rgba(255,0,51,0.4);
       min-width: 280px;
       justify-content: center;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
     }
     .btn-download:hover {
       background: var(--red-dark);
@@ -242,24 +246,6 @@
       font-size: 11px;
       color: #444;
       margin-top: -6px;
-    }
-
-    .btn-download.btn-latest {
-      background: var(--red);
-      border: 2px solid var(--red);
-      box-shadow: 0 0 50px rgba(255,0,51,0.4);
-    }
-    .btn-download.btn-latest:hover {
-      background: var(--red-dark);
-      box-shadow: 0 0 60px rgba(255,0,51,0.55);
-    }
-
-    .latest-hint {
-      font-size: 11px;
-      color: #888;
-      margin-top: -6px;
-      max-width: 300px;
-      line-height: 1.5;
     }
 
     .version {
@@ -314,6 +300,175 @@
       .btn-download { font-size: 15px; padding: 15px 30px; min-width: 240px; }
       .drawer { padding: 52px 20px 28px; }
     }
+
+    /* ── Download Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 32px 28px 28px;
+      position: relative;
+      animation: slideUp 0.25s cubic-bezier(0.23,1,0.32,1) both;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 18px;
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--red);
+      margin-bottom: 6px;
+      padding-right: 24px;
+      line-height: 1.3;
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .modal-bugs {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .modal-bugs p {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .modal-bugs ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .modal-bugs li {
+      font-size: 13px;
+      color: #cc4444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-bugs li::before {
+      content: "✗";
+      font-weight: 700;
+      color: #cc4444;
+      flex-shrink: 0;
+    }
+
+    .modal-compare {
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+    .compare-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background: #0f0f0f;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .compare-header span {
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .compare-header span:nth-child(2) { text-align: center; color: #cc4444; }
+    .compare-header span:nth-child(3) { text-align: center; color: #22cc66; }
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid #141414;
+    }
+    .compare-row:last-child { border-bottom: none; }
+    .compare-row span {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.3;
+    }
+    .compare-row span:nth-child(2) {
+      text-align: center;
+      color: #cc4444;
+      font-size: 15px;
+    }
+    .compare-row span:nth-child(3) {
+      text-align: center;
+      color: #22cc66;
+      font-size: 15px;
+    }
+
+    .modal-notice {
+      background: rgba(255,0,51,0.06);
+      border: 1px solid rgba(255,0,51,0.18);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .modal-love {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-style: italic;
+    }
+    .modal-love span { color: var(--red); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -362,34 +517,24 @@
     <p class="tagline">Made with love by Conz ❤️</p>
 
     <div class="btn-group">
-      <a class="btn-download" id="downloadBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.0.8/ConzChat-v4.0.8.apk">
+      <button class="btn-download" onclick="openModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
         Download ConzChat
-      </a>
+      </button>
 
-      <a class="btn-download btn-clone" id="downloadCloneBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.0.8/ConzChat-Clone-v4.0.8.apk">
+      <button class="btn-download btn-clone" onclick="openModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
         Download ConzChat (Clone)
-      </a>
+      </button>
       <p class="clone-hint">Run two accounts on one device</p>
-
-      <a class="btn-download btn-latest" id="downloadLatestBtn" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v4.1.0-modified/ConzChat-Latest-Modified.apk">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Download ConzChat (Latest)
-      </a>
-      <p class="clone-hint latest-hint">This is the latest updated version of ConzChat, the original and clone are outdated, please use this one.</p>
     </div>
 
     <p class="version" id="versionText">v4.0.8</p>
@@ -417,6 +562,78 @@
 
   <div class="footer">© 2026 ConzChat</div>
 
+  <!-- ── Download Info Modal ── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+
+      <div class="modal-title">The Original ConzChat Build Was Running on a Firebase Backend</div>
+      <div class="modal-subtitle">Firebase = Garbage &nbsp;·&nbsp; It was slow and had many bugs such as…</div>
+
+      <div class="modal-bugs">
+        <p>Known Issues</p>
+        <ul>
+          <li>Many vulnerabilities</li>
+          <li>Notifications never working</li>
+          <li>Calls never working</li>
+          <li>Glitches in message receiving</li>
+          <li>Public Groups were terrible</li>
+          <li>Inputs were delayed</li>
+          <li>Restricted to Email &amp; Password login</li>
+        </ul>
+      </div>
+
+      <div class="modal-compare">
+        <div class="compare-header">
+          <span>Feature</span>
+          <span>Firebase ❌</span>
+          <span>Golang ✅</span>
+        </div>
+        <div class="compare-row">
+          <span>Many Vulnerabilities</span>
+          <span>❌</span>
+          <span>✅ Bulletproof</span>
+        </div>
+        <div class="compare-row">
+          <span>Notifications</span>
+          <span>❌ Never Working</span>
+          <span>✅ Perfect</span>
+        </div>
+        <div class="compare-row">
+          <span>Calls</span>
+          <span>❌ Never Working</span>
+          <span>✅ Perfect</span>
+        </div>
+        <div class="compare-row">
+          <span>Messaging</span>
+          <span>❌ Glitches</span>
+          <span>✅ Snappy AF</span>
+        </div>
+        <div class="compare-row">
+          <span>Groups</span>
+          <span>❌ Terrible</span>
+          <span>✅ Massive Upgrade</span>
+        </div>
+        <div class="compare-row">
+          <span>Input Speed</span>
+          <span>❌ Delayed</span>
+          <span>✅ Smooth as Butter</span>
+        </div>
+        <div class="compare-row">
+          <span>Login Method</span>
+          <span>❌ Email &amp; Pass</span>
+          <span>✅ Username &amp; Pass</span>
+        </div>
+      </div>
+
+      <div class="modal-notice">
+        The version you are trying to download is the <strong>Firebase version which is discontinued</strong>. Conz will update these download buttons when the Golang version has been thoroughly tested and is ready for public use. In the meantime please be patient.
+      </div>
+
+      <div class="modal-love">Much love &nbsp;<span>~Conz~</span></div>
+    </div>
+  </div>
+
   <script>
     function openDrawer() {
       document.getElementById('devDrawer').classList.add('open');
@@ -427,17 +644,26 @@
       document.getElementById('drawerOverlay').classList.remove('open');
     }
 
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
     fetch('https://api.github.com/repos/ConzTheCodeWizzard/conz-chat/releases/latest')
       .then(r => r.json())
       .then(data => {
         if (data && data.tag_name) {
           document.getElementById('versionText').textContent = data.tag_name;
-        }
-        if (data && data.assets) {
-          const apk = data.assets.find(a => a.name.startsWith('ConzChat-v') && !a.name.includes('Clone') && !a.name.includes('source'));
-          const cloneApk = data.assets.find(a => a.name.startsWith('ConzChat-Clone-v'));
-          if (apk) document.getElementById('downloadBtn').href = apk.browser_download_url;
-          if (cloneApk) document.getElementById('downloadCloneBtn').href = cloneApk.browser_download_url;
         }
       })
       .catch(() => {});
@@ -445,4 +671,3 @@
 
 </body>
 </html>
-
