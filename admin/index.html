@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConzChat Admin</title>
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #FF0033;
+      --red-dark: #CC0028;
+      --bg: #080808;
+      --bg2: #101010;
+      --bg3: #161616;
+      --bg4: #1e1e1e;
+      --text: #ffffff;
+      --muted: #888;
+      --border: #222;
+      --green: #00cc66;
+      --yellow: #ffcc00;
+      --orange: #ff6600;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+    /* ── Login ── */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center; height: 100vh;
+      background: radial-gradient(ellipse at 50% 40%, rgba(255,0,51,0.12) 0%, transparent 70%);
+    }
+    .login-box {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      padding: 40px; width: 360px; text-align: center;
+    }
+    .login-logo { font-size: 2rem; font-weight: 900; color: var(--red); margin-bottom: 4px; }
+    .login-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .login-box input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 12px 14px; font-size: 0.95rem; margin-bottom: 12px; outline: none;
+      transition: border 0.2s;
+    }
+    .login-box input:focus { border-color: var(--red); }
+    .login-box button {
+      width: 100%; background: var(--red); color: #fff; border: none; border-radius: 8px;
+      padding: 13px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s;
+    }
+    .login-box button:hover { background: var(--red-dark, #cc0028); }
+    .login-box button:active { transform: scale(0.97); }
+    .login-err { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+
+    /* ── App Shell ── */
+    #app { display: none; height: 100vh; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 20px 0; z-index: 10;
+    }
+    .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo .name { font-size: 1.1rem; font-weight: 800; color: var(--red); }
+    .sidebar-logo .tag { font-size: 0.72rem; color: var(--muted); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+      color: var(--muted); font-size: 0.88rem; cursor: pointer; transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--red); border-left-color: var(--red); background: rgba(255,0,51,0.06); }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+    .logout-btn {
+      width: 100%; background: transparent; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 8px; padding: 9px; font-size: 0.82rem; cursor: pointer; transition: all 0.15s;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .main { margin-left: 220px; padding: 28px 32px; min-height: 100vh; overflow-y: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; }
+
+    /* ── Stats Grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px; transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: #333; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.orange { color: var(--orange); }
+
+    /* ── Online Users ── */
+    .online-list { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 28px; }
+    .online-list h3 { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .online-user { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .online-user:last-child { border-bottom: none; }
+    .online-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; flex-shrink: 0; }
+    .online-name { font-size: 0.88rem; font-weight: 600; }
+    .online-un { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Users Table ── */
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 16px;
+    }
+    .search-bar input {
+      flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 10px 14px; font-size: 0.9rem; outline: none; transition: border 0.2s;
+    }
+    .search-bar input:focus { border-color: var(--red); }
+    .btn {
+      padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: #cc0028; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: #444; background: rgba(255,255,255,0.04); }
+    .btn-danger { background: rgba(255,0,51,0.15); color: var(--red); border: 1px solid rgba(255,0,51,0.3); }
+    .btn-danger:hover { background: rgba(255,0,51,0.25); }
+    .btn-success { background: rgba(0,204,102,0.15); color: var(--green); border: 1px solid rgba(0,204,102,0.3); }
+    .btn-success:hover { background: rgba(0,204,102,0.25); }
+    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+    .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-admin { background: rgba(255,0,51,0.2); color: var(--red); }
+    .badge-mod { background: rgba(255,204,0,0.2); color: var(--yellow); }
+    .badge-user { background: rgba(255,255,255,0.08); color: var(--muted); }
+    .badge-banned { background: rgba(255,0,51,0.3); color: #ff6680; }
+    .badge-shadow { background: rgba(255,102,0,0.2); color: var(--orange); }
+    .badge-online { background: rgba(0,204,102,0.2); color: var(--green); }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Reports ── */
+    .report-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px; margin-bottom: 12px;
+    }
+    .report-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .report-user { font-weight: 700; font-size: 0.9rem; }
+    .report-time { font-size: 0.75rem; color: var(--muted); }
+    .report-text { color: #ccc; font-size: 0.88rem; line-height: 1.5; margin-bottom: 12px; }
+    .report-actions { display: flex; gap: 8px; }
+    .report-replied { color: var(--green); font-size: 0.78rem; margin-top: 6px; }
+
+    /* ── Device Bans ── */
+    .device-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+    .device-form h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 14px; }
+    .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .form-row input {
+      flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 10px 14px; font-size: 0.88rem; outline: none;
+    }
+    .form-row input:focus { border-color: var(--red); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      padding: 28px; width: 420px; max-width: 95vw;
+    }
+    .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+    .modal input, .modal textarea, .modal select {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 10px 14px; font-size: 0.9rem; margin-bottom: 12px; outline: none;
+    }
+    .modal textarea { resize: vertical; min-height: 80px; }
+    .modal select option { background: var(--bg3); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px;
+      font-size: 0.88rem; z-index: 200; opacity: 0; transform: translateY(10px);
+      transition: all 0.25s; pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error { border-color: var(--red); color: var(--red); }
+
+    /* ── Pagination ── */
+    .pagination { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+    .pagination .btn { padding: 7px 14px; }
+    .page-info { font-size: 0.82rem; color: var(--muted); }
+
+    .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 0.9rem; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+    .refresh-btn { float: right; margin-top: -4px; }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">ConzChat</div>
+    <div class="login-sub">Developer Admin Dashboard</div>
+    <input type="password" id="tokenInput" placeholder="Admin token" autocomplete="off" />
+    <button onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="name">ConzChat</div>
+      <div class="tag">Admin Dashboard</div>
+    </div>
+    <div class="nav-item active" onclick="showPage('stats')" id="nav-stats">
+      <span class="nav-icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="showPage('users')" id="nav-users">
+      <span class="nav-icon">👥</span> Users
+    </div>
+    <div class="nav-item" onclick="showPage('reports')" id="nav-reports">
+      <span class="nav-icon">🚩</span> Reports
+      <span id="reportBadge" style="margin-left:auto;background:var(--red);color:#fff;border-radius:20px;padding:1px 7px;font-size:0.7rem;display:none;"></span>
+    </div>
+    <div class="nav-item" onclick="showPage('devices')" id="nav-devices">
+      <span class="nav-icon">📱</span> Device Bans
+    </div>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- Overview -->
+    <div class="page active" id="page-stats">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div class="page-title" style="margin-bottom:0;">Overview</div>
+        <button class="btn btn-outline btn-sm" onclick="loadStats()">↻ Refresh</button>
+      </div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading">Loading stats...</div>
+      </div>
+      <div class="online-list" id="onlineList">
+        <h3>🟢 Online Now</h3>
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div class="page" id="page-users">
+      <div class="page-title">Users</div>
+      <div class="search-bar">
+        <input type="text" id="userSearch" placeholder="Search by username or display name..." onkeydown="if(event.key==='Enter')searchUsers()" />
+        <button class="btn btn-primary" onclick="searchUsers()">Search</button>
+        <button class="btn btn-outline" onclick="loadUsers(0)">All</button>
+      </div>
+      <div class="table-wrap" id="usersTable">
+        <div class="loading">Loading users...</div>
+      </div>
+      <div class="pagination" id="usersPagination"></div>
+    </div>
+
+    <!-- Reports -->
+    <div class="page" id="page-reports">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div class="page-title" style="margin-bottom:0;">Reports & Suggestions</div>
+        <button class="btn btn-outline btn-sm" onclick="loadReports()">↻ Refresh</button>
+      </div>
+      <div id="reportsList"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- Device Bans -->
+    <div class="page" id="page-devices">
+      <div class="page-title">Device Bans</div>
+      <div class="device-form">
+        <h3>Ban a Device ID</h3>
+        <div class="form-row">
+          <input type="text" id="newDeviceId" placeholder="Device ID (Android ID)" />
+          <input type="text" id="newDeviceReason" placeholder="Reason" />
+          <button class="btn btn-danger" onclick="addDeviceBan()">Ban Device</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="deviceTable">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- User Action Modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <h3 id="modalTitle">User Action</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirm" onclick="confirmModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://167.99.85.232:8081';
+let TOKEN = '';
+let currentPage = 0;
+let modalAction = null;
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) return;
+  // Test the token
+  try {
+    const r = await fetch(`${API}/admin/stats`, { headers: { 'X-Admin-Token': t } });
+    if (r.ok) {
+      TOKEN = t;
+      sessionStorage.setItem('adminToken', t);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadStats();
+      loadOnline();
+      loadUsers(0);
+      loadReports();
+      loadDeviceBans();
+    } else {
+      document.getElementById('loginErr').textContent = 'Invalid token. Access denied.';
+    }
+  } catch (e) {
+    document.getElementById('loginErr').textContent = 'Cannot reach server. Check connection.';
+  }
+}
+
+function doLogout() {
+  TOKEN = '';
+  sessionStorage.removeItem('adminToken');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('tokenInput').value = '';
+}
+
+// Auto-login from session
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('adminToken');
+  if (saved) { document.getElementById('tokenInput').value = saved; doLogin(); }
+  document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+});
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+}
+
+// ── API helper ────────────────────────────────────────────────────────────
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'X-Admin-Token': TOKEN, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(`${API}${path}`, opts);
+  return r.json();
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+async function loadStats() {
+  const data = await api('/admin/stats');
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = `
+    ${statCard('Total Users', data.total_users, 'text')}
+    ${statCard('Online Now', data.online_now, 'green')}
+    ${statCard('New Today', data.new_users_today, 'text')}
+    ${statCard('Total Messages', data.total_messages, 'text')}
+    ${statCard('Banned', data.banned_users, data.banned_users > 0 ? 'red' : 'text')}
+    ${statCard('Shadow Banned', data.shadow_banned, data.shadow_banned > 0 ? 'orange' : 'text')}
+    ${statCard('Public Rooms', data.public_groups, 'text')}
+    ${statCard('Open Reports', data.open_reports, data.open_reports > 0 ? 'yellow' : 'text')}
+    ${statCard('Device Bans', data.device_bans, 'text')}
+  `;
+  // Update report badge
+  if (data.open_reports > 0) {
+    const b = document.getElementById('reportBadge');
+    b.textContent = data.open_reports;
+    b.style.display = 'inline';
+  }
+}
+
+function statCard(label, value, color) {
+  return `<div class="stat-card"><div class="stat-label">${label}</div><div class="stat-value ${color}">${value}</div></div>`;
+}
+
+async function loadOnline() {
+  const data = await api('/admin/online');
+  const el = document.getElementById('onlineList');
+  const users = data.online_users || [];
+  if (!users.length) {
+    el.innerHTML = '<h3>🟢 Online Now</h3><div class="empty">No users online</div>';
+    return;
+  }
+  el.innerHTML = `<h3>🟢 Online Now (${users.length})</h3>` +
+    users.map(u => `<div class="online-user">
+      <div class="online-dot"></div>
+      <div><div class="online-name">${esc(u.display_name || u.username)}</div><div class="online-un">@${esc(u.username)}</div></div>
+    </div>`).join('');
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────
+async function loadUsers(page = 0) {
+  currentPage = page;
+  document.getElementById('usersTable').innerHTML = '<div class="loading">Loading...</div>';
+  const q = document.getElementById('userSearch')?.value?.trim() || '';
+  const data = await api(`/admin/users?page=${page}${q ? '&q=' + encodeURIComponent(q) : ''}`);
+  renderUsersTable(data.users || []);
+  renderPagination(page, data.users?.length === 25);
+}
+
+function searchUsers() { loadUsers(0); }
+
+function renderUsersTable(users) {
+  if (!users.length) {
+    document.getElementById('usersTable').innerHTML = '<div class="empty">No users found</div>';
+    return;
+  }
+  document.getElementById('usersTable').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>ID</th><th>Username</th><th>Display Name</th><th>Role</th><th>Status</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${users.map(u => userRow(u)).join('')}</tbody>
+    </table>`;
+}
+
+function userRow(u) {
+  const statusBadges = [
+    u.is_banned ? '<span class="badge badge-banned">Banned</span>' : '',
+    u.is_shadow_banned ? '<span class="badge badge-shadow">Shadow</span>' : '',
+    u.online ? '<span class="badge badge-online">Online</span>' : '',
+  ].filter(Boolean).join(' ') || '<span class="badge badge-user">Active</span>';
+
+  const roleBadge = u.role === 'admin' ? 'badge-admin' : u.role === 'mod' ? 'badge-mod' : 'badge-user';
+
+  return `<tr>
+    <td style="color:var(--muted);font-size:0.78rem">${u.id}</td>
+    <td><strong>@${esc(u.username)}</strong></td>
+    <td>${esc(u.display_name || '—')}</td>
+    <td><span class="badge ${roleBadge}">${u.role}</span></td>
+    <td>${statusBadges}</td>
+    <td>
+      <div class="actions">
+        ${u.is_banned
+          ? `<button class="btn btn-success btn-sm" onclick="unbanUser(${u.id},'${esc(u.username)}')">Unban</button>`
+          : `<button class="btn btn-danger btn-sm" onclick="openBanModal(${u.id},'${esc(u.username)}')">Ban</button>`}
+        <button class="btn btn-outline btn-sm" onclick="openRoleModal(${u.id},'${esc(u.username)}','${u.role}')">Role</button>
+        <button class="btn btn-outline btn-sm" onclick="openForceLogoutModal(${u.id},'${esc(u.username)}')">Logout</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleShadow(${u.id},'${esc(u.username)}',${u.is_shadow_banned})">${u.is_shadow_banned ? 'Un-Shadow' : 'Shadow'}</button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+function renderPagination(page, hasMore) {
+  const el = document.getElementById('usersPagination');
+  el.innerHTML = `
+    ${page > 0 ? `<button class="btn btn-outline" onclick="loadUsers(${page-1})">← Prev</button>` : ''}
+    <span class="page-info">Page ${page + 1}</span>
+    ${hasMore ? `<button class="btn btn-outline" onclick="loadUsers(${page+1})">Next →</button>` : ''}
+  `;
+}
+
+// ── User Actions ──────────────────────────────────────────────────────────
+function openBanModal(uid, username) {
+  document.getElementById('modalTitle').textContent = `Ban @${username}`;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="color:var(--muted);font-size:0.88rem;margin-bottom:12px;">This will ban the account and force logout. Enter a reason:</p>
+    <input type="text" id="banReason" placeholder="Reason for ban" value="Violation of community guidelines" />
+  `;
+  document.getElementById('modalConfirm').className = 'btn btn-danger';
+  document.getElementById('modalConfirm').textContent = 'Ban User';
+  modalAction = async () => {
+    const reason = document.getElementById('banReason').value;
+    await api('/admin/ban', 'POST', { user_id: uid, reason });
+    toast('User banned', 'success');
+    loadUsers(currentPage);
+    loadStats();
+  };
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function unbanUser(uid, username) {
+  await api('/admin/unban', 'POST', { user_id: uid });
+  toast(`@${username} unbanned`, 'success');
+  loadUsers(currentPage);
+  loadStats();
+}
+
+function openRoleModal(uid, username, currentRole) {
+  document.getElementById('modalTitle').textContent = `Set Role — @${username}`;
+  document.getElementById('modalBody').innerHTML = `
+    <select id="roleSelect">
+      <option value="user" ${currentRole==='user'?'selected':''}>User</option>
+      <option value="mod" ${currentRole==='mod'?'selected':''}>Moderator</option>
+      <option value="admin" ${currentRole==='admin'?'selected':''}>Admin</option>
+    </select>
+  `;
+  document.getElementById('modalConfirm').className = 'btn btn-primary';
+  document.getElementById('modalConfirm').textContent = 'Set Role';
+  modalAction = async () => {
+    const role = document.getElementById('roleSelect').value;
+    await api('/admin/set-role', 'POST', { user_id: uid, role });
+    toast(`Role updated to ${role}`, 'success');
+    loadUsers(currentPage);
+  };
+  document.getElementById('userModal').classList.add('open');
+}
+
+function openForceLogoutModal(uid, username) {
+  document.getElementById('modalTitle').textContent = `Force Logout — @${username}`;
+  document.getElementById('modalBody').innerHTML = `
+    <input type="text" id="logoutMsg" placeholder="Message shown to user" value="You have been logged out by an administrator." />
+  `;
+  document.getElementById('modalConfirm').className = 'btn btn-danger';
+  document.getElementById('modalConfirm').textContent = 'Force Logout';
+  modalAction = async () => {
+    const message = document.getElementById('logoutMsg').value;
+    await api('/admin/force-logout', 'POST', { user_id: uid, message });
+    toast('User force logged out', 'success');
+  };
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function toggleShadow(uid, username, current) {
+  await api('/admin/shadow-ban', 'POST', { user_id: uid, enabled: !current });
+  toast(current ? `@${username} shadow ban removed` : `@${username} shadow banned`, 'success');
+  loadUsers(currentPage);
+}
+
+function closeModal() {
+  document.getElementById('userModal').classList.remove('open');
+  modalAction = null;
+}
+
+async function confirmModal() {
+  if (modalAction) { await modalAction(); closeModal(); }
+}
+
+// ── Reports ───────────────────────────────────────────────────────────────
+async function loadReports() {
+  const data = await api('/admin/reports');
+  const reports = data.reports || [];
+  const el = document.getElementById('reportsList');
+
+  if (!reports.length) {
+    el.innerHTML = '<div class="empty">No reports yet</div>';
+    return;
+  }
+
+  el.innerHTML = reports.map(r => `
+    <div class="report-card">
+      <div class="report-header">
+        <div class="report-user">@${esc(r.username || 'Unknown')} <span style="color:var(--muted);font-weight:400;font-size:0.8rem">#${r.id}</span></div>
+        <div class="report-time">${formatTime(r.ts)}</div>
+      </div>
+      <div class="report-text">${esc(r.text)}</div>
+      ${r.replied
+        ? `<div class="report-replied">✓ Actioned${r.reply ? ': ' + esc(r.reply) : ''}</div>`
+        : `<div class="report-actions">
+            <button class="btn btn-outline btn-sm" onclick="dismissReport(${r.id})">Dismiss</button>
+            <button class="btn btn-primary btn-sm" onclick="openReportBanModal(${r.id}, ${r.user_id}, '${esc(r.username)}')">Ban User</button>
+          </div>`
+      }
+    </div>
+  `).join('');
+}
+
+async function dismissReport(id) {
+  await api('/admin/report-action', 'POST', { report_id: id, action: 'dismiss', reply: 'Reviewed and dismissed' });
+  toast('Report dismissed', 'success');
+  loadReports();
+  loadStats();
+}
+
+function openReportBanModal(reportId, userId, username) {
+  document.getElementById('modalTitle').textContent = `Ban @${username} from Report`;
+  document.getElementById('modalBody').innerHTML = `
+    <input type="text" id="banReason" placeholder="Reason" value="Reported by user — community violation" />
+  `;
+  document.getElementById('modalConfirm').className = 'btn btn-danger';
+  document.getElementById('modalConfirm').textContent = 'Ban & Close Report';
+  modalAction = async () => {
+    const reason = document.getElementById('banReason').value;
+    await api('/admin/ban', 'POST', { user_id: userId, reason });
+    await api('/admin/report-action', 'POST', { report_id: reportId, action: 'ban', reply: `User banned: ${reason}` });
+    toast('User banned and report closed', 'success');
+    loadReports();
+    loadUsers(currentPage);
+    loadStats();
+  };
+  document.getElementById('userModal').classList.add('open');
+}
+
+// ── Device Bans ───────────────────────────────────────────────────────────
+async function loadDeviceBans() {
+  const data = await api('/admin/device-bans');
+  const bans = data.device_bans || [];
+  const el = document.getElementById('deviceTable');
+  if (!bans.length) {
+    el.innerHTML = '<div class="empty">No device bans</div>';
+    return;
+  }
+  el.innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Device ID</th><th>Reason</th><th>Banned At</th><th>Action</th></tr></thead>
+    <tbody>${bans.map(b => `<tr>
+      <td style="color:var(--muted)">${b.id}</td>
+      <td><code style="font-size:0.8rem;color:#aaa">${esc(b.device_id)}</code></td>
+      <td>${esc(b.reason || '—')}</td>
+      <td style="color:var(--muted)">${formatTime(b.banned_at)}</td>
+      <td><button class="btn btn-success btn-sm" onclick="removeDeviceBan('${esc(b.device_id)}')">Remove</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function addDeviceBan() {
+  const device_id = document.getElementById('newDeviceId').value.trim();
+  const reason = document.getElementById('newDeviceReason').value.trim();
+  if (!device_id) { toast('Device ID required', 'error'); return; }
+  await api('/admin/device-ban', 'POST', { device_id, reason });
+  toast('Device banned', 'success');
+  document.getElementById('newDeviceId').value = '';
+  document.getElementById('newDeviceReason').value = '';
+  loadDeviceBans();
+  loadStats();
+}
+
+async function removeDeviceBan(device_id) {
+  await api('/admin/device-unban', 'POST', { device_id });
+  toast('Device ban removed', 'success');
+  loadDeviceBans();
+  loadStats();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function formatTime(ts) {
+  if (!ts || ts === '') return '—';
+  const n = Number(ts);
+  const d = n > 1e10 ? new Date(n) : new Date(n * 1000);
+  return d.toLocaleString();
+}
+
+let toastTimer;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// Auto-refresh stats every 30s
+setInterval(() => {
+  if (TOKEN) { loadStats(); loadOnline(); }
+}, 30000);
+</script>
+</body>
+</html>
