@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConzChat Profile</title>
+  <meta name="description" content="Chat on ConzChat" />
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #FF0033;
+      --red-dark: #CC0028;
+      --bg: #080808;
+      --bg2: #101010;
+      --bg3: #161616;
+      --border: #1e1e1e;
+      --border2: #2a2a2a;
+      --text: #ffffff;
+      --muted: #777777;
+    }
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Animated canvas */
+    #bgCanvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    /* App brand row */
+    .app-brand {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 40px;
+      opacity: 0.6;
+      text-decoration: none;
+    }
+    .app-brand img { width: 28px; height: 28px; border-radius: 8px; }
+    .app-brand span { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+    /* Profile card */
+    .profile-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 28px;
+      padding: 40px 32px 32px;
+      max-width: 360px;
+      width: 100%;
+      animation: fadeUp 0.6s cubic-bezier(0.23,1,0.32,1) both;
+    }
+
+    /* Avatar */
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .avatar {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF0033 0%, #660015 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      font-weight: 900;
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(255,0,51,0.2), 0 0 30px rgba(255,0,51,0.3);
+      margin: 0 auto;
+    }
+    .avatar-ring {
+      position: absolute; inset: -4px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, rgba(255,0,51,0.6), transparent 60%) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+      animation: spin 6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .username {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .username-at {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .username-at span { color: var(--red); }
+
+    /* Buttons */
+    .btn-chat {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 24px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.12s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(255,0,51,0.4);
+      margin-bottom: 10px;
+      animation: btn-pulse 3s ease infinite;
+    }
+    .btn-chat:hover {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 32px rgba(255,0,51,0.55);
+    }
+    .btn-chat:active { transform: scale(0.97); }
+
+    .btn-download {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 50px;
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-download:hover { color: var(--text); border-color: #444; }
+
+    .divider {
+      width: 40px; height: 1px;
+      background: var(--border2);
+      margin: 24px auto;
+    }
+
+    .app-info {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .app-info strong { color: #aaa; }
+
+    /* Not found state */
+    .not-found { display: none; }
+    .not-found .nf-icon { font-size: 48px; margin-bottom: 16px; }
+    .not-found .nf-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .not-found .nf-sub { font-size: 14px; color: var(--muted); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes btn-pulse {
+      0%, 100% { box-shadow: 0 4px 24px rgba(255,0,51,0.4); }
+      50%       { box-shadow: 0 4px 36px rgba(255,0,51,0.6); }
+    }
+
+    .footer {
+      margin-top: 32px;
+      font-size: 11px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="page">
+
+  <a class="app-brand" href="https://conzchat.com">
+    <img src="/icon.png" alt="ConzChat" />
+    <span>ConzChat</span>
+  </a>
+
+  <!-- Profile card (shown when username found) -->
+  <div class="profile-card" id="profileCard">
+    <div class="avatar-wrap">
+      <div class="avatar" id="avatarInitial">?</div>
+      <div class="avatar-ring"></div>
+    </div>
+
+    <div class="username" id="displayName">Loading…</div>
+    <div class="username-at">on <span>ConzChat</span></div>
+
+    <a class="btn-chat" id="btnChat" href="#">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      Chat on ConzChat
+    </a>
+
+    <a class="btn-download" href="https://conzchat.com">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Don't have ConzChat? Download it
+    </a>
+
+    <div class="divider"></div>
+    <p class="app-info">
+      <strong>ConzChat</strong> is a fast, private messenger built on Golang.<br />
+      Download the app to start chatting.
+    </p>
+  </div>
+
+  <!-- Not found state -->
+  <div class="profile-card not-found" id="notFound">
+    <div class="nf-icon">🔍</div>
+    <div class="nf-title">User not found</div>
+    <div class="nf-sub" id="nfSub">No ConzChat user with that username.</div>
+    <div class="divider"></div>
+    <a class="btn-download" href="https://conzchat.com">← Back to ConzChat</a>
+  </div>
+
+  <div class="footer">© 2026 ConzChat</div>
+
+</div>
+
+<script>
+  /* ── Particle canvas ── */
+  (function() {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    const particles = Array.from({length: 40}, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.2,
+      dy: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.2 + 0.04,
+      pulse: Math.random() * Math.PI * 2
+    }));
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      // Glow blob
+      const g = ctx.createRadialGradient(W*0.8, H*0.1, 0, W*0.8, H*0.1, W*0.5);
+      g.addColorStop(0, 'rgba(255,0,51,0.07)');
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      particles.forEach(p => {
+        p.pulse += 0.018;
+        const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,80,80,${a})`; ctx.fill();
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ── Profile logic ── */
+  (function() {
+    // Extract username from URL path: /u/ConzNew or /u/ConzNew/
+    // Also check sessionStorage for GitHub Pages 404 redirect
+    let username = sessionStorage.getItem('conzchat_profile_user') || '';
+    sessionStorage.removeItem('conzchat_profile_user');
+    if (!username) {
+      const pathParts = window.location.pathname.replace(/\/$/, '').split('/');
+      // pathParts = ['', 'u', 'ConzNew']
+      username = pathParts[pathParts.length - 1];
+    }
+
+    if (!username || username === 'u') {
+      // No username — redirect to main site
+      window.location.href = 'https://conzchat.com';
+      return;
+    }
+
+    // Set display
+    document.title = username + ' on ConzChat';
+    document.getElementById('displayName').textContent = username;
+    document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
+
+    // Build deep link URLs
+    // Custom scheme: conzchat://user/ConzNew  (works on all Android)
+    // HTTPS App Link: https://conzchat.com/u/ConzNew  (Android 6+ verified)
+    const deepLink = 'conzchat://user/' + encodeURIComponent(username);
+    const appLink  = 'https://conzchat.com/u/' + encodeURIComponent(username);
+
+    const btnChat = document.getElementById('btnChat');
+
+    // On click: try custom scheme first, fall back gracefully
+    btnChat.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      // Attempt to open the app via custom URI scheme
+      const start = Date.now();
+      window.location.href = deepLink;
+
+      // If app not installed, the page stays — after 1.5s redirect to download
+      setTimeout(function() {
+        if (Date.now() - start < 2000) {
+          // App didn't open — show download hint
+          btnChat.textContent = '📲 Download ConzChat to chat';
+          btnChat.href = 'https://conzchat.com';
+          btnChat.style.background = '#333';
+          btnChat.style.boxShadow = 'none';
+          btnChat.addEventListener('click', function() {
+            window.location.href = 'https://conzchat.com';
+          }, { once: true });
+        }
+      }, 1500);
+    });
+
+    // Also set href for browsers that support it directly
+    btnChat.href = deepLink;
+
+    // Meta tags for sharing
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.content = 'Chat with ' + username + ' on ConzChat';
+
+    // OG tags
+    const head = document.head;
+    function addMeta(prop, content, isOG) {
+      const m = document.createElement('meta');
+      m.setAttribute(isOG ? 'property' : 'name', prop);
+      m.content = content;
+      head.appendChild(m);
+    }
+    addMeta('og:title', username + ' on ConzChat', true);
+    addMeta('og:description', 'Chat with ' + username + ' on ConzChat — the fast, private messenger.', true);
+    addMeta('og:image', 'https://conzchat.com/icon.png', true);
+    addMeta('og:url', window.location.href, true);
+    addMeta('twitter:card', 'summary', false);
+    addMeta('twitter:title', username + ' on ConzChat', false);
+  })();
+</script>
+
+</body>
+</html>

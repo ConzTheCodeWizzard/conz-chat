@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConzChat</title>
+  <script>
+    // GitHub Pages SPA redirect trick:
+    // When /u/ConzNew is requested, GitHub Pages serves this 404.html.
+    // We store the path in sessionStorage and redirect to /u/index.html
+    // which then reads the stored path.
+    var path = window.location.pathname;
+    // If it looks like a /u/ profile path, redirect to the profile page handler
+    if (path.match(/^\/u\/[^/]+\/?$/)) {
+      // Store the username for the profile page to pick up
+      var username = path.replace(/^\/u\//, '').replace(/\/$/, '');
+      sessionStorage.setItem('conzchat_profile_user', username);
+      window.location.replace('/u/');
+    } else {
+      // Not a profile path — redirect to home
+      window.location.replace('/');
+    }
+  </script>
+</head>
+<body></body>
+</html>
