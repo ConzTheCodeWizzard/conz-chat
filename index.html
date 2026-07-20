@@ -862,23 +862,23 @@
 
     <!-- Download buttons -->
     <div class="btn-group">
-      <button class="btn-download" onclick="openModal()">
+      <a class="btn-download" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v31/ConzChat-Pro-v31.apk">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         Download ConzChat
-      </button>
-      <button class="btn-download btn-clone" onclick="openModal()">
+      </a>
+      <a class="btn-download btn-clone" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v31/ConzChat-Pro-Clone-v31.apk">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         Download ConzChat (Clone)
-      </button>
-      <p class="clone-hint">Run two accounts on one device</p>
+      </a>
+      <p class="clone-hint">v31 &nbsp;·&nbsp; Android 8.0+ &nbsp;·&nbsp; ~126 MB &nbsp;·&nbsp; Run two accounts on one device</p>
     </div>
 
     <!-- Feature cards -->
@@ -977,11 +977,49 @@
       </div>
     </div>
 
+    <!-- Why we rebuilt it -->
+    <div class="whats-new" style="margin-top:28px;">
+      <div class="whats-new-card" style="cursor:pointer;" onclick="this.querySelector('.firebase-details').style.display=this.querySelector('.firebase-details').style.display==='none'?'block':'none'">
+        <div class="whats-new-header">
+          <span style="font-size:16px">🔥</span>
+          <span class="whats-new-title">Why We Rebuilt It</span>
+          <span class="whats-new-badge" style="background:rgba(255,0,51,0.12);border-color:rgba(255,0,51,0.25);color:var(--red);">Firebase → Golang</span>
+        </div>
+        <div class="firebase-details" style="display:none;">
+          <div class="issues-card" style="margin-bottom:14px;">
+            <div class="issues-label">Known Issues with the Old Firebase Version</div>
+            <ul class="issues-list">
+              <li>Many security vulnerabilities</li>
+              <li>Notifications never working</li>
+              <li>Calls never working</li>
+              <li>Glitches in message receiving</li>
+              <li>Public Groups were terrible</li>
+              <li>Inputs were delayed</li>
+              <li>Restricted to Email &amp; Password login</li>
+            </ul>
+          </div>
+          <div class="compare-title">Firebase vs Golang</div>
+          <div class="compare-grid">
+            <div class="compare-headers"><span>Feature</span><span>Firebase ❌</span><span>Golang ✅</span></div>
+            <div class="compare-item"><span class="ci-label">Security</span><span class="ci-bad">❌ Vulnerable</span><span class="ci-good">✅ Bulletproof</span></div>
+            <div class="compare-item"><span class="ci-label">Notifications</span><span class="ci-bad">❌ Broken</span><span class="ci-good">✅ Perfect</span></div>
+            <div class="compare-item"><span class="ci-label">Calls</span><span class="ci-bad">❌ Broken</span><span class="ci-good">✅ Perfect</span></div>
+            <div class="compare-item"><span class="ci-label">Messaging</span><span class="ci-bad">❌ Glitchy</span><span class="ci-good">✅ Snappy AF</span></div>
+            <div class="compare-item"><span class="ci-label">Groups</span><span class="ci-bad">❌ Terrible</span><span class="ci-good">✅ Massive ↑</span></div>
+            <div class="compare-item"><span class="ci-label">Input Speed</span><span class="ci-bad">❌ Delayed</span><span class="ci-good">✅ Butter</span></div>
+            <div class="compare-item"><span class="ci-label">Login</span><span class="ci-bad">❌ Email</span><span class="ci-good">✅ Username</span></div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center;font-style:italic;">Much love &nbsp;<span style="color:var(--red);font-weight:800;">~Conz~</span></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted2);margin-top:8px;">Tap to expand ▾</p>
+      </div>
+    </div>
+
     <div class="footer">© 2026 ConzChat &nbsp;·&nbsp; Made with ❤️ in the UK</div>
 
   </div>
 
-  <!-- Download Info Modal -->
+  <!-- Download Info Modal (kept for reference, no longer triggered by buttons) -->
   <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
     <div class="modal" id="modal">
       <button class="modal-close" onclick="closeModal()">✕</button>
