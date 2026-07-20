@@ -36,6 +36,67 @@
       overflow-x: hidden;
     }
 
+    /* ── Tunnel Intro ── */
+    #tunnelOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #tunnelCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #tunnelLogo {
+      position: relative;
+      z-index: 2;
+      font-size: clamp(2rem, 8vw, 5rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.03em;
+      text-shadow: 0 0 60px rgba(255,0,51,0.9), 0 0 120px rgba(255,0,51,0.5);
+      opacity: 0;
+      transform: scale(0.4);
+      transition: none;
+      pointer-events: none;
+    }
+    #tunnelFlash {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* ── Mute button ── */
+    #muteBtn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 500;
+      background: rgba(255,0,51,0.08);
+      border: 1px solid rgba(255,0,51,0.3);
+      color: var(--red);
+      font-size: 18px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    #muteBtn:hover { background: rgba(255,0,51,0.18); }
+    #muteBtn.visible { display: flex; }
+
     /* ── Animated canvas background ── */
     #bgCanvas {
       position: fixed;
@@ -93,6 +154,8 @@
       max-width: 560px;
       margin: 0 auto;
       border-radius: 0 0 24px 24px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .drawer.open { transform: translateY(0); }
 
@@ -136,6 +199,9 @@
       font-size: 18px;
       flex-shrink: 0;
     }
+    .dev-avatar.grey {
+      background: linear-gradient(135deg, #444, #222);
+    }
     .dev-info { flex: 1; }
     .dev-name {
       font-size: 15px;
@@ -143,6 +209,7 @@
       color: var(--red);
       margin-bottom: 2px;
     }
+    .dev-name.grey-name { color: #888; }
     .dev-role {
       font-size: 11px;
       color: var(--muted);
@@ -154,6 +221,37 @@
       color: #aaa;
       line-height: 1.6;
       margin-bottom: 14px;
+    }
+    .dev-note {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.03);
+      border-left: 2px solid #444;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+      font-style: italic;
+    }
+    .dev-credits {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .dev-credits li {
+      font-size: 12px;
+      color: #bbb;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .dev-credits li::before {
+      content: "▸";
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 1px;
     }
     .btn-kik {
       display: inline-flex;
@@ -373,7 +471,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Feature icon colours */
     .fi-red    { background: rgba(255,0,51,0.12); }
     .fi-orange { background: rgba(255,120,0,0.12); }
     .fi-blue   { background: rgba(0,120,255,0.12); }
@@ -550,7 +647,6 @@
       line-height: 1.5;
     }
 
-    /* Known issues */
     .issues-card {
       background: rgba(255,0,51,0.04);
       border: 1px solid rgba(255,0,51,0.12);
@@ -587,7 +683,6 @@
       flex-shrink: 0;
     }
 
-    /* Comparison cards */
     .compare-title {
       font-size: 10px;
       font-weight: 700;
@@ -608,11 +703,7 @@
       gap: 6px;
       align-items: center;
     }
-    .compare-item .ci-label {
-      font-size: 12px;
-      color: #888;
-      font-weight: 500;
-    }
+    .compare-item .ci-label { font-size: 12px; color: #888; font-weight: 500; }
     .compare-item .ci-bad {
       background: rgba(255,0,51,0.06);
       border: 1px solid rgba(255,0,51,0.12);
@@ -681,6 +772,16 @@
 </head>
 <body>
 
+  <!-- ══ TUNNEL INTRO ══ -->
+  <div id="tunnelOverlay">
+    <canvas id="tunnelCanvas"></canvas>
+    <div id="tunnelLogo">CONZCHAT</div>
+    <div id="tunnelFlash"></div>
+  </div>
+
+  <!-- Mute button (shown after intro) -->
+  <button id="muteBtn" title="Toggle music">🔊</button>
+
   <!-- Animated particle canvas -->
   <canvas id="bgCanvas"></canvas>
 
@@ -695,6 +796,7 @@
     <button class="drawer-close" onclick="closeDrawer()">✕</button>
     <p class="drawer-title">The Team</p>
 
+    <!-- Conz -->
     <div class="dev-card">
       <div class="dev-card-header">
         <div class="dev-avatar">👑</div>
@@ -704,6 +806,21 @@
         </div>
       </div>
       <p class="dev-bio">Conz is the creator of ConzChat. His mission was — and still is — to build something genuinely fresh: a fast, private messenger that doesn't compromise.</p>
+      <ul class="dev-credits">
+        <li>Full Android app architecture &amp; development (v1–v26+)</li>
+        <li>Go (Golang) backend — complete rewrite from Firebase</li>
+        <li>Real-time WebSocket messaging engine</li>
+        <li>Public &amp; private group chat system</li>
+        <li>Read receipt system (S → D → R)</li>
+        <li>Voice notes, GIF support, in-app camera</li>
+        <li>Media drawer (Camera / Gallery / GIF)</li>
+        <li>Join/leave system messages with history cutoff</li>
+        <li>Profile pictures in DMs and group chats</li>
+        <li>Chat themes &amp; UI/UX design</li>
+        <li>VPS deployment &amp; server infrastructure</li>
+        <li>Notification sidecar &amp; conversation persistence</li>
+        <li>This website</li>
+      </ul>
       <a class="btn-kik" href="https://kik.me/ConzNew" target="_blank" rel="noopener noreferrer">
         💬 Contact Conz on KiK
       </a>
@@ -712,15 +829,16 @@
       </a>
     </div>
 
+    <!-- Void -->
     <div class="dev-card">
       <div class="dev-card-header">
-        <div class="dev-avatar">⚡</div>
+        <div class="dev-avatar grey">⚡</div>
         <div class="dev-info">
-          <div class="dev-name">Void</div>
-          <div class="dev-role">Co-Developer &amp; Expert Coder</div>
+          <div class="dev-name grey-name">Void</div>
+          <div class="dev-role">Contributor</div>
         </div>
       </div>
-      <p class="dev-bio">Void recently joined the team, bringing 7+ years of coding experience. He's been instrumental in pushing the Golang backend forward.</p>
+      <p class="dev-note">Void done a bit of work on the outdated Firebase version and has yet to work on the new improved Golang version.</p>
       <a class="btn-kik" href="https://kik.me/Adking100" target="_blank" rel="noopener noreferrer">
         💬 Contact Void on KiK
       </a>
@@ -938,102 +1056,333 @@
   </div>
 
   <script>
-    /* ── Particle canvas ── */
-    (function() {
-      const canvas = document.getElementById('bgCanvas');
-      const ctx = canvas.getContext('2d');
-      let W, H, particles = [];
+  /* ══════════════════════════════════════════════
+     TUNNEL INTRO
+  ══════════════════════════════════════════════ */
+  (function() {
+    const overlay  = document.getElementById('tunnelOverlay');
+    const canvas   = document.getElementById('tunnelCanvas');
+    const ctx      = canvas.getContext('2d');
+    const logoEl   = document.getElementById('tunnelLogo');
+    const flashEl  = document.getElementById('tunnelFlash');
 
-      function resize() {
-        W = canvas.width = window.innerWidth;
-        H = canvas.height = window.innerHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
+    let W, H, startTime = null, done = false;
 
-      function rand(min, max) { return Math.random() * (max - min) + min; }
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
 
-      // Create particles
-      for (let i = 0; i < 55; i++) {
-        particles.push({
-          x: rand(0, window.innerWidth),
-          y: rand(0, window.innerHeight),
-          r: rand(0.5, 2),
-          dx: rand(-0.15, 0.15),
-          dy: rand(-0.15, 0.15),
-          alpha: rand(0.05, 0.25),
-          pulse: rand(0, Math.PI * 2)
-        });
-      }
+    // ── Web Audio: electronic whoosh + explosion ──
+    let audioCtx = null;
+    function playTunnelSound() {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
 
-      // Glow blobs
-      const blobs = [
-        { x: 0.85, y: 0.05, r: 0.45, color: 'rgba(255,0,51,0.06)' },
-        { x: 0.1,  y: 0.85, r: 0.4,  color: 'rgba(120,0,20,0.05)' },
-        { x: 0.5,  y: 0.5,  r: 0.3,  color: 'rgba(255,0,51,0.025)' },
-      ];
+        // Whoosh: filtered noise that rises in pitch
+        const bufLen = audioCtx.sampleRate * 3.5;
+        const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
 
-      let frame = 0;
-      function draw() {
-        ctx.clearRect(0, 0, W, H);
-        frame++;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buf;
 
-        // Draw blobs
-        blobs.forEach(b => {
-          const grd = ctx.createRadialGradient(b.x*W, b.y*H, 0, b.x*W, b.y*H, b.r * Math.min(W,H));
-          grd.addColorStop(0, b.color);
-          grd.addColorStop(1, 'transparent');
-          ctx.fillStyle = grd;
-          ctx.fillRect(0, 0, W, H);
-        });
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(200, now);
+        filter.frequency.linearRampToValueAtTime(3000, now + 2.8);
+        filter.Q.value = 0.8;
 
-        // Draw particles
-        particles.forEach(p => {
-          p.pulse += 0.015;
-          const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,80,80,${a})`;
+        const gainWhoosh = audioCtx.createGain();
+        gainWhoosh.gain.setValueAtTime(0, now);
+        gainWhoosh.gain.linearRampToValueAtTime(0.35, now + 0.3);
+        gainWhoosh.gain.linearRampToValueAtTime(0.55, now + 2.5);
+        gainWhoosh.gain.linearRampToValueAtTime(0, now + 3.2);
+
+        noise.connect(filter);
+        filter.connect(gainWhoosh);
+        gainWhoosh.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + 3.5);
+
+        // Explosion: low boom at t=2.8s
+        const boomBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.8, audioCtx.sampleRate);
+        const boomData = boomBuf.getChannelData(0);
+        for (let i = 0; i < boomData.length; i++) {
+          boomData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.12));
+        }
+        const boom = audioCtx.createBufferSource();
+        boom.buffer = boomBuf;
+
+        const boomFilter = audioCtx.createBiquadFilter();
+        boomFilter.type = 'lowpass';
+        boomFilter.frequency.value = 180;
+
+        const boomGain = audioCtx.createGain();
+        boomGain.gain.setValueAtTime(0, now + 2.7);
+        boomGain.gain.linearRampToValueAtTime(1.2, now + 2.82);
+        boomGain.gain.exponentialRampToValueAtTime(0.001, now + 3.5);
+
+        boom.connect(boomFilter);
+        boomFilter.connect(boomGain);
+        boomGain.connect(audioCtx.destination);
+        boom.start(now + 2.7);
+
+        // High crack at explosion
+        const crackOsc = audioCtx.createOscillator();
+        crackOsc.type = 'sawtooth';
+        crackOsc.frequency.setValueAtTime(800, now + 2.8);
+        crackOsc.frequency.exponentialRampToValueAtTime(80, now + 3.1);
+        const crackGain = audioCtx.createGain();
+        crackGain.gain.setValueAtTime(0.6, now + 2.8);
+        crackGain.gain.exponentialRampToValueAtTime(0.001, now + 3.1);
+        crackOsc.connect(crackGain);
+        crackGain.connect(audioCtx.destination);
+        crackOsc.start(now + 2.8);
+        crackOsc.stop(now + 3.1);
+
+      } catch(e) {}
+    }
+
+    // ── Background beat (soft lo-fi electronic) ──
+    let bgAudio = null;
+    let bgMuted = false;
+    function startBgBeat() {
+      bgAudio = new Audio('https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3');
+      bgAudio.loop = true;
+      bgAudio.volume = 0.18;
+      bgAudio.play().catch(() => {});
+      const muteBtn = document.getElementById('muteBtn');
+      muteBtn.classList.add('visible');
+      muteBtn.addEventListener('click', function() {
+        bgMuted = !bgMuted;
+        bgAudio.muted = bgMuted;
+        muteBtn.textContent = bgMuted ? '🔇' : '🔊';
+      });
+    }
+
+    // ── Tunnel rendering ──
+    const RINGS = 14;
+    const SIDES = 8;
+    let rotation = 0;
+
+    function drawTunnel(t) {
+      // t: 0→1 over 2.8 seconds (speed up toward end)
+      ctx.clearRect(0, 0, W, H);
+
+      const cx = W / 2, cy = H / 2;
+      const speed = 1 + t * 4; // accelerates
+      rotation += 0.012 * speed;
+
+      // Dark background
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+
+      // Draw rings from back to front
+      for (let i = RINGS; i >= 0; i--) {
+        const depth = ((i / RINGS) - (t * 0.6 * speed) % 1 + 1) % 1;
+        const scale = Math.pow(depth, 0.7);
+        const radius = scale * Math.min(W, H) * 0.72;
+        const alpha  = depth * 0.9;
+        const rot    = rotation + i * 0.22;
+
+        // Red gradient ring fill
+        const rVal = Math.floor(180 + depth * 75);
+        ctx.beginPath();
+        for (let s = 0; s <= SIDES; s++) {
+          const angle = (s / SIDES) * Math.PI * 2 + rot;
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius;
+          s === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = `rgba(${rVal},0,30,${alpha * 0.85})`;
+        ctx.lineWidth = 1.5 + depth * 2;
+        ctx.stroke();
+
+        // Inner glow fill for closer rings
+        if (depth > 0.5) {
+          ctx.fillStyle = `rgba(${rVal},0,20,${(depth - 0.5) * 0.12})`;
           ctx.fill();
-
-          p.x += p.dx;
-          p.y += p.dy;
-          if (p.x < 0) p.x = W;
-          if (p.x > W) p.x = 0;
-          if (p.y < 0) p.y = H;
-          if (p.y > H) p.y = 0;
-        });
-
-        requestAnimationFrame(draw);
+        }
       }
-      draw();
-    })();
 
-    /* ── Drawer ── */
-    function openDrawer() {
-      document.getElementById('devDrawer').classList.add('open');
-      document.getElementById('drawerOverlay').classList.add('open');
-    }
-    function closeDrawer() {
-      document.getElementById('devDrawer').classList.remove('open');
-      document.getElementById('drawerOverlay').classList.remove('open');
+      // Central glow — grows as we approach explosion
+      const glowSize = 20 + t * 180;
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+      grd.addColorStop(0, `rgba(255,60,0,${0.3 + t * 0.7})`);
+      grd.addColorStop(0.4, `rgba(200,0,20,${0.15 + t * 0.3})`);
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flying sparks
+      const sparkCount = Math.floor(8 + t * 20);
+      for (let s = 0; s < sparkCount; s++) {
+        const angle = (s / sparkCount) * Math.PI * 2 + rotation * 2;
+        const dist  = (0.1 + t * 0.5) * Math.min(W, H) * 0.4 * (0.5 + Math.sin(s * 1.3) * 0.5);
+        const sx = cx + Math.cos(angle) * dist;
+        const sy = cy + Math.sin(angle) * dist;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5 + t * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,${Math.floor(80 + t * 120)},0,${0.4 + t * 0.6})`;
+        ctx.fill();
+      }
     }
 
-    /* ── Modal ── */
-    function openModal() {
-      document.getElementById('modalOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
+    function explode() {
+      // Flash white
+      flashEl.style.transition = 'opacity 0.08s ease';
+      flashEl.style.opacity = '1';
+
+      // Show logo burst
+      logoEl.style.transition = 'opacity 0.25s ease, transform 0.4s cubic-bezier(0.23,1,0.32,1)';
+      logoEl.style.opacity = '1';
+      logoEl.style.transform = 'scale(1)';
+
+      setTimeout(() => {
+        flashEl.style.transition = 'opacity 0.4s ease';
+        flashEl.style.opacity = '0';
+      }, 120);
+
+      // Fade out overlay after logo shown
+      setTimeout(() => {
+        overlay.style.transition = 'opacity 0.6s ease';
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          startBgBeat();
+        }, 600);
+      }, 700);
     }
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('open');
-      document.body.style.overflow = '';
+
+    function animate(timestamp) {
+      if (done) return;
+      if (!startTime) startTime = timestamp;
+      const elapsed = (timestamp - startTime) / 1000; // seconds
+      const DURATION = 2.8;
+
+      if (elapsed < DURATION) {
+        const t = elapsed / DURATION;
+        drawTunnel(t);
+        requestAnimationFrame(animate);
+      } else {
+        // Draw final frame at t=1
+        drawTunnel(1);
+        done = true;
+        explode();
+      }
     }
-    function handleOverlayClick(e) {
-      if (e.target === document.getElementById('modalOverlay')) closeModal();
+
+    // Start on first user interaction or auto-start
+    function kickoff() {
+      playTunnelSound();
+      requestAnimationFrame(animate);
+      document.removeEventListener('click', kickoff);
+      document.removeEventListener('touchstart', kickoff);
     }
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') { closeModal(); closeDrawer(); }
-    });
+
+    // Try auto-start (works on most browsers)
+    setTimeout(() => {
+      kickoff();
+    }, 100);
+
+    // Fallback: start on first tap/click if autoplay blocked
+    document.addEventListener('click', kickoff, { once: true });
+    document.addEventListener('touchstart', kickoff, { once: true });
+  })();
+
+  /* ══════════════════════════════════════════════
+     PARTICLE BACKGROUND
+  ══════════════════════════════════════════════ */
+  (function() {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    for (let i = 0; i < 55; i++) {
+      particles.push({
+        x: rand(0, window.innerWidth),
+        y: rand(0, window.innerHeight),
+        r: rand(0.5, 2),
+        dx: rand(-0.15, 0.15),
+        dy: rand(-0.15, 0.15),
+        alpha: rand(0.05, 0.25),
+        pulse: rand(0, Math.PI * 2)
+      });
+    }
+
+    const blobs = [
+      { x: 0.85, y: 0.05, r: 0.45, color: 'rgba(255,0,51,0.06)' },
+      { x: 0.1,  y: 0.85, r: 0.4,  color: 'rgba(120,0,20,0.05)' },
+      { x: 0.5,  y: 0.5,  r: 0.3,  color: 'rgba(255,0,51,0.025)' },
+    ];
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      blobs.forEach(b => {
+        const grd = ctx.createRadialGradient(b.x*W, b.y*H, 0, b.x*W, b.y*H, b.r * Math.min(W,H));
+        grd.addColorStop(0, b.color);
+        grd.addColorStop(1, 'transparent');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, W, H);
+      });
+      particles.forEach(p => {
+        p.pulse += 0.015;
+        const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,80,80,${a})`;
+        ctx.fill();
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ══════════════════════════════════════════════
+     DRAWER / MODAL
+  ══════════════════════════════════════════════ */
+  function openDrawer() {
+    document.getElementById('devDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('devDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  }
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeModal(); closeDrawer(); }
+  });
   </script>
 
 </body>
