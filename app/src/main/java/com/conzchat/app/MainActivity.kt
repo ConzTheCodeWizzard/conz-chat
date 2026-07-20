@@ -1,7 +1,6 @@
 package com.conzchat.app
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,26 +9,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import android.content.Intent
+import com.conzchat.app.service.CallService
 import com.conzchat.app.ui.auth.WelcomeFragment
+import com.conzchat.app.ui.call.CallFragment
 import com.conzchat.app.ui.home.HomeFragment
-import com.conzchat.app.util.FirebaseManager
-import com.conzchat.app.util.SessionManager
+import com.conzchat.app.util.ApiManager
 import com.conzchat.app.util.AppPreferences
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.messaging.FirebaseMessaging
+import com.conzchat.app.util.OneSignalManager
+import com.onesignal.OneSignal
+import com.onesignal.notifications.INotificationClickListener
+import com.onesignal.notifications.INotificationClickEvent
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    private var authListener: FirebaseAuth.AuthStateListener? = null
-
-    // Android 13+ notification permission launcher
     private val notifPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* granted or denied — FCM still works, just no heads-up on 13+ if denied */ }
+    ) { granted ->
+        if (granted) OneSignalManager.optIn()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply theme before super.onCreate
         when {
             com.conzchat.app.util.ConzMods.isHarleyQuinnTheme(this) -> setTheme(R.style.Theme_ConzChat_HarleyQuinn)
             com.conzchat.app.util.ConzMods.isLightMode(this) -> setTheme(R.style.Theme_ConzChat_Light)
@@ -37,24 +37,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Apply Harley Quinn background image if theme is active
         if (com.conzchat.app.util.ConzMods.isHarleyQuinnTheme(this)) {
             val container = findViewById<android.widget.FrameLayout>(R.id.fragmentContainer)
             container.background = ContextCompat.getDrawable(this, R.drawable.bg_harley_quinn)
-            // Add a semi-transparent overlay so text is still readable
             container.foreground = android.graphics.drawable.ColorDrawable(0xAA0A0A12.toInt())
         }
 
-        // Apply brightness from preferences
         val brightness = AppPreferences.getBrightness(this)
         applyBrightness(brightness)
 
-        // Apply screenshot protection mod on startup
         if (com.conzchat.app.util.ConzMods.isScreenshotProtection(this)) {
             window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
 
-        // Request POST_NOTIFICATIONS on Android 13+
+        // Request notification permission (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -62,97 +58,126 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        auth = FirebaseManager.auth
+        // Initialize ApiManager with application context
+        ApiManager.init(applicationContext)
 
-        authListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null) {
-                // Register FCM token every time user is authenticated
-                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-                    FirebaseManager.updateFcmToken(token)
-                }
-                // Link this device to the user in OneSignal for push notifications
-                com.conzchat.app.util.OneSignalManager.login(user.uid)
-                // Start session guard
-                SessionManager.startSessionGuard(user.uid) {
-                    runOnUiThread {
-                        showSessionKickedDialog()
+        if (ApiManager.isLoggedIn()) {
+            // Restore session — fetch current user profile
+            ApiManager.getMe { user, _ ->
+                runOnUiThread {
+                    if (user != null) {
+                        ApiManager.currentUser = user
+                        ApiManager.connectWebSocket()
+                        // Re-link OneSignal to this user on session restore
+                        OneSignalManager.login(user.uid)
+                        OneSignalManager.optIn()
+                        showHome()
+                        setupOneSignalCallHandler()
+                        // Handle deep link or incoming call after home loads
+                        if (intent?.action == CallService.ACTION_ACCEPT_CALL) {
+                            handleIncomingCallIntent(intent)
+                        } else {
+                            com.conzchat.app.util.DeepLinkHandler.handle(this, intent)
+                        }
+                    } else {
+                        ApiManager.clearSession()
+                        showWelcome()
                     }
                 }
-                showHome()
-            } else {
-                // Unlink device from user in OneSignal
-                com.conzchat.app.util.OneSignalManager.logout()
-                SessionManager.stopSessionGuard()
-                showWelcome()
             }
+        } else {
+            showWelcome()
         }
-
-        // Handle notification tap
-        handleNotificationIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleNotificationIntent(intent)
+        setIntent(intent)
+        // Handle incoming call accept from notification
+        if (intent.action == CallService.ACTION_ACCEPT_CALL) {
+            handleIncomingCallIntent(intent)
+        } else {
+            // Handle deep link when app is already running
+            com.conzchat.app.util.DeepLinkHandler.handle(this, intent)
+        }
     }
 
-    private fun handleNotificationIntent(intent: Intent?) {
-        intent ?: return
-        val fromUid = intent.getStringExtra("fromUid") ?: return
-        val notifType = intent.getStringExtra("notifType") ?: "message"
-        // Delay to let auth + HomeFragment load first
+    private fun handleIncomingCallIntent(intent: Intent) {
+        val fromUid = intent.getStringExtra(CallService.EXTRA_TO_UID) ?: return
+        val fromName = intent.getStringExtra(CallService.EXTRA_TO_NAME) ?: "Unknown"
+        val fromPhoto = intent.getStringExtra(CallService.EXTRA_TO_PHOTO) ?: ""
+        val callType = intent.getStringExtra(CallService.EXTRA_CALL_TYPE) ?: "voice"
+        val callId = intent.getStringExtra(CallService.EXTRA_CALL_ID) ?: ""
+        val channel = intent.getStringExtra(CallService.EXTRA_CHANNEL) ?: ""
+        val token = intent.getStringExtra(CallService.EXTRA_TOKEN) ?: ""
+        val isIncoming = intent.getBooleanExtra(CallService.EXTRA_IS_INCOMING, true)
+
+        if (fromUid.isEmpty()) return
+
+        // Wait briefly for the fragment container to be ready
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            if (FirebaseManager.currentUid.isEmpty()) return@postDelayed
-            when (notifType) {
-                "group" -> {
-                    val chatId = intent.getStringExtra("chatId") ?: return@postDelayed
-                    FirebaseManager.groupsRef.document(chatId).get().addOnSuccessListener { snap ->
-                        val name = snap.getString("name") ?: "Group"
-                        val photo = snap.getString("photo") ?: ""
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer,
-                                com.conzchat.app.ui.groups.GroupChatFragment.newInstance(chatId, name, photo))
-                            .addToBackStack(null).commitAllowingStateLoss()
-                    }
-                }
-                else -> {
-                    FirebaseManager.usersRef.document(fromUid).get().addOnSuccessListener { snap ->
-                        val name = snap.getString("displayName") ?: snap.getString("username") ?: ""
-                        val photo = snap.getString("photo") ?: ""
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer,
-                                com.conzchat.app.ui.chat.ChatFragment.newInstance(fromUid, name, photo))
-                            .addToBackStack(null).commitAllowingStateLoss()
+            val callFrag = CallFragment.newInstance(
+                toUid = fromUid,
+                toName = fromName,
+                toPhoto = fromPhoto,
+                callType = callType,
+                isIncoming = isIncoming,
+                callId = callId,
+                channelName = channel,
+                agoraToken = token
+            )
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, callFrag)
+                .addToBackStack(null)
+                .commitAllowingStateLoss()
+        }, 500)
+    }
+
+    fun setupOneSignalCallHandler() {
+        // Handle notification click for incoming calls
+        OneSignal.Notifications.addClickListener(object : INotificationClickListener {
+            override fun onClick(event: INotificationClickEvent) {
+                val data = event.notification.additionalData ?: return
+                val notifType = data.optString("notifType", "")
+                if (notifType == "incoming_call") {
+                    val fromUid = data.optString("fromUid", "")
+                    val fromName = data.optString("fromName", "Unknown")
+                    val fromPhoto = data.optString("fromPhoto", "")
+                    val callType = data.optString("callType", "voice")
+                    val callId = data.optString("callId", "")
+                    val channel = data.optString("channel", "")
+                    val agoraToken = data.optString("agoraToken", "")
+                    if (fromUid.isNotEmpty()) {
+                        runOnUiThread {
+                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                val callFrag = CallFragment.newInstance(
+                                    toUid = fromUid,
+                                    toName = fromName,
+                                    toPhoto = fromPhoto,
+                                    callType = callType,
+                                    isIncoming = true,
+                                    callId = callId,
+                                    channelName = channel,
+                                    agoraToken = agoraToken
+                                )
+                                supportFragmentManager.beginTransaction()
+                                    .replace(R.id.fragmentContainer, callFrag)
+                                    .addToBackStack(null)
+                                    .commitAllowingStateLoss()
+                            }, 300)
+                        }
                     }
                 }
             }
-        }, 1200)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        auth.addAuthStateListener(authListener!!)
-        // Set online presence (Ghost Mode hides online status)
-        val uid = FirebaseManager.currentUid
-        if (uid.isNotEmpty() && !com.conzchat.app.util.ConzMods.isGhostMode(this)) {
-            FirebaseManager.usersRef.document(uid)
-                .update("online", true, "lastSeen", System.currentTimeMillis())
-        } else if (uid.isNotEmpty() && com.conzchat.app.util.ConzMods.isGhostMode(this)) {
-            // Ghost mode: always appear offline
-            FirebaseManager.usersRef.document(uid)
-                .update("online", false)
-        }
+        })
     }
 
     override fun onStop() {
         super.onStop()
-        authListener?.let { auth.removeAuthStateListener(it) }
-        // Set offline presence
-        val uid = FirebaseManager.currentUid
+        // Update online status (fire-and-forget)
+        val uid = ApiManager.currentUserId
         if (uid.isNotEmpty()) {
-            FirebaseManager.usersRef.document(uid)
-                .update("online", false, "lastSeen", System.currentTimeMillis())
+            ApiManager.updateFcmToken("offline_signal")
         }
     }
 
@@ -176,29 +201,30 @@ class MainActivity : AppCompatActivity() {
         window.attributes = lp
     }
 
-    private fun showSessionKickedDialog() {
+    fun showSessionKickedDialog() {
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("⚠️ Account Logged In Elsewhere")
+            .setTitle("Account Logged In Elsewhere")
             .setMessage("Your account has been logged into on another device. You have been signed out for security.")
             .setCancelable(false)
             .setPositiveButton("OK") { _, _ ->
-                FirebaseManager.auth.signOut()
+                OneSignalManager.logout()
+                ApiManager.clearSession()
+                showWelcome()
             }
             .show()
-        // Auto sign out after 4 seconds
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            FirebaseManager.auth.signOut()
+            OneSignalManager.logout()
+            ApiManager.clearSession()
+            showWelcome()
         }, 4000)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Reset app lock so next launch requires password again
         com.conzchat.app.util.ConzMods.setAppUnlocked(this, false)
     }
 
     override fun onBackPressed() {
-        // Just close normally — no exit dialog
         super.onBackPressed()
     }
 }

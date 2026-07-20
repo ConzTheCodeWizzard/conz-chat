@@ -4,92 +4,83 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaRecorder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
+import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.conzchat.app.BuildConfig
-import com.conzchat.app.ConzChatApp
 import com.conzchat.app.R
 import com.conzchat.app.databinding.FragmentChatBinding
 import com.conzchat.app.model.Message
 import com.conzchat.app.model.ReplyTo
-import com.conzchat.app.ui.call.CallFragment
-import com.conzchat.app.ui.profile.ProfileFragment
-import com.conzchat.app.util.ConzMods
-import com.conzchat.app.util.FirebaseManager
-import com.conzchat.app.util.ImageUtils
-import com.conzchat.app.util.OneSignalNotifier
-import com.conzchat.app.util.toast
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
-import java.io.File
+import com.conzchat.app.util.ApiManager
 import com.conzchat.app.util.HarleyThemeHelper
+import com.conzchat.app.util.toast
+import com.bumptech.glide.Glide
+import java.io.File
 
-class ChatFragment : Fragment() {
-
-    companion object {
-        fun newInstance(uid: String, name: String, photo: String): ChatFragment {
-            return ChatFragment().apply {
-                arguments = Bundle().apply {
-                    putString("uid", uid)
-                    putString("name", name)
-                    putString("photo", photo)
-                }
-            }
-        }
-    }
-
+class ChatFragment : Fragment(), ApiManager.WebSocketListener2 {
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var messageAdapter: MessageAdapter
+    private lateinit var adapter: MessageAdapter
     private val messages = mutableListOf<Message>()
-
-    private var messagesListener: ListenerRegistration? = null
-    private var typingListener: ListenerRegistration? = null
-
     private var otherUid = ""
     private var otherName = ""
     private var otherPhoto = ""
     private var replyTo: ReplyTo? = null
-    private var viewOnceMode = false
-    private var mediaBarOpen = false
-    private var cameraUri: Uri? = null
-    private var typingHandler = Handler(Looper.getMainLooper())
-    private var typingRunnable: Runnable? = null
-    private val uid get() = FirebaseManager.currentUid
-
-    // Activity result launchers
-    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { sendImageFromUri(it) }
-    }
-    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) cameraUri?.let { sendImageFromUri(it, isCamera = true) }
-    }
-    private val videoLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { sendVideoFromUri(it) }
-    }
-    private val audioLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { sendVoiceFromUri(it) }
+    private val uid get() = ApiManager.currentUserId
+    private var isTyping = false
+    private var typingHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val stopTypingRunnable = Runnable {
+        isTyping = false
+        ApiManager.sendTyping(otherUid, false)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    // ── Receipt polling ───────────────────────────────────────────────────────
+    // Since the backend does not push receipt_update WebSocket events, we poll
+    // the message list after sending to pick up S→D→R transitions.
+    private val receiptPollHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var receiptPollCount = 0
+    private val maxReceiptPolls = 12  // poll up to 12 times (60 seconds total)
+    private val receiptPollRunnable = object : Runnable {
+        override fun run() {
+            if (_binding == null || receiptPollCount >= maxReceiptPolls) return
+            receiptPollCount++
+            refreshReceiptsOnly()
+            // Poll every 5 seconds
+            receiptPollHandler.postDelayed(this, 5_000)
+        }
+    }
+
+    // ── Voice recording (inline mic button) ─────────────────────────────────
+    private var voiceRecorder: MediaRecorder? = null
+    private var voiceFile: File? = null
+    private var isVoiceRecording = false
+
+    // Pending gallery media (shown in preview bar before send)
+    private var pendingMediaUri: Uri? = null
+    private var pendingMediaIsVideo = false
+
+    // Camera result receiver (called by CameraFragment via setFragmentResult)
+    private val cameraResultKey = "camera_result"
+
+    companion object {
+        fun newInstance(uid: String, name: String, photo: String) = ChatFragment().apply {
+            arguments = Bundle().apply {
+                putString("uid", uid); putString("name", name); putString("photo", photo)
+            }
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentChatBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -97,590 +88,489 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         HarleyThemeHelper.applyTheme(requireContext(), view)
-
         otherUid = arguments?.getString("uid") ?: ""
         otherName = arguments?.getString("name") ?: ""
         otherPhoto = arguments?.getString("photo") ?: ""
 
-        setupUI()
-        loadMessages()
-        listenTyping()
-    }
-
-    private fun setupUI() {
-        // Top bar
         binding.tvChatName.text = otherName
-        binding.tvChatName.setOnClickListener {
-            openFragment(ProfileFragment.newInstance(otherUid))
-        }
-        if (otherPhoto.isNotEmpty()) {
-            com.bumptech.glide.Glide.with(this)
-                .load(otherPhoto)
-                .apply(com.bumptech.glide.request.RequestOptions.circleCropTransform())
-                .placeholder(R.drawable.ic_default_avatar)
-                .into(binding.ivChatAvatar)
-        }
+        Glide.with(this).load(otherPhoto).circleCrop().placeholder(R.drawable.ic_default_avatar).into(binding.ivChatAvatar)
         binding.ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        // Call buttons
-        binding.ivVoiceCall.setOnClickListener { startCall("voice") }
-        binding.ivVideoCall.setOnClickListener { startCall("video") }
+        // ── Call buttons ──────────────────────────────────────────────────────
+        binding.ivVoiceCall?.setOnClickListener { launchCall("voice") }
+        binding.ivVideoCall?.setOnClickListener { launchCall("video") }
 
-        // Chat search
-        binding.ivChatSearch.setOnClickListener { toggleChatSearch() }
+        binding.ivChatAvatar.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, com.conzchat.app.ui.profile.ProfileFragment.newInstance(otherUid))
+                .addToBackStack(null).commit()
+        }
 
-        // Load topbar badge (premium/dev) and status
-        loadTopbarInfo()
-
-        // Message list
-        messageAdapter = MessageAdapter(
+        adapter = MessageAdapter(
             messages = messages,
             myUid = uid,
-            onReaction = { msgId, emoji -> addReaction(msgId, emoji) },
-            onReply = { msg -> startReply(msg) },
-            onDelete = { msgId -> deleteMessage(msgId) },
+            onReaction = { msgId, emoji -> ApiManager.addReaction(msgId, emoji) { _, _ -> } },
+            onReply = { msg -> setReply(msg) },
+            onDelete = { msgId -> ApiManager.deleteMessage(msgId) { ok, _ ->
+                if (ok) {
+                    activity?.runOnUiThread {
+                        val idx = messages.indexOfFirst { it.id == msgId }
+                        if (idx >= 0) { messages[idx] = messages[idx].copy(deleted = true, text = ""); adapter.notifyItemChanged(idx) }
+                    }
+                }
+            }},
             onImageClick = { url -> openFullImage(url) },
-            onViewOnce = { msgId, type, url -> openViewOnce(msgId, type, url) },
-            onProfileClick = { uid -> openFragment(ProfileFragment.newInstance(uid)) }
+            onViewOnce = { _, _, _ -> },
+            onProfileClick = { uid ->
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, com.conzchat.app.ui.profile.ProfileFragment.newInstance(uid))
+                    .addToBackStack(null).commit()
+            }
         )
+        // Populate avatar cache so incoming messages show the other person's photo
+        if (otherPhoto.isNotEmpty()) {
+            adapter.avatarCache[otherUid] = otherPhoto
+        }
         binding.rvMessages.apply {
             layoutManager = LinearLayoutManager(context).apply { stackFromEnd = true }
-            adapter = messageAdapter
+            adapter = this@ChatFragment.adapter
         }
 
-        // Swipe-to-reply
-        val swipeCallback = object : ItemTouchHelper.SimpleCallback(
-            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(rv: androidx.recyclerview.widget.RecyclerView, vh: androidx.recyclerview.widget.RecyclerView.ViewHolder, target: androidx.recyclerview.widget.RecyclerView.ViewHolder) = false
-            override fun onSwiped(vh: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
-                val pos = vh.adapterPosition
-                if (pos >= 0 && pos < messages.size) {
-                    startReply(messages[pos])
+        binding.btnSend.setOnClickListener { sendMessageOrMedia() }
+        // + button opens the media drawer (Camera / Gallery / GIF)
+        binding.btnMedia.setOnClickListener {
+            MediaDrawerBottomSheet(
+                onCamera = { openCameraFragment() },
+                onGallery = { openGallerySheet() },
+                onGif = {
+                    GifPickerBottomSheet.newInstance(otherUid, isGroup = false, isPublicGroup = false) { gifUrl ->
+                        sendMediaMessage(gifUrl, "gif", isCamera = false, isGallery = false)
+                    }.show(childFragmentManager, "gif")
                 }
-                messageAdapter.notifyItemChanged(pos)
-            }
-            override fun getSwipeThreshold(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder) = 0.3f
+            ).show(childFragmentManager, "mediaDrawer")
         }
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(binding.rvMessages)
+        binding.btnCancelMediaPreview.setOnClickListener { clearMediaPreview() }
+        binding.btnCancelReply.setOnClickListener { clearReply() }
 
-        // Input
-        binding.etMessage.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                val hasText = s?.isNotEmpty() == true
-                binding.btnSend.visibility = if (hasText) View.VISIBLE else View.GONE
-                binding.btnMedia.visibility = if (hasText) View.GONE else View.VISIBLE
-                if (hasText) setTyping()
+        // Mic button: hold to record, drag left to discard, release to send
+        var micDownX = 0f
+        binding.btnMic.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> { micDownX = event.rawX; startVoiceRecording(); true }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - micDownX
+                    val threshold = 80 * resources.displayMetrics.density
+                    binding.tvSlideToCancel.setTextColor(
+                        if (dx < -threshold) 0xFFFF0033.toInt() else 0xFF888888.toInt())
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val dx = event.rawX - micDownX
+                    val threshold = 80 * resources.displayMetrics.density
+                    if (dx < -threshold) discardVoiceRecording() else stopAndSendVoice()
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> { discardVoiceRecording(); true }
+                else -> false
             }
+        }
+
+        // Listen for camera results (photo or video from CameraFragment)
+        parentFragmentManager.setFragmentResultListener(cameraResultKey, viewLifecycleOwner) { _, bundle ->
+            val url = bundle.getString("url") ?: return@setFragmentResultListener
+            val type = bundle.getString("type") ?: "image"
+            sendMediaMessage(url, type, isCamera = true, isGallery = false)
+        }
+
+        binding.etMessage.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!isTyping) { isTyping = true; ApiManager.sendTyping(otherUid, true) }
+                typingHandler.removeCallbacks(stopTypingRunnable)
+                typingHandler.postDelayed(stopTypingRunnable, 3000)
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        binding.btnSend.setOnClickListener { sendTextMessage() }
-        binding.btnMedia.setOnClickListener { toggleMediaBar() }
-
-        // Media bar
-        binding.btnCamera.setOnClickListener { openCamera() }
-        binding.btnGallery.setOnClickListener { galleryLauncher.launch("image/*") }
-        binding.btnVideo.setOnClickListener { videoLauncher.launch("video/*") }
-        binding.btnVoice.setOnClickListener { openVoiceRecorder() }
-        binding.btnGif.setOnClickListener { openGifPicker() }
-        binding.btnViewOnce.setOnClickListener {
-            viewOnceMode = !viewOnceMode
-            binding.btnViewOnce.alpha = if (viewOnceMode) 1.0f else 0.5f
-            context?.toast(if (viewOnceMode) "View-once ON" else "View-once OFF")
-        }
-
-        // Reply bar close
-        binding.btnCancelReply.setOnClickListener { cancelReply() }
-
-        // Conz super menu (type "conz" to open)
-        setupConzMenu()
-    }
-
-    private fun setupConzMenu() {
-        binding.btnConzMenuClose.setOnClickListener {
-            binding.conzMenu.visibility = View.GONE
-        }
-        binding.btnPremiumMenu.setOnClickListener {
-            binding.conzMenu.visibility = View.GONE
-            binding.premiumMenu.visibility = View.VISIBLE
-        }
-        binding.btnClosePremiumMenu.setOnClickListener {
-            binding.premiumMenu.visibility = View.GONE
-            binding.conzMenu.visibility = View.VISIBLE
-        }
-        binding.btnGivePremium.setOnClickListener { givePremium() }
-        binding.btnStartSpam.setOnClickListener { startAnimatedMessage() }
-        binding.btnStopSpam.setOnClickListener { stopAnimatedMessage() }
-
-        // Dev-only: boot user
-        if (uid == ConzChatApp.DEV_UID) {
-            binding.btnBootUser.visibility = View.VISIBLE
-            binding.btnBanUser.visibility = View.VISIBLE
-        }
-        binding.btnBootUser.setOnClickListener { bootUser() }
-        binding.btnBanUser.setOnClickListener { banUser() }
+        loadMessages()
+        ApiManager.addWsListener(this)
+        ApiManager.markMessagesRead(otherUid) { _, _ -> }
     }
 
     private fun loadMessages() {
-        messagesListener = FirebaseManager.messagesRef
-            .orderBy("time", Query.Direction.ASCENDING)
-            .addSnapshotListener { snap, _ ->
-                if (snap == null) return@addSnapshotListener
+        ApiManager.getMessages(otherUid) { msgs, _ ->
+            activity?.runOnUiThread {
+                if (_binding == null) return@runOnUiThread
                 messages.clear()
-                snap.documents.forEach { doc ->
-                    val m = doc.data ?: return@forEach
-                    val from = m["from"] as? String ?: return@forEach
-                    val to = m["to"] as? String ?: return@forEach
-                    if (from != uid && to != uid) return@forEach
-                    val other = if (from == uid) to else from
-                    if (other != otherUid) return@forEach
-
-                    val isMine = from == uid
-                    val msgId = doc.id
-
-                    // Self-destruct: delete expired messages
-                    val selfDestruct = m["selfDestruct"] as? Boolean ?: false
-                    val selfDestructAt = m["selfDestructAt"] as? Long ?: 0L
-                    if (selfDestruct && selfDestructAt > 0 && System.currentTimeMillis() > selfDestructAt) {
-                        FirebaseManager.messagesRef.document(msgId).delete()
-                        return@forEach
-                    }
-
-                    // Update receipts
-                    if (!ConzMods.isDisableReceipts(requireContext())) {
-                        if (!isMine && m["receipt"] != "R") {
-                            FirebaseManager.messagesRef.document(msgId).update("receipt", "R")
-                        }
-                    }
-
-                    val replyToData = m["replyTo"] as? Map<*, *>
-                    val replyTo = if (replyToData != null) ReplyTo(
-                        id = replyToData["id"] as? String ?: "",
-                        text = replyToData["text"] as? String ?: "",
-                        sender = replyToData["sender"] as? String ?: ""
-                    ) else null
-
-                    val reactionsRaw = m["reactions"] as? Map<*, *>
-                    val reactions = reactionsRaw?.entries?.associate {
-                        (it.key as? String ?: "") to (it.value as? String ?: "")
-                    } ?: emptyMap()
-
-                    messages.add(Message(
-                        id = msgId,
-                        from = from,
-                        to = to,
-                        time = m["time"] as? Long ?: 0L,
-                        text = m["text"] as? String ?: "",
-                        type = m["type"] as? String ?: "text",
-                        url = m["url"] as? String ?: "",
-                        receipt = m["receipt"] as? String ?: "S",
-                        deleted = m["deleted"] as? Boolean ?: false,
-                        viewOnce = m["viewOnce"] as? Boolean ?: false,
-                        viewed = m["viewed"] as? Boolean ?: false,
-                        isCamera = m["isCamera"] as? Boolean ?: false,
-                        transcript = m["transcript"] as? String ?: "",
-                        replyTo = replyTo,
-                        reactions = reactions
-                    ))
-                }
-                messageAdapter.notifyDataSetChanged()
-                binding.rvMessages.scrollToPosition(messages.size - 1)
+                if (msgs != null) messages.addAll(msgs.sortedBy { it.time })
+                adapter.notifyDataSetChanged()
+                if (messages.isNotEmpty()) binding.rvMessages.scrollToPosition(messages.size - 1)
+                // Start receipt polling whenever we load messages so receipts
+                // update even if we didn't send anything in this session.
+                val hasPendingReceipts = messages.any { it.from == uid && it.receipt != "R" }
+                if (hasPendingReceipts) startReceiptPolling(resetCount = true)
             }
+        }
     }
 
-    private fun listenTyping() {
-        typingListener = FirebaseManager.dmTypingRef
-            .whereEqualTo("to", uid)
-            .whereEqualTo("from", otherUid)
-            .addSnapshotListener { snap, _ ->
-                var isTyping = false
-                snap?.documents?.forEach { doc ->
-                    val d = doc.data ?: return@forEach
-                    val typing = d["typing"] as? Boolean ?: false
-                    val ts = d["ts"] as? Long ?: 0L
-                    if (typing && (System.currentTimeMillis() - ts) < 5000) isTyping = true
-                }
-                // Show typing indicator in the topbar subtitle (Kik-style)
-                if (isTyping) {
-                    binding.tvChatStatus.visibility = View.VISIBLE
-                    binding.tvChatStatus.text = "$otherName is typing..."
-                    binding.tvChatStatus.setTextColor(0xFFCC0022.toInt())
-                } else {
-                    // Restore status or hide
-                    val savedStatus = binding.tvChatStatus.tag as? String
-                    if (!savedStatus.isNullOrEmpty()) {
-                        binding.tvChatStatus.visibility = View.VISIBLE
-                        binding.tvChatStatus.text = savedStatus
-                        binding.tvChatStatus.setTextColor(0xFF888888.toInt())
-                    } else {
-                        binding.tvChatStatus.visibility = View.GONE
+    /**
+     * Refresh only the receipt fields of existing messages without scrolling or
+     * clearing the list. Called by the receipt polling mechanism.
+     */
+    private fun refreshReceiptsOnly() {
+        ApiManager.getMessages(otherUid) { msgs, _ ->
+            activity?.runOnUiThread {
+                if (_binding == null || msgs == null) return@runOnUiThread
+                var changed = false
+                val sorted = msgs.sortedBy { it.time }
+                for (fresh in sorted) {
+                    val idx = messages.indexOfFirst { it.id == fresh.id }
+                    if (idx >= 0 && messages[idx].receipt != fresh.receipt) {
+                        messages[idx] = messages[idx].copy(receipt = fresh.receipt)
+                        adapter.notifyItemChanged(idx)
+                        changed = true
                     }
+                }
+                // If all my sent messages are "R", stop polling early
+                val allRead = messages.filter { it.from == uid }.all { it.receipt == "R" }
+                if (allRead) {
+                    receiptPollHandler.removeCallbacks(receiptPollRunnable)
                 }
             }
+        }
     }
 
-    private fun setTyping() {
-        if (ConzMods.isDisableTyping(requireContext())) return
-        FirebaseManager.dmTypingRef.document("${uid}_${otherUid}").set(
-            mapOf("from" to uid, "to" to otherUid, "typing" to true, "ts" to System.currentTimeMillis())
-        )
-        typingRunnable?.let { typingHandler.removeCallbacks(it) }
-        typingRunnable = Runnable { clearTyping() }
-        typingHandler.postDelayed(typingRunnable!!, 3000)
+    /** Start or extend receipt polling. Safe to call multiple times — only resets
+     *  the counter when called from loadMessages (fresh open), not on every send/receive. */
+    private fun startReceiptPolling(resetCount: Boolean = false) {
+        receiptPollHandler.removeCallbacks(receiptPollRunnable)
+        if (resetCount) receiptPollCount = 0
+        receiptPollHandler.postDelayed(receiptPollRunnable, 3_000)
     }
 
-    private fun clearTyping() {
-        FirebaseManager.dmTypingRef.document("${uid}_${otherUid}").set(
-            mapOf("from" to uid, "to" to otherUid, "typing" to false, "ts" to System.currentTimeMillis())
-        )
-    }
-
-    private fun sendTextMessage() {
-        val text = binding.etMessage.text.toString().trim()
-        if (text.isEmpty()) return
-
-        // Check for Conz super menu trigger
-        if (text.lowercase() == "conz") {
-            binding.etMessage.setText("")
-            binding.conzMenu.visibility = if (binding.conzMenu.isVisible()) View.GONE else View.VISIBLE
+    private fun sendMessageOrMedia() {
+        // If there's a pending gallery media, send it (with optional caption text)
+        val pendingUri = pendingMediaUri
+        if (pendingUri != null) {
+            val caption = binding.etMessage.text.toString().trim()
+            binding.etMessage.text.clear()
+            clearMediaPreview()
+            uploadAndSendFromGallery(pendingUri, caption)
             return
         }
+        sendMessage()
+    }
 
-        clearTyping()
-
-        val msgData = hashMapOf<String, Any>(
-            "from" to uid,
-            "to" to otherUid,
-            "time" to System.currentTimeMillis(),
-            "text" to text,
-            "type" to "text",
-            "receipt" to "S"
-        )
-        replyTo?.let { msgData["replyTo"] = mapOf("id" to it.id, "text" to it.text, "sender" to it.sender) }
-        // Self-Destruct: add timer if enabled (30 seconds)
-        if (ConzMods.isSelfDestruct(requireContext())) {
-            msgData["selfDestruct"] = true
-            msgData["selfDestructAt"] = System.currentTimeMillis() + 30000L
+    private fun sendMessage() {
+        val text = binding.etMessage.text.toString().trim()
+        if (text.isEmpty()) return
+        binding.etMessage.text.clear()
+        ApiManager.sendMessage(otherUid, text, replyTo = replyTo) { msg, err ->
+            activity?.runOnUiThread {
+                if (err != null) context?.toast("Failed to send")
+                else if (msg != null) {
+                    messages.add(msg)
+                    adapter.notifyItemInserted(messages.size - 1)
+                    binding.rvMessages.scrollToPosition(messages.size - 1)
+                    startReceiptPolling(resetCount = true)
+                }
+            }
         }
-        FirebaseManager.messagesRef.add(msgData)
-        // Send push notification via OneSignal
-        sendDmPushNotification(text)
-        binding.etMessage.setText("")
-        cancelReply()
-        activity?.window?.decorView?.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+        clearReply()
     }
 
-    private fun sendDmPushNotification(messageText: String) {
-        val myUid = uid
-        if (myUid.isEmpty() || otherUid.isEmpty()) return
-        // Get sender's display name from Firestore then send notification via FCM v1 API
-        FirebaseManager.usersRef.document(myUid).get().addOnSuccessListener { snap ->
-            val senderName = snap.getString("displayName") ?: snap.getString("username") ?: "Someone"
-            com.conzchat.app.util.FcmNotifier.sendDmNotification(
-                toUid = otherUid,
-                senderName = senderName,
-                messageText = messageText,
-                senderUid = myUid
-            )
+
+
+    private fun reactMessage(msg: Message, emoji: String) {
+        ApiManager.addReaction(msg.id, emoji) { _, _ -> }
+    }
+
+    /** Open the gallery bottom-sheet picker */
+    private fun openGallerySheet() {
+        GalleryPickerBottomSheet.newInstance { uri, isVideo ->
+            pendingMediaUri = uri
+            pendingMediaIsVideo = isVideo
+            showMediaPreview(uri, isVideo)
+        }.show(childFragmentManager, "galleryPicker")
+    }
+
+    private fun showMediaPreview(uri: Uri, isVideo: Boolean) {
+        binding.mediaPreviewBar.visibility = View.VISIBLE
+        Glide.with(this).load(uri).centerCrop().into(binding.ivMediaPreview)
+        binding.ivMediaPreviewVideoIcon.visibility = if (isVideo) View.VISIBLE else View.GONE
+        binding.tvMediaPreviewLabel.text = if (isVideo) "Video ready · tap send" else "Photo ready · tap send"
+    }
+
+    private fun clearMediaPreview() {
+        pendingMediaUri = null
+        pendingMediaIsVideo = false
+        binding.mediaPreviewBar.visibility = View.GONE
+    }
+
+    private fun uploadAndSendFromGallery(uri: Uri, caption: String = "") {
+        val ctx = context ?: return
+        val file = uriToFile(ctx, uri) ?: return
+        val mimeType = ctx.contentResolver.getType(uri) ?: "application/octet-stream"
+        val type = when {
+            mimeType.startsWith("image/") -> "image"
+            mimeType.startsWith("video/") -> "video"
+            else -> "file"
+        }
+        ApiManager.uploadFile(file, mimeType) { url, err ->
+            activity?.runOnUiThread {
+                if (url != null) {
+                    ApiManager.sendMessage(otherUid, caption, type = type, url = url, isGallery = true) { msg, _ ->
+                        activity?.runOnUiThread {
+                            if (msg != null) {
+                                messages.add(msg)
+                                adapter.notifyItemInserted(messages.size - 1)
+                                binding.rvMessages.scrollToPosition(messages.size - 1)
+                                startReceiptPolling(resetCount = true)
+                            }
+                        }
+                    }
+                } else {
+                    context?.toast("Upload failed: $err")
+                }
+            }
         }
     }
 
-    private fun sendImageFromUri(uri: Uri, isCamera: Boolean = false) {
-        val base64 = ImageUtils.compressImageToBase64ForChat(requireContext(), uri) ?: return
-        val msgData = hashMapOf<String, Any>(
-            "from" to uid, "to" to otherUid,
-            "time" to System.currentTimeMillis(),
-            "type" to "image", "url" to base64,
-            "text" to "", "receipt" to "S",
-            "isCamera" to (isCamera || ConzMods.isFakeCamera(requireContext())),
-            "viewOnce" to viewOnceMode, "viewed" to false
-        )
-        replyTo?.let { msgData["replyTo"] = mapOf("id" to it.id, "text" to it.text, "sender" to it.sender) }
-        FirebaseManager.messagesRef.add(msgData)
-        sendDmPushNotification("📷 Photo")
-        cancelReply()
-        closeMediaBar()
+    /** Send an already-uploaded URL as a message (used by camera result and GIF picker) */
+    private fun sendMediaMessage(url: String, type: String, isCamera: Boolean, isGallery: Boolean) {
+        ApiManager.sendMessage(otherUid, "", type = type, url = url,
+            isCamera = isCamera, isGallery = isGallery) { msg, _ ->
+            activity?.runOnUiThread {
+                if (msg != null) {
+                    messages.add(msg)
+                    adapter.notifyItemInserted(messages.size - 1)
+                    binding.rvMessages.scrollToPosition(messages.size - 1)
+                    startReceiptPolling(resetCount = true)
+                }
+            }
+        }
     }
 
-    private fun sendVideoFromUri(uri: Uri) {
-        context?.toast("Uploading video...")
-        val inputStream = requireContext().contentResolver.openInputStream(uri) ?: return
-        val bytes = inputStream.readBytes()
-        inputStream.close()
-        val base64 = "data:video/mp4;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-        val msgData = hashMapOf<String, Any>(
-            "from" to uid, "to" to otherUid,
-            "time" to System.currentTimeMillis(),
-            "type" to "video", "url" to base64,
-            "text" to "", "receipt" to "S",
-            "viewOnce" to viewOnceMode, "viewed" to false
-        )
-        FirebaseManager.messagesRef.add(msgData)
-        sendDmPushNotification("🎥 Video")
-        closeMediaBar()
+    /** Open the in-app camera fragment (tap=photo, hold=video) */
+    private fun openCameraFragment() {
+        val cameraFrag = CameraFragment.newInstance(cameraResultKey)
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, cameraFrag)
+            .addToBackStack(null)
+            .commit()
     }
 
-    private fun sendVoiceFromUri(uri: Uri) {
-        val inputStream = requireContext().contentResolver.openInputStream(uri) ?: return
-        val bytes = inputStream.readBytes()
-        inputStream.close()
-        val base64 = "data:audio/mpeg;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-        val msgData = hashMapOf<String, Any>(
-            "from" to uid, "to" to otherUid,
-            "time" to System.currentTimeMillis(),
-            "type" to "voice", "url" to base64,
-            "text" to "", "receipt" to "S"
-        )
-        FirebaseManager.messagesRef.add(msgData)
-        sendDmPushNotification("🎤 Voice message")
-        closeMediaBar()
+    // ── Inline voice recording ────────────────────────────────────────────────
+    private val recordTimerHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var recordStartMs = 0L
+    private val MAX_RECORD_MS = 120_000L // 2 minutes
+    private val recordTimerRunnable = object : Runnable {
+        override fun run() {
+            if (!isVoiceRecording || _binding == null) return
+            val elapsed = System.currentTimeMillis() - recordStartMs
+            val secs = (elapsed / 1000).toInt()
+            binding.tvRecordTimer.text = "%d:%02d".format(secs / 60, secs % 60)
+            if (elapsed >= MAX_RECORD_MS) { stopAndSendVoice(); return }
+            recordTimerHandler.postDelayed(this, 500)
+        }
+    }
+    private fun startVoiceRecording() {
+        val ctx = context ?: return
+        if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED) {
+            ctx.toast("Microphone permission required")
+            return
+        }
+        try {
+            val file = File(ctx.cacheDir, "voice_${System.currentTimeMillis()}.m4a")
+            voiceFile = file
+            voiceRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                MediaRecorder(ctx) else @Suppress("DEPRECATION") MediaRecorder()
+            voiceRecorder!!.apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setAudioEncodingBitRate(128000)
+                setAudioSamplingRate(44100)
+                setOutputFile(file.absolutePath)
+                prepare()
+                start()
+            }
+                        isVoiceRecording = true
+            recordStartMs = System.currentTimeMillis()
+            binding.voiceRecordingOverlay.visibility = View.VISIBLE
+            binding.tvRecordTimer.text = "0:00"
+            recordTimerHandler.post(recordTimerRunnable)
+        } catch (e: Exception) {
+            ctx.toast("Could not start recording: ${e.message}")
+            cleanupVoiceRecorder()
+        }
+    }
+    private fun discardVoiceRecording() {
+        recordTimerHandler.removeCallbacks(recordTimerRunnable)
+        binding.voiceRecordingOverlay.visibility = View.GONE
+        binding.tvSlideToCancel.setTextColor(0xFF888888.toInt())
+        cleanupVoiceRecorder()
+        context?.toast("Recording discarded")
+    }
+    private fun stopAndSendVoice() {
+        if (!isVoiceRecording) return
+        isVoiceRecording = false
+        recordTimerHandler.removeCallbacks(recordTimerRunnable)
+        binding.voiceRecordingOverlay.visibility = View.GONE
+        binding.tvSlideToCancel.setTextColor(0xFF888888.toInt())
+        try { voiceRecorder?.stop() } catch (e: Exception) {
+            cleanupVoiceRecorder(); context?.toast("Recording too short"); return
+        } finally { voiceRecorder?.release(); voiceRecorder = null }
+        val file = voiceFile ?: return
+        if (!file.exists() || file.length() < 1000) { context?.toast("Recording too short"); return }
+        ApiManager.uploadFile(file, "audio/mpeg") { url, err ->
+            activity?.runOnUiThread {
+                if (url != null) {
+                    ApiManager.sendMessage(otherUid, "", "voice", url) { msg, _ ->
+                        activity?.runOnUiThread {
+                            if (msg != null) {
+                                messages.add(msg)
+                                adapter.notifyItemInserted(messages.size - 1)
+                                binding.rvMessages.scrollToPosition(messages.size - 1)
+                                startReceiptPolling(resetCount = true)
+                            }
+                        }
+                    }
+                } else { context?.toast("Failed to upload voice: $err") }
+            }
+        }
     }
 
-    fun sendGif(url: String) {
-        val msgData = hashMapOf<String, Any>(
-            "from" to uid, "to" to otherUid,
-            "time" to System.currentTimeMillis(),
-            "type" to "gif", "url" to url,
-            "text" to "", "receipt" to "S"
-        )
-        FirebaseManager.messagesRef.add(msgData)
-        sendDmPushNotification("GIF")
+    private fun cleanupVoiceRecorder() {
+        isVoiceRecording = false
+        recordTimerHandler.removeCallbacks(recordTimerRunnable)
+        if (_binding != null) binding.voiceRecordingOverlay.visibility = View.GONE
+        try { voiceRecorder?.stop() } catch (_: Exception) {}
+        try { voiceRecorder?.release() } catch (_: Exception) {}
+        voiceRecorder = null
+        voiceFile?.delete(); voiceFile = null
     }
 
-    private fun addReaction(msgId: String, emoji: String) {
-        FirebaseManager.messagesRef.document(msgId)
-            .update("reactions.$uid", emoji)
-    }
-
-    private fun startReply(msg: Message) {
-        replyTo = ReplyTo(id = msg.id, text = msg.text.ifEmpty { "📎 Media" }, sender = if (msg.from == uid) "You" else otherName)
+    private fun setReply(msg: Message) {
+        replyTo = ReplyTo(id = msg.id, text = msg.text, sender = msg.from)
+        binding.tvReplyText.text = msg.text
         binding.replyBar.visibility = View.VISIBLE
-        binding.tvReplyText.text = replyTo!!.text.take(60)
-        binding.tvReplySender.text = replyTo!!.sender
-        binding.etMessage.requestFocus()
     }
 
-    private fun cancelReply() {
+    private fun clearReply() {
         replyTo = null
         binding.replyBar.visibility = View.GONE
     }
 
-    private fun deleteMessage(msgId: String) {
-        FirebaseManager.messagesRef.document(msgId).update(
-            mapOf("deleted" to true, "text" to "This message was deleted", "type" to "text")
-        )
-    }
-
     private fun openFullImage(url: String) {
-        val fragment = FullImageFragment.newInstance(url)
-        openFragment(fragment)
-    }
-
-    private fun openViewOnce(msgId: String, type: String, url: String) {
-        FirebaseManager.messagesRef.document(msgId).update("viewed", true)
-        val fragment = FullImageFragment.newInstance(url)
-        openFragment(fragment)
-    }
-
-    private fun toggleMediaBar() {
-        mediaBarOpen = !mediaBarOpen
-        binding.mediaBar.visibility = if (mediaBarOpen) View.VISIBLE else View.GONE
-    }
-
-    private fun closeMediaBar() {
-        mediaBarOpen = false
-        binding.mediaBar.visibility = View.GONE
-    }
-
-    private fun openCamera() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), 101)
-            return
-        }
-        val photoFile = File.createTempFile("photo_", ".jpg", requireContext().cacheDir)
-        cameraUri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.provider", photoFile)
-        cameraLauncher.launch(cameraUri!!)
-    }
-
-    private fun openVoiceRecorder() {
-        val fragment = VoiceRecorderBottomSheet.newInstance(otherUid)
-        fragment.show(childFragmentManager, "voice_recorder")
-    }
-
-    private fun openGifPicker() {
-        val fragment = GifPickerBottomSheet.newInstance()
-        fragment.setOnGifSelected { url -> sendGif(url) }
-        fragment.show(childFragmentManager, "gif_picker")
-    }
-
-    private fun startCall(type: String) {
-        val callId = FirebaseManager.db.collection("calls").document().id
-        val callData = hashMapOf(
-            "from" to uid, "to" to otherUid,
-            "type" to type, "status" to "ringing",
-            "time" to System.currentTimeMillis()
-        )
-        FirebaseManager.callsRef.document(callId).set(callData)
-        val fragment = CallFragment.newInstance(
-            toUid = otherUid, toName = otherName, toPhoto = otherPhoto,
-            callType = type, isIncoming = false, callId = callId
-        )
+        val fragment = com.conzchat.app.ui.chat.FullImageFragment.newInstance(url)
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack(null)
-            .commit()
+            .add(R.id.fragmentContainer, fragment).addToBackStack(null).commit()
     }
 
-    private fun givePremium() {
-        if (uid != ConzChatApp.DEV_UID) { context?.toast("YOU AINT A DEV!"); return }
-        FirebaseManager.usersRef.document(otherUid).update(
-            mapOf(
-                "premium" to true,
-                "premiumPopup" to "Premium has been successfully added to your account, ENJOY! Please refresh the app to activate premium features."
-            )
-        )
-        context?.toast("Premium granted!")
-        binding.premiumMenu.visibility = View.GONE
-    }
-
-    private var spamRunnable: Runnable? = null
-    private val spamHandler = Handler(Looper.getMainLooper())
-
-    private fun startAnimatedMessage() {
-        val text = binding.etAnimatedMsg.text.toString().trim()
-        if (text.isEmpty()) return
-        spamRunnable = object : Runnable {
-            override fun run() {
-                val msgData = hashMapOf<String, Any>(
-                    "from" to uid, "to" to otherUid,
-                    "time" to System.currentTimeMillis(),
-                    "text" to "🎭 $text 🎭", "type" to "text", "receipt" to "S"
-                )
-                FirebaseManager.messagesRef.add(msgData)
-                spamHandler.postDelayed(this, 150)
-            }
-        }
-        spamHandler.post(spamRunnable!!)
-        binding.tvPremiumConsole.text = "Spam started"
-    }
-
-    private fun stopAnimatedMessage() {
-        spamRunnable?.let { spamHandler.removeCallbacks(it) }
-        binding.tvPremiumConsole.text = "Spam stopped"
-    }
-
-    private fun bootUser() {
-        if (uid != ConzChatApp.DEV_UID) return
-        FirebaseManager.usersRef.document(otherUid).update(
-            mapOf("forceLogout" to true, "logoutMessage" to "You have been booted by the developer.")
-        )
-        context?.toast("User booted")
-        binding.conzMenu.visibility = View.GONE
-    }
-
-    private fun banUser() {
-        if (uid != ConzChatApp.DEV_UID) return
-        FirebaseManager.usersRef.document(otherUid).update("banned", true)
-        context?.toast("User banned")
-        binding.conzMenu.visibility = View.GONE
-    }
-
-    private fun loadTopbarInfo() {
-        FirebaseManager.usersRef.document(otherUid).addSnapshotListener { snap, _ ->
-            if (_binding == null || snap == null) return@addSnapshotListener
-            val isPremium = snap.getBoolean("premium") ?: false
-            val isDev = otherUid == ConzChatApp.DEV_UID
-            val status = snap.getString("status") ?: ""
-            val isOnline = snap.getBoolean("online") ?: false
-            val lastSeen = snap.getLong("lastSeen") ?: 0L
-            // Badge
-            when {
-                isDev -> {
-                    binding.tvTopbarBadge.text = "🔧 DEV"
-                    binding.tvTopbarBadge.visibility = View.VISIBLE
-                }
-                isPremium -> {
-                    binding.tvTopbarBadge.text = "👑 PREMIUM"
-                    binding.tvTopbarBadge.visibility = View.VISIBLE
-                }
-                else -> binding.tvTopbarBadge.visibility = View.GONE
-            }
-            // Online/offline status in topbar subtitle
-            val statusText = when {
-                isOnline -> "Online"
-                lastSeen > 0L -> "Last seen " + com.conzchat.app.util.TimeUtils.formatKikTime(lastSeen)
-                status.isNotEmpty() -> status
-                else -> ""
-            }
-            if (statusText.isNotEmpty()) {
-                binding.tvChatStatus.text = statusText
-                binding.tvChatStatus.tag = statusText
-                binding.tvChatStatus.visibility = View.VISIBLE
-                binding.tvChatStatus.setTextColor(
-                    if (isOnline) 0xFF00CC66.toInt() else 0xFF888888.toInt()
-                )
-            } else {
-                binding.tvChatStatus.visibility = View.GONE
-            }
-            // Populate avatar cache for the other user
-            val photoUrl = snap.getString("photo") ?: ""
-            if (photoUrl.isNotEmpty()) {
-                messageAdapter.avatarCache[otherUid] = photoUrl
-                messageAdapter.notifyDataSetChanged()
-            }
-        }
-    }
-
-    private var chatSearchOpen = false
-
-    private fun toggleChatSearch() {
-        chatSearchOpen = !chatSearchOpen
-        if (chatSearchOpen) {
-            // Show a search dialog
-            val input = android.widget.EditText(requireContext()).apply {
-                hint = "Search messages..."
-                setTextColor(0xFFFFFFFF.toInt())
-                setHintTextColor(0xFF888888.toInt())
-            }
-            android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Search in chat")
-                .setView(input)
-                .setPositiveButton("Search") { _, _ ->
-                    val query = input.text.toString().trim().lowercase()
-                    if (query.isEmpty()) return@setPositiveButton
-                    val idx = messages.indexOfLast { it.text.lowercase().contains(query) }
-                    if (idx >= 0) {
-                        binding.rvMessages.scrollToPosition(idx)
-                        context?.toast("Found: \"${messages[idx].text.take(40)}\"")
-                    } else {
-                        context?.toast("No messages found for \"$query\"")
+    override fun onMessage(msg: ApiManager.WSMessage) {
+        activity?.runOnUiThread {
+            when (msg.type) {
+                "new_message" -> {
+                    val payload = ApiManager.gson.fromJson(ApiManager.gson.toJson(msg.payload), Message::class.java)
+                    if ((payload.from == otherUid && payload.to == uid) || (payload.from == uid && payload.to == otherUid)) {
+                        if (messages.none { it.id == payload.id }) {
+                            messages.add(payload)
+                            adapter.notifyItemInserted(messages.size - 1)
+                            binding.rvMessages.scrollToPosition(messages.size - 1)
+                            if (payload.from == otherUid) {
+                                ApiManager.markMessagesRead(otherUid) { _, _ -> }
+                                // Refresh receipts so sender sees "R" quickly
+                                startReceiptPolling(resetCount = false)
+                            }
+                        }
                     }
                 }
-                .setNegativeButton("Cancel") { _, _ -> chatSearchOpen = false }
-                .show()
-        } else {
-            chatSearchOpen = false
+                "typing" -> {
+                    val p = msg.payload as? Map<*, *>
+                    val fromId = p?.get("from")?.toString() ?: ""
+                    val typing = p?.get("typing") as? Boolean ?: false
+                    if (fromId == otherUid) {
+                        // tvTyping not in layout - typing indicator removed
+                    }
+                }
+                "message_deleted" -> {
+                    val p = msg.payload as? Map<*, *>
+                    val msgId = p?.get("id")?.toString() ?: ""
+                    val idx = messages.indexOfFirst { it.id == msgId }
+                    if (idx >= 0) {
+                        messages[idx] = messages[idx].copy(deleted = true, text = "")
+                        adapter.notifyItemChanged(idx)
+                    }
+                }
+                "reaction" -> {
+                    val p = msg.payload as? Map<*, *>
+                    val msgId = p?.get("messageId")?.toString() ?: ""
+                    val emoji = p?.get("emoji")?.toString() ?: ""
+                    val reactorId = p?.get("userId")?.toString() ?: ""
+                    val idx = messages.indexOfFirst { it.id == msgId }
+                    if (idx >= 0) {
+                        val updated = messages[idx].reactions.toMutableMap()
+                        updated[reactorId] = emoji
+                        messages[idx] = messages[idx].copy(reactions = updated)
+                        adapter.notifyItemChanged(idx)
+                    }
+                }
+            }
         }
     }
 
-    private fun openFragment(fragment: Fragment) {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
+    // ── Call launch ──────────────────────────────────────────────────────────────────
+    private fun launchCall(type: String) {
+        if (otherUid.isEmpty()) return
+        // Generate a unique channel name for this call session
+        val myUid = ApiManager.currentUserId
+        val sorted = listOf(myUid, otherUid).sorted()
+        val channelName = "dm_${sorted[0]}_${sorted[1]}_${System.currentTimeMillis() / 1000}"
+        val callId = "call_${System.currentTimeMillis()}"
 
-    private fun View.isVisible() = visibility == View.VISIBLE
+        // Fetch Agora token then launch CallFragment
+        ApiManager.getAgoraToken(channelName) { token, err ->
+            activity?.runOnUiThread {
+                if (err != null || token == null) {
+                    context?.toast("Could not start call — check connection")
+                    return@runOnUiThread
+                }
+                val callFrag = com.conzchat.app.ui.call.CallFragment.newInstance(
+                    toUid = otherUid,
+                    toName = otherName,
+                    toPhoto = otherPhoto,
+                    callType = type,
+                    isIncoming = false,
+                    callId = callId,
+                    channelName = channelName,
+                    agoraToken = token
+                )
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, callFrag)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        messagesListener?.remove()
-        typingListener?.remove()
-        clearTyping()
-        typingRunnable?.let { typingHandler.removeCallbacks(it) }
-        spamRunnable?.let { spamHandler.removeCallbacks(it) }
+        ApiManager.removeWsListener(this)
+        typingHandler.removeCallbacks(stopTypingRunnable)
+        receiptPollHandler.removeCallbacks(receiptPollRunnable)
+        cleanupVoiceRecorder()
         _binding = null
     }
+}
+
+private fun uriToFile(context: android.content.Context, uri: Uri): File? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val ext = context.contentResolver.getType(uri)?.substringAfterLast("/") ?: "tmp"
+        val file = File.createTempFile("upload_", ".$ext", context.cacheDir)
+        file.outputStream().use { inputStream.copyTo(it) }
+        file
+    } catch (e: Exception) { null }
 }

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="gcm_defaultSenderId" translatable="false">431124465784</string>
-    <string name="google_api_key" translatable="false">AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to</string>
-    <string name="google_app_id" translatable="false">1:431124465784:android:conzchatandroid</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyB7JVaVsJCRX1uWzxr8oR3_bDF18mnj8to</string>
-    <string name="google_storage_bucket" translatable="false">conzchat.firebasestorage.app</string>
-    <string name="project_id" translatable="false">conzchat</string>
-</resources>

@@ -238,6 +238,102 @@
 
         </LinearLayout>
 
+        <!-- Media preview bar (shown after gallery/camera selection) -->
+        <LinearLayout
+            android:id="@+id/mediaPreviewBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="@color/bgCard"
+            android:visibility="gone">
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp">
+                <ImageView
+                    android:id="@+id/ivMediaPreview"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:scaleType="centerCrop"
+                    android:background="@color/bgCard" />
+                <ImageView
+                    android:id="@+id/ivMediaPreviewVideoIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_videocam"
+                    android:tint="#FFFFFF"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+                <ImageView
+                    android:id="@+id/btnCancelMediaPreview"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_close"
+                    android:background="#CC000000"
+                    android:tint="#FFFFFF"
+                    android:padding="2dp"
+                    android:layout_gravity="top|end" />
+            </FrameLayout>
+            <TextView
+                android:id="@+id/tvMediaPreviewLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tap send to share"
+                android:textSize="12sp"
+                android:textColor="#888888"
+                android:paddingStart="12dp" />
+        </LinearLayout>
+        <!-- Voice recording overlay (shown while holding mic) -->
+        <FrameLayout
+            android:id="@+id/voiceRecordingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="#1A0000"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+                <FrameLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp">
+                    <ProgressBar
+                        android:id="@+id/voiceSpinner"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:indeterminateTint="#FF0033" />
+                    <TextView
+                        android:id="@+id/tvRecordTimer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0:00"
+                        android:textSize="11sp"
+                        android:textColor="#FF0033"
+                        android:textStyle="bold" />
+                </FrameLayout>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Recording..."
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp" />
+                <TextView
+                    android:id="@+id/tvSlideToCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="← Slide to cancel"
+                    android:textColor="#888888"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </FrameLayout>
         <!-- Input bar -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -271,13 +367,21 @@
                 android:layout_marginHorizontal="8dp" />
 
             <ImageView
+                android:id="@+id/btnMic"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_mic"
+                android:padding="6dp"
+                android:tint="#FF0033"
+                android:layout_marginEnd="4dp" />
+
+            <ImageView
                 android:id="@+id/btnSend"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:src="@drawable/ic_send"
                 android:padding="6dp"
-                android:tint="#FF0033"
-                android:visibility="gone" />
+                android:tint="#FF0033" />
         </LinearLayout>
 
     </LinearLayout>

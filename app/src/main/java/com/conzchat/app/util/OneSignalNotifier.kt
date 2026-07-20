@@ -12,7 +12,7 @@ import java.net.URL
 
 /**
  * Sends push notifications via OneSignal REST API.
- * Called from the sender's device whenever they send a message.
+ * Called from the sender's device whenever they send a message or initiate a call.
  * OneSignal delivers the notification to the recipient's device
  * even if their app is completely closed.
  */
@@ -25,10 +25,6 @@ object OneSignalNotifier {
 
     /**
      * Send a DM notification to a specific user by their UID.
-     * @param toUid Firebase UID of the recipient
-     * @param senderName Display name of the sender
-     * @param messageText The message text (or "📷 Photo", "🎤 Voice", etc.)
-     * @param senderUid Firebase UID of the sender (for tap-to-open)
      */
     fun sendDmNotification(
         toUid: String,
@@ -40,7 +36,6 @@ object OneSignalNotifier {
             try {
                 val body = JSONObject().apply {
                     put("app_id", APP_ID)
-                    // Target by external_id (which we set to the user's Firebase UID)
                     put("include_aliases", JSONObject().apply {
                         put("external_id", JSONArray().apply { put(toUid) })
                     })
@@ -68,11 +63,6 @@ object OneSignalNotifier {
 
     /**
      * Send a group message notification to multiple users.
-     * @param toUids List of Firebase UIDs to notify (excluding the sender)
-     * @param groupName Name of the group
-     * @param senderName Display name of the sender
-     * @param messageText The message text
-     * @param chatId The group chat ID (for tap-to-open)
      */
     fun sendGroupNotification(
         toUids: List<String>,
@@ -140,6 +130,68 @@ object OneSignalNotifier {
                 postToOneSignal(body)
             } catch (e: Exception) {
                 Log.e(TAG, "sendFriendRequestNotification failed: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Send an incoming call notification to a user.
+     * This triggers a high-priority heads-up notification with Accept/Decline actions.
+     *
+     * @param toUid         UID of the callee
+     * @param fromUid       UID of the caller
+     * @param fromName      Display name of the caller
+     * @param fromPhoto     Profile photo URL of the caller
+     * @param callType      "voice" or "video"
+     * @param callId        Unique call session ID
+     * @param channelName   Agora channel name for this call
+     * @param agoraToken    Agora RTC token for the callee to join
+     */
+    fun sendCallNotification(
+        toUid: String,
+        fromUid: String,
+        fromName: String,
+        fromPhoto: String,
+        callType: String,
+        callId: String,
+        channelName: String,
+        agoraToken: String
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val typeLabel = if (callType == "video") "Video" else "Voice"
+                val body = JSONObject().apply {
+                    put("app_id", APP_ID)
+                    put("include_aliases", JSONObject().apply {
+                        put("external_id", JSONArray().apply { put(toUid) })
+                    })
+                    put("target_channel", "push")
+                    put("headings", JSONObject().apply {
+                        put("en", "Incoming $typeLabel Call")
+                    })
+                    put("contents", JSONObject().apply {
+                        put("en", "$fromName is calling you")
+                    })
+                    put("data", JSONObject().apply {
+                        put("notifType", "incoming_call")
+                        put("fromUid", fromUid)
+                        put("fromName", fromName)
+                        put("fromPhoto", fromPhoto)
+                        put("callType", callType)
+                        put("callId", callId)
+                        put("channel", channelName)
+                        put("agoraToken", agoraToken)
+                    })
+                    put("android_channel_id", "conzchat_calls")
+                    put("priority", 10)
+                    put("android_visibility", 1)
+                    put("ttl", 30)  // Expire after 30 seconds if not delivered
+                    // Android-specific: show as heads-up notification
+                    put("android_accent_color", "FF0033")
+                }
+                postToOneSignal(body)
+            } catch (e: Exception) {
+                Log.e(TAG, "sendCallNotification failed: ${e.message}")
             }
         }
     }

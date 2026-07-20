@@ -21,11 +21,18 @@ import java.net.URL
 class GifPickerBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
-        // Real Giphy API key (same as web app)
-        private const val GIPHY_KEY = "gvnL7xPoArGXv6249XCJl87Hto1qv9wa"
+        private val GIPHY_KEY get() = com.conzchat.app.util.SecureConfig.giphyApiKey()
         private const val GIPHY_BASE = "https://api.giphy.com/v1/gifs"
 
         fun newInstance() = GifPickerBottomSheet()
+
+        /** Convenience factory that wires the callback before showing */
+        fun newInstance(
+            chatId: String,
+            isGroup: Boolean,
+            isPublicGroup: Boolean,
+            onGifSelected: (String) -> Unit
+        ): GifPickerBottomSheet = GifPickerBottomSheet().also { it.setOnGifSelected(onGifSelected) }
     }
 
     private var _binding: BottomSheetGifPickerBinding? = null
