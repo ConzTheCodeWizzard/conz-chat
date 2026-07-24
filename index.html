@@ -503,7 +503,84 @@
       .features-grid{grid-template-columns:1fr;}
       .stats-row{grid-template-columns:1fr 1fr;}
     }
-  </style>
+  
+    /* ══ PRE-DOWNLOAD MODAL ══ */
+    #dlModal{
+      display:none;position:fixed;inset:0;z-index:10000;
+      background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);
+      align-items:center;justify-content:center;padding:20px;
+    }
+    #dlModal.open{display:flex;}
+    #dlModalBox{
+      background:linear-gradient(145deg,#111111,#0d0d0d);
+      border:1px solid rgba(255,0,51,0.25);
+      border-radius:20px;
+      max-width:520px;width:100%;
+      padding:40px 36px 36px;
+      position:relative;
+      box-shadow:0 0 80px rgba(255,0,51,0.15),0 40px 80px rgba(0,0,0,0.8);
+      animation:modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes modalIn{from{opacity:0;transform:scale(0.88) translateY(20px)}to{opacity:1;transform:none}}
+    #dlModalClose{
+      position:absolute;top:16px;right:20px;
+      background:none;border:none;color:#666;font-size:22px;cursor:pointer;
+      transition:color 0.2s;line-height:1;
+    }
+    #dlModalClose:hover{color:#fff;}
+    .dl-modal-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,0,51,0.12);border:1px solid rgba(255,0,51,0.3);
+      border-radius:100px;padding:6px 14px;
+      font-size:11px;font-weight:600;letter-spacing:0.08em;
+      color:var(--red);text-transform:uppercase;margin-bottom:20px;
+    }
+    .dl-modal-badge span{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite;}
+    #dlModalBox h2{
+      font-family:'Space Grotesk',sans-serif;
+      font-size:clamp(1.4rem,4vw,1.9rem);font-weight:700;
+      line-height:1.2;margin-bottom:8px;
+    }
+    #dlModalBox h2 span{color:var(--red);}
+    .dl-modal-sub{color:#888;font-size:13px;margin-bottom:28px;line-height:1.5;}
+    .dl-steps{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+    .dl-step{
+      display:flex;align-items:flex-start;gap:14px;
+      background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px;padding:14px 16px;
+    }
+    .dl-step-num{
+      min-width:28px;height:28px;border-radius:50%;
+      background:rgba(255,0,51,0.15);border:1px solid rgba(255,0,51,0.3);
+      color:var(--red);font-size:12px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+    }
+    .dl-step-text{font-size:13.5px;color:#ccc;line-height:1.5;}
+    .dl-step-text strong{color:#fff;display:block;margin-bottom:2px;font-size:14px;}
+    .dl-notice{
+      background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.2);
+      border-radius:12px;padding:14px 16px;margin-bottom:24px;
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .dl-notice-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .dl-notice-text{font-size:12.5px;color:#bbb;line-height:1.6;}
+    .dl-notice-text strong{color:#ffaa44;display:block;margin-bottom:3px;}
+    .dl-divider{height:1px;background:rgba(255,255,255,0.07);margin:20px 0;}
+    .dl-ready{text-align:center;margin-bottom:20px;}
+    .dl-ready p{color:#888;font-size:13px;margin-bottom:4px;}
+    .dl-ready strong{color:#fff;font-size:15px;}
+    #btnActualDownload{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      width:100%;padding:16px;border-radius:12px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,var(--red),#ff3355);
+      color:#fff;font-family:'Space Grotesk',sans-serif;
+      font-size:16px;font-weight:700;letter-spacing:0.02em;
+      transition:all 0.25s;box-shadow:0 8px 32px rgba(255,0,51,0.35);
+      text-decoration:none;
+    }
+    #btnActualDownload:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,0,51,0.5);}
+    #btnActualDownload svg{width:20px;height:20px;fill:#fff;}
+</style>
 </head>
 <body>
 
@@ -895,5 +972,104 @@
   });
 })();
 </script>
+
+  <!-- ══ PRE-DOWNLOAD MODAL ══ -->
+  <div id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlModalTitle">
+    <div id="dlModalBox">
+      <button id="dlModalClose" aria-label="Close">&times;</button>
+
+      <div class="dl-modal-badge"><span></span>Android App</div>
+
+      <h2 id="dlModalTitle">Before we get started,<br><span>please make sure you&hellip;</span></h2>
+      <p class="dl-modal-sub">Just a few quick things to ensure a smooth install experience.</p>
+
+      <ul class="dl-steps">
+        <li class="dl-step">
+          <div class="dl-step-num">1</div>
+          <div class="dl-step-text">
+            <strong>Allow downloads from unknown sources</strong>
+            Go to Settings &rarr; Security (or Apps) &rarr; enable <em>Install unknown apps</em> for your browser or file manager.
+          </div>
+        </li>
+        <li class="dl-step">
+          <div class="dl-step-num">2</div>
+          <div class="dl-step-text">
+            <strong>Delete any older version first</strong>
+            Uninstall any previous ConzChat APK before installing this one to avoid conflicts.
+          </div>
+        </li>
+        <li class="dl-step">
+          <div class="dl-step-num">3</div>
+          <div class="dl-step-text">
+            <strong>Create a fresh account</strong>
+            The new Golang backend is a complete rebuild &mdash; existing accounts from older versions no longer exist. You&rsquo;ll need to sign up again.
+          </div>
+        </li>
+      </ul>
+
+      <div class="dl-notice">
+        <div class="dl-notice-icon">🛡️</div>
+        <div class="dl-notice-text">
+          <strong>About the dangerous app detection popup</strong>
+          When you first open ConzChat you may see a warning popup about other apps on your device. This does <em>not</em> mean ConzChat is harvesting your data or doing anything malicious &mdash; it is simply the developer trying to protect you from known harmful apps that cannot be trusted. Your privacy is fully respected.
+        </div>
+      </div>
+
+      <div class="dl-divider"></div>
+
+      <div class="dl-ready">
+        <p>That&rsquo;s everything &mdash;</p>
+        <strong>Okay, let&rsquo;s get you on the app! 🚀</strong>
+      </div>
+
+      <a id="btnActualDownload" href="https://github.com/ConzTheCodeWizzard/conz-chat/releases/download/v39/ConzChat-Pro-v39.apk" download>
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Download ConzChat
+      </a>
+    </div>
+  </div>
+
+
+  <script>
+    // Pre-download modal logic
+    (function(){
+      var modal = document.getElementById('dlModal');
+      var closeBtn = document.getElementById('dlModalClose');
+      function openModal(e){
+        if(e) e.preventDefault();
+        modal.classList.add('open');
+        document.body.style.overflow='hidden';
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        document.body.style.overflow='';
+      }
+      // Wire all download buttons to open modal instead
+      document.querySelectorAll('a[href*=".apk"], a[href*="releases/download"]').forEach(function(a){
+        if(a.id === 'btnActualDownload') return;
+        a.addEventListener('click', openModal);
+        // Change text to "Get ConzChat" for main CTAs
+        if(a.classList.contains('btn-primary') || a.classList.contains('nav-cta')){
+          var txt = a.querySelector('span') || a;
+          if(txt.textContent.toLowerCase().includes('download')){
+            if(a.classList.contains('nav-cta')) a.textContent = 'Get ConzChat';
+            else {
+              // preserve icon if present
+              var icon = a.querySelector('svg');
+              a.innerHTML = '';
+              if(icon) a.appendChild(icon);
+              var s = document.createElement('span');
+              s.textContent = 'Get ConzChat';
+              a.appendChild(s);
+            }
+          }
+        }
+      });
+      if(closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+    })();
+  </script>
+
 </body>
 </html>
