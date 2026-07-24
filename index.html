@@ -508,9 +508,11 @@
     #dlModal{
       display:none;position:fixed;inset:0;z-index:10000;
       background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);
-      align-items:center;justify-content:center;padding:20px;
+      align-items:flex-start;justify-content:center;
+      padding:20px;overflow-y:auto;
     }
     #dlModal.open{display:flex;}
+
     #dlModalBox{
       background:linear-gradient(145deg,#111111,#0d0d0d);
       border:1px solid rgba(255,0,51,0.25);
@@ -518,6 +520,7 @@
       max-width:520px;width:100%;
       padding:40px 36px 36px;
       position:relative;
+      margin:auto;
       box-shadow:0 0 80px rgba(255,0,51,0.15),0 40px 80px rgba(0,0,0,0.8);
       animation:modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
     }
@@ -1038,11 +1041,9 @@
       function openModal(e){
         if(e) e.preventDefault();
         modal.classList.add('open');
-        document.body.style.overflow='hidden';
       }
       function closeModal(){
         modal.classList.remove('open');
-        document.body.style.overflow='';
       }
       // Wire all download buttons to open modal instead
       document.querySelectorAll('a[href*=".apk"], a[href*="releases/download"]').forEach(function(a){
